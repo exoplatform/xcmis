@@ -75,7 +75,6 @@ public class DiscoveryTest extends BaseTest
    @BeforeClass
    public static void start() throws Exception
    {
-      BaseTest.setUp();
       testRootFolderId = createFolder(rootFolderID, CmisConstants.FOLDER, "discovery_testroot", null, null, null);
 
       documentType = connection.getTypeDefinition(CmisConstants.DOCUMENT);

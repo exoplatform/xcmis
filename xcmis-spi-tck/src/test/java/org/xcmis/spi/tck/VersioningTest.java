@@ -19,15 +19,12 @@
 package org.xcmis.spi.tck;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -36,747 +33,744 @@ import org.xcmis.spi.BaseContentStream;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentStream;
-import org.xcmis.spi.DocumentData;
-import org.xcmis.spi.FilterNotValidException;
-import org.xcmis.spi.FolderData;
-import org.xcmis.spi.ObjectData;
+import org.xcmis.spi.ItemsTree;
+import org.xcmis.spi.NotSupportedException;
 import org.xcmis.spi.ObjectNotFoundException;
-import org.xcmis.spi.PolicyData;
-import org.xcmis.spi.PropertyFilter;
 import org.xcmis.spi.RenditionFilter;
 import org.xcmis.spi.StreamNotSupportedException;
 import org.xcmis.spi.model.AccessControlEntry;
-import org.xcmis.spi.model.BaseType;
 import org.xcmis.spi.model.CapabilityACL;
 import org.xcmis.spi.model.CmisObject;
 import org.xcmis.spi.model.ContentStreamAllowed;
 import org.xcmis.spi.model.IncludeRelationships;
 import org.xcmis.spi.model.Property;
-import org.xcmis.spi.model.PropertyDefinition;
 import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.model.VersioningState;
-import org.xcmis.spi.model.impl.IdProperty;
-import org.xcmis.spi.model.impl.StringProperty;
 import org.xcmis.spi.utils.MimeType;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class VersioningTest extends BaseTest
 {
 
-   static FolderData testroot = null;
+   private static String testRootFolderId;
+
+   private static TypeDefinition documentTypeVersionable;
+
+   private static TypeDefinition documentTypeNotVersionable;
+
+   private String principal = "root";
 
    @BeforeClass
    public static void start() throws Exception
    {
-      BaseTest.setUp();
-      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootFolderID);
-      testroot =
-         getStorage().createFolder(rootFolder, folderTypeDefinition,
-            getPropsMap(CmisConstants.FOLDER, "versioning_testroot"), null, null);
-      System.out.print("Running Versioning Service tests....");
-
-   }
-
-   /**
-    * 2.2.7.1
-    * Create a private working copy of the document.
-    * @throws Exception
-    */
-   @Test
-   public void testCheckOut_Simple() throws Exception
-   {
-      if (!IS_VERSIONABLE)
-         return;
-      DocumentData doc1 = createDocument(testroot, "testCheckOut_Simple", "1234567890aBcDE");
-      String pwcID = getConnection().checkout(doc1.getObjectId());
-      assertNotNull("Checkout failed.", pwcID);
-      assertNotNull("Object not found.", getStorage().getObjectById(pwcID));
-   }
-
-   /**
-    * 2.2.7.1.3
-    * �  constraint: The Repository MUST throw this exception if the Document�s Object-Type definition�s versionable attribute is FALSE. 
-    * @throws Exception
-    */
-   @Test
-   public void testCheckOut_ConstraintException() throws Exception
-   {
-      if (!IS_VERSIONABLE)
-         return;
-
-      String typeID = new String();
-      DocumentData doc1 = null;
-      try
+      testRootFolderId = createFolder(rootFolderID, CmisConstants.FOLDER, "versioning_testroot", null, null, null);
+      TypeDefinition documentType = connection.getTypeDefinition(CmisConstants.DOCUMENT);
+      List<ItemsTree<TypeDefinition>> allDocs = connection.getTypeDescendants(documentType.getId(), -1, true);
+      if (documentType.isVersionable())
       {
-         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-
-         Map<String, PropertyDefinition<?>> propertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
-         org.xcmis.spi.model.PropertyDefinition<?> propDefName =
-            PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.NAME);
-         org.xcmis.spi.model.PropertyDefinition<?> popDefObjectTypeId =
-            PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.OBJECT_TYPE_ID);
-
-         Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-         properties.put(CmisConstants.NAME, new StringProperty(propDefName.getId(), propDefName.getQueryName(),
-            propDefName.getLocalName(), propDefName.getDisplayName(), "testCheckOut_ConstraintException"));
-         properties.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(popDefObjectTypeId.getId(), popDefObjectTypeId
-            .getQueryName(), popDefObjectTypeId.getLocalName(), popDefObjectTypeId.getDisplayName(),
-            "cmis:versiontype1"));
-
-         TypeDefinition newType =
-            new TypeDefinition("cmis:versiontype1", BaseType.DOCUMENT, "cmis:versiontype1", "cmis:versiontype1", "",
-               "cmis:document", "cmis:versiontype1", "cmis:versiontype1", true, false, true, true, false, false, false,
-               false, null, null, ContentStreamAllowed.ALLOWED, propertyDefinitions);
-         typeID = getStorage().addType(newType);
-         newType = getStorage().getTypeDefinition(typeID, true);
-
-         doc1 = getStorage().createDocument(testroot, newType, properties, cs, null, null, VersioningState.MAJOR);
-         String pwcID = getConnection().checkout(doc1.getObjectId());
-         fail("ConstraintException must be thrown");
+         documentTypeVersionable = documentType;
       }
-      catch (ConstraintException ex)
+      else
       {
-         //OK
+         documentTypeNotVersionable = documentType;
       }
-      finally
+      if (documentTypeNotVersionable == null)
       {
-         getStorage().deleteObject(doc1, true);
-         getStorage().removeType(typeID);
+         documentTypeNotVersionable = getNotVersionableDocType(allDocs);
       }
-   }
-
-   /**
-    * 2.2.7.2
-    * Removes the private working copy of the checked-out document, allowing other documents 
-    * in the version series to be checked out again.
-    * @throws Exception
-    */
-   @Test
-   public void testCancelCheckOut_Simple() throws Exception
-   {
-      if (!IS_VERSIONABLE)
-         return;
-
-      DocumentData doc1 = createDocument(testroot, "testCancelCheckOut_Simple", "1234567890aBcDE");
-      String pwcID = getConnection().checkout(doc1.getObjectId());
-      getConnection().cancelCheckout(pwcID);
-      try
+      if (documentTypeVersionable == null)
       {
-         getStorage().getObjectById(pwcID);
-         fail("PWC must be deleted after cancel checkout.");
+         documentTypeVersionable = getVersionableDocType(allDocs);
       }
-      catch (ObjectNotFoundException ex)
-      {
-         //OK
-      }
-   }
-
-   /**
-    * 2.2.7.2.3
-    * �  constraint: The Repository MUST throw this exception if the Document�s Object-Type definition�s versionable attribute is FALSE. 
-    * @throws Exception
-    */
-   @Test
-   public void testCancelCheckOut_ConstraintException() throws Exception
-   {
-      if (!IS_VERSIONABLE)
-         return;
-
-      String typeID = new String();
-      DocumentData doc1 = null;
-      try
-      {
-         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-
-         Map<String, PropertyDefinition<?>> kinoPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
-         org.xcmis.spi.model.PropertyDefinition<?> propDefName =
-            PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.NAME);
-         org.xcmis.spi.model.PropertyDefinition<?> popDefObjectTypeId =
-            PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.OBJECT_TYPE_ID);
-
-         Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-         properties.put(CmisConstants.NAME, new StringProperty(propDefName.getId(), propDefName.getQueryName(),
-            propDefName.getLocalName(), propDefName.getDisplayName(), "testCancelCheckOut_ConstraintException"));
-         properties.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(popDefObjectTypeId.getId(), popDefObjectTypeId
-            .getQueryName(), popDefObjectTypeId.getLocalName(), popDefObjectTypeId.getDisplayName(),
-            "cmis:versiontype2"));
-
-         TypeDefinition newType =
-            new TypeDefinition("cmis:versiontype2", BaseType.DOCUMENT, "cmis:versiontype2", "cmis:versiontype2", "",
-               "cmis:document", "cmis:versiontype2", "cmis:versiontype2", true, false, true, true, false, false, false,
-               false, null, null, ContentStreamAllowed.ALLOWED, kinoPropertyDefinitions);
-         typeID = getStorage().addType(newType);
-         newType = getStorage().getTypeDefinition(typeID, true);
-
-         doc1 = getStorage().createDocument(testroot, newType, properties, cs, null, null, VersioningState.MAJOR);
-         String pwcID = getConnection().checkout(doc1.getObjectId());
-         getConnection().cancelCheckout(pwcID);
-         fail("ConstraintException must be thrown.");
-      }
-      catch (ConstraintException ex)
-      {
-         //OK
-      }
-      finally
-      {
-         getStorage().deleteObject(doc1, true);
-         getStorage().removeType(typeID);
-      }
-   }
-
-   /**
-    * 2.2.7.3
-    * Checks-in the Private Working Copy document.
-    * @throws Exception
-    */
-   @Test
-   public void testCheckIn_Simple() throws Exception
-   {
-      if (!IS_VERSIONABLE)
-         return;
-
-      byte[] before = "zzz".getBytes();
-      byte[] after = new byte[3];
-      ContentStream cs2 = new BaseContentStream(before, null, new MimeType("text", "plain"));
-      DocumentData doc1 = createDocument(testroot, "testCheckIn_Simple", "1234567890aBcDE");
-
-      String pwcID = getConnection().checkout(doc1.getObjectId());
-      String chIn = getConnection().checkin(pwcID, true, null, cs2, "", null, null, null);
-      assertNotNull("Check-in failed.", chIn);
-      getStorage().getObjectById(chIn).getContentStream(null).getStream().read(after);
-      assertArrayEquals(before, after);
-   }
-
-   /**
-    * 2.2.7.3
-    * Checks-in the Private Working Copy document.
-    * @throws Exception
-    */
-   @Test
-   public void testCheckIn_AddACL() throws Exception
-   {
-      if (!IS_VERSIONABLE)
-         return;
-      if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
-      {
-         //SKIP
-         return;
-      }
-      byte[] after = new byte[3];
-      ContentStream cs2 = new BaseContentStream(after, null, new MimeType("text", "plain"));
-      DocumentData doc1 = createDocument(testroot, "testCheckIn_AddACL", "1234567890aBcDE");
-
-      String username = "username";
-      List<AccessControlEntry> addACL = createACL(username, "cmis:read");
-
-      String pwcID = getConnection().checkout(doc1.getObjectId());
-      String chIn = getConnection().checkin(pwcID, true, null, cs2, "", addACL, null, null);
-      assertNotNull("Check-in failed;", chIn);
-      ObjectData obj = getStorage().getObjectById(chIn);
-      for (AccessControlEntry one : obj.getACL(false))
-      {
-         if (one.getPrincipal().equalsIgnoreCase(username))
-         {
-            assertTrue("Items number incorrect in result.", one.getPermissions().size() == 1);
-            assertTrue("ACL adding failed.", one.getPermissions().contains("cmis:read"));
-         }
-      }
-   }
-
-   /**
-    * 2.2.7.3
-    * Checks-in the Private Working Copy document.
-    * @throws Exception
-    */
-   @Test
-   public void testCheckIn_ApplyPolicy() throws Exception
-   {
-      if (!IS_VERSIONABLE)
-         return;
-
-      if (!isPoliciesSupported)
-      {
-         //SKIP
-         return;
-      }
-      PolicyData policy = null;
-      try
-      {
-         byte[] after = new byte[3];
-         ContentStream cs2 = new BaseContentStream(after, null, new MimeType("text", "plain"));
-         DocumentData doc1 = createDocument(testroot, "testCheckIn_ApplyPolicy", "1234567890aBcDE");
-         policy = createPolicy(testroot, "testCheckIn_ApplyPolicy_policy1");
-
-         ArrayList<String> policies = new ArrayList<String>();
-         policies.add(policy.getObjectId());
-
-         String pwcID = getConnection().checkout(doc1.getObjectId());
-         String chIn = getConnection().checkin(pwcID, true, null, cs2, "", null, null, policies);
-         assertNotNull("Check-in failed.", chIn);
-         ObjectData obj = getStorage().getObjectById(chIn);
-         Iterator<PolicyData> it = obj.getPolicies().iterator();
-         while (it.hasNext())
-         {
-            PolicyData one = it.next();
-            assertTrue("Policy adding failed.", one.getName().equals("testCheckIn_ApplyPolicy_policy1"));
-            assertTrue("Policy adding failed.", one.getPolicyText().equals("testPolicyText"));
-            obj.removePolicy(one);
-         }
-      }
-      finally
-      {
-         if (policy != null)
-            getStorage().deleteObject(policy, true);
-      }
-   }
-
-   /**
-    * 2.2.7.3.3
-    * �  constraint: The Repository MUST throw this exception if the Document�s Object-Type definition�s versionable attribute is FALSE. 
-    * @throws Exception
-    */
-   @Test
-   public void testCheckIn_ConstraintExceptionNotVersionable() throws Exception
-   {
-      if (!IS_VERSIONABLE)
-         return;
-
-      DocumentData doc1 = null;
-      String typeID = new String();
-      try
-      {
-         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-
-         Map<String, PropertyDefinition<?>> kinoPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
-         org.xcmis.spi.model.PropertyDefinition<?> propDefName =
-            PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.NAME);
-         org.xcmis.spi.model.PropertyDefinition<?> popDefObjectTypeId =
-            PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.OBJECT_TYPE_ID);
-
-         Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-         properties.put(CmisConstants.NAME, new StringProperty(propDefName.getId(), propDefName.getQueryName(),
-            propDefName.getLocalName(), propDefName.getDisplayName(), "testCheckIn_ConstraintExceptionNotVersionable"));
-         properties.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(popDefObjectTypeId.getId(), popDefObjectTypeId
-            .getQueryName(), popDefObjectTypeId.getLocalName(), popDefObjectTypeId.getDisplayName(),
-            "cmis:versiontype3"));
-
-         TypeDefinition newType =
-            new TypeDefinition("cmis:versiontype3", BaseType.DOCUMENT, "cmis:versiontype3", "cmis:versiontype3", "",
-               "cmis:document", "cmis:versiontype3", "cmis:versiontype3", true, false, true, true, false, false, false,
-               false, null, null, ContentStreamAllowed.ALLOWED, kinoPropertyDefinitions);
-         typeID = getStorage().addType(newType);
-         newType = getStorage().getTypeDefinition(typeID, true);
-
-         doc1 = getStorage().createDocument(testroot, newType, properties, cs, null, null, VersioningState.MAJOR);
-
-         String pwcID = getConnection().checkout(doc1.getObjectId());
-         String chIn = getConnection().checkin(pwcID, true, null, cs, "", null, null, null);
-         fail("ConstraintException must be thrown.");
-      }
-      catch (ConstraintException ex)
-      {
-         //OK
-      }
-      finally
-      {
-         getStorage().deleteObject(doc1, true);
-         getStorage().removeType(typeID);
-      }
-   }
-
-   /**
-    * 2.2.7.3.3
-    * �  constraint: The Repository MUST throw this exception if the "contentStreamAllowed" attribute of the Object-Type definition specified by the cmis:objectTypeId 
-    * property value is set to "not allowed" and a contentStream input parameter is provided.
-    * @throws Exception
-    */
-   @Test
-   public void testCheckIn_ConstraintExceptionContentNotAllowed() throws Exception
-   {
-      if (!IS_VERSIONABLE)
-         return;
-
-      String pwcID = null;
-      String typeID = new String();
-      DocumentData doc1 = null;
-      try
-      {
-         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-
-         Map<String, PropertyDefinition<?>> kinoPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
-         org.xcmis.spi.model.PropertyDefinition<?> propDefName =
-            PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.NAME);
-         org.xcmis.spi.model.PropertyDefinition<?> popDefObjectTypeId =
-            PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.OBJECT_TYPE_ID);
-
-         Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-         properties.put(CmisConstants.NAME, new StringProperty(propDefName.getId(), propDefName.getQueryName(),
-            propDefName.getLocalName(), propDefName.getDisplayName(),
-            "testCheckIn_ConstraintExceptionContentNotAllowed"));
-         properties.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(popDefObjectTypeId.getId(), popDefObjectTypeId
-            .getQueryName(), popDefObjectTypeId.getLocalName(), popDefObjectTypeId.getDisplayName(),
-            "cmis:versiontype4"));
-
-         TypeDefinition newType =
-            new TypeDefinition("cmis:versiontype4", BaseType.DOCUMENT, "cmis:versiontype4", "cmis:versiontype4", "",
-               "cmis:document", "cmis:versiontype4", "cmis:versiontype4", true, false, true, true, false, false, false,
-               true, null, null, ContentStreamAllowed.NOT_ALLOWED, kinoPropertyDefinitions);
-         typeID = getStorage().addType(newType);
-         newType = getStorage().getTypeDefinition(typeID, true);
-
-         doc1 = getStorage().createDocument(testroot, newType, properties, null, null, null, VersioningState.MAJOR);
-         pwcID = getConnection().checkout(doc1.getObjectId());
-         String chIn = getConnection().checkin(pwcID, true, null, cs, "", null, null, null);
-         fail("ConstraintException must be thrown.");
-
-      }
-      catch (ConstraintException ex)
-      {
-         //OK
-      }
-      catch (StreamNotSupportedException sex)
-      {
-         //OK
-      }
-      finally
-      {
-         getStorage().deleteObject(doc1, true);
-         if (typeID != null)
-            getStorage().removeType(typeID);
-      }
-   }
-
-   /**
-    * 2.2.7.4
-    * Get a the latest Document object in the Version Series.
-    * @throws Exception
-    */
-   @Test
-   public void testGetObjectOfLatestVersion_Simple() throws Exception
-   {
-      if (!IS_VERSIONABLE)
-         return;
-
-      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-      DocumentData doc1 = createDocument(testroot, "testGetObjectOfLatestVersion_Simple", "1234567890aBcDE");
-      String pwcID = getConnection().checkout(doc1.getObjectId());
-      String chIn = getConnection().checkin(pwcID, true, null, cs, "", null, null, null);
-      CmisObject obj =
-         getConnection().getObjectOfLatestVersion(doc1.getVersionSeriesId(), false, true, IncludeRelationships.BOTH,
-            true, true, true, PropertyFilter.ALL, RenditionFilter.NONE);
-      assertNotNull("GetObjectOfLatestVersion failed.", obj);
-   }
-
-   /**
-    * 2.2.7.4
-    * Get a the latest Document object in the Version Series.
-    * @throws Exception
-    */
-   @Test
-   public void testGetObjectOfLatestVersion_AllowableActions() throws Exception
-   {
-      if (!IS_VERSIONABLE)
-         return;
-      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-      DocumentData doc1 = createDocument(testroot, "testGetObjectOfLatestVersion_AllowableActions", "1234567890aBcDE");
-
-      String pwcID = getConnection().checkout(doc1.getObjectId());
-      String chIn = getConnection().checkin(pwcID, true, null, cs, "", null, null, null);
-      CmisObject obj =
-         getConnection().getObjectOfLatestVersion(doc1.getVersionSeriesId(), false, true, IncludeRelationships.BOTH,
-            true, true, true, PropertyFilter.ALL, RenditionFilter.NONE);
-      assertNotNull("GetObjectOfLatestVersion failed.", obj);
-      assertNotNull(" AllowableActions must be present in result.", obj.getAllowableActions());
-   }
-
-   /**
-    * 2.2.7.4
-    * Get a the latest Document object in the Version Series.
-    * @throws Exception
-    */
-   @Test
-   public void testGetObjectOfLatestVersion_IncludePolicies() throws Exception
-   {
-
-      if (!IS_VERSIONABLE)
-         return;
-
-      if (!isPoliciesSupported)
-      {
-         //SKIP
-         return;
-      }
-      PolicyData policy = null;
-      String chIn = null;
-      try
-      {
-         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-         policy = createPolicy(testroot, "policy_testGetObjectOfLatestVersion");
-         ArrayList<String> policies = new ArrayList<String>();
-         policies.add(policy.getObjectId());
-
-         DocumentData doc1 =
-            createDocument(testroot, "testGetObjectOfLatestVersion_IncludePolicies", "1234567890aBcDE");
-         String pwcID = getConnection().checkout(doc1.getObjectId());
-         chIn = getConnection().checkin(pwcID, true, null, cs, "", null, null, policies);
-         CmisObject obj =
-            getConnection().getObjectOfLatestVersion(doc1.getVersionSeriesId(), false, true, IncludeRelationships.BOTH,
-               true, true, true, PropertyFilter.ALL, RenditionFilter.NONE);
-         assertNotNull("GetObjectOfLatestVersion failed.", obj);
-         Iterator<String> it = obj.getPolicyIds().iterator();
-         while (it.hasNext())
-         {
-            PolicyData one = (PolicyData)getStorage().getObjectById(it.next());
-            assertTrue("Policy adding failed.", one.getName().equals("policy_testGetObjectOfLatestVersion"));
-            assertTrue("Policy text failed.", one.getPolicyText().equals("testPolicyText"));
-         }
-      }
-      finally
-      {
-         if (chIn != null)
-            getStorage().deleteObject(getStorage().getObjectById(chIn), true);
-         if (policy != null)
-            getStorage().deleteObject(policy, true);
-      }
-   }
-
-   /**
-    * 2.2.7.4
-    * Get a the latest Document object in the Version Series.
-    * @throws Exception
-    */
-   @Test
-   public void testGetObjectOfLatestVersion_IncludeACL() throws Exception
-   {
-      if (!IS_VERSIONABLE)
-         return;
-
-      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-      String username = "username";
-      List<AccessControlEntry> addACL = createACL(username, "cmis:read");
-      DocumentData doc1 = createDocument(testroot, "testGetObjectOfLatestVersion_IncludeACL", "1234567890aBcDE");
-      String pwcID = getConnection().checkout(doc1.getObjectId());
-      String chIn = getConnection().checkin(pwcID, true, null, cs, "", addACL, null, null);
-      CmisObject obj =
-         getConnection().getObjectOfLatestVersion(doc1.getVersionSeriesId(), false, true, IncludeRelationships.BOTH,
-            true, true, true, PropertyFilter.ALL, RenditionFilter.NONE);
-      assertNotNull("GetObjectOfLatestVersion failed.", obj);
-      for (AccessControlEntry one : obj.getACL())
-      {
-         if (one.getPrincipal().equalsIgnoreCase(username))
-         {
-            assertTrue("Permission setting failed.", one.getPermissions().size() == 1);
-            assertTrue("Permission setting failed.", one.getPermissions().contains("cmis:read"));
-         }
-      }
-   }
-
-   /**
-    * 2.2.7.4
-    * Repositories SHOULD return only the properties specified in the property filter 
-    * if they exist on the object�s type definition.
-    * @throws Exception
-    */
-   @Test
-   public void testGetObjectOfLatestVersion_PropertiesFiltered() throws Exception
-   {
-      if (!IS_VERSIONABLE)
-         return;
-
-      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-      DocumentData doc1 =
-         createDocument(testroot, "testGetObjectOfLatestVersion_PropertiesFiltered", "1234567890aBcDE");
-      String pwcID = getConnection().checkout(doc1.getObjectId());
-      String chIn = getConnection().checkin(pwcID, true, null, cs, "", null, null, null);
-      CmisObject obj =
-         getConnection().getObjectOfLatestVersion(doc1.getVersionSeriesId(), false, true, IncludeRelationships.BOTH,
-            true, true, true, "cmis:name,cmis:path", RenditionFilter.NONE);
-      assertNotNull("GetObjectOfLatestVersion failed.", obj);
-      for (Map.Entry<String, Property<?>> e : obj.getProperties().entrySet())
-      {
-         if (e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path"))//Other props must be ignored
-            continue;
-         else
-            fail("Property filter works incorrect.");
-      }
-   }
-
-   /**
-    * 2.2.7.4.3
-    * � filterNotValid: The Repository MUST throw this exception if this property filter input parameter is not valid.
-    * @throws Exception
-    */
-   @Test
-   public void testGetObjectOfLatestVersion_FilterNotValidException() throws Exception
-   {
-      if (!IS_VERSIONABLE)
-         return;
-
-      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-      DocumentData doc1 =
-         createDocument(testroot, "testGetObjectOfLatestVersion_FilterNotValidException", "1234567890aBcDE");
-      String pwcID = getConnection().checkout(doc1.getObjectId());
-      String chIn = getConnection().checkin(pwcID, true, null, cs, "", null, null, null);
-      try
-      {
-         CmisObject obj =
-            getConnection().getObjectOfLatestVersion(doc1.getVersionSeriesId(), false, true, IncludeRelationships.BOTH,
-               true, true, true, "(,*", RenditionFilter.NONE);
-         fail("FilterNotValidException must be thrown.");
-      }
-      catch (FilterNotValidException ex)
-      {
-         //OK
-      }
-   }
-
-   /**
-    * 2.2.7.4.3
-    * �  objectNotFound:  The Repository MUST throw this exception if the input parameter major is TRUE and the Version Series contains no major versions.
-    * @throws Exception
-    */
-   @Test
-   public void testGetObjectOfLatestVersion_ObjectNotFoundException() throws Exception
-   {
-      if (!IS_VERSIONABLE)
-         return;
-
-      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-      DocumentData doc1 =
-         createDocument(testroot, "testGetObjectOfLatestVersion_ObjectNotFoundException", "1234567890aBcDE");
-
-      String pwcID = getConnection().checkout(doc1.getObjectId());
-      String chIn = getConnection().checkin(pwcID, false, null, cs, "", null, null, null);
-      try
-      {
-         CmisObject obj =
-            getConnection().getObjectOfLatestVersion(doc1.getVersionSeriesId(), true, true, IncludeRelationships.BOTH,
-               true, true, true, PropertyFilter.ALL, RenditionFilter.NONE);
-         fail("ObjectNotFoundException must be thrown.");
-      }
-      catch (ObjectNotFoundException ex)
-      {
-         //OK
-      }
-   }
-
-   /**
-    * 2.2.7.5
-    * Get a subset of the properties for the latest Document Object in the Version Series.  
-    * @throws Exception
-    */
-   @Test
-   public void testGetPropertiesOfLatestVersion_Simple() throws Exception
-   {
-      if (!IS_VERSIONABLE)
-         return;
-
-      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-      DocumentData doc1 = createDocument(testroot, "testGetPropertiesOfLatestVersion_Simple", "1234567890aBcDE");
-      String pwcID = getConnection().checkout(doc1.getObjectId());
-      String chIn = getConnection().checkin(pwcID, true, null, cs, "", null, null, null);
-      CmisObject obj =
-         getConnection().getPropertiesOfLatestVersion(doc1.getVersionSeriesId(), true, true, PropertyFilter.ALL);
-      assertNotNull("GetPropertiesOfLatestVersion failed.", obj);
-      assertNotNull("ObjectInfo must be present in result.", obj.getObjectInfo());
-   }
-
-   /**
-    * 2.2.7.5
-    * Repositories SHOULD return only the properties specified in the property filter 
-    * if they exist on the object�s type definition.
-    * @throws Exception
-    */
-   @Test
-   public void testGetPropertiesOfLatestVersion_PropertiesFiltered() throws Exception
-   {
-      if (!IS_VERSIONABLE)
-         return;
-
-      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-      DocumentData doc1 =
-         createDocument(testroot, "testGetPropertiesOfLatestVersion_PropertiesFiltered", "1234567890aBcDE");
-
-      String pwcID = getConnection().checkout(doc1.getObjectId());
-      String chIn = getConnection().checkin(pwcID, true, null, cs, "", null, null, null);
-      CmisObject obj =
-         getConnection().getPropertiesOfLatestVersion(doc1.getVersionSeriesId(), true, true, "cmis:name,cmis:path");
-      assertNotNull("GetPropertiesOfLatestVersion failed;", obj);
-
-      for (Map.Entry<String, Property<?>> e : obj.getProperties().entrySet())
-      {
-         if (e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")) //Other props must be ignored
-            continue;
-         else
-            fail("Property filter works incorrect.");
-      }
-   }
-
-   /**
-    * 2.2.7.5.3
-    * �  filterNotValid: The Repository MUST throw this exception if this property filter input parameter is not valid.
-    * @throws Exception
-    */
-   @Test
-   public void testGetPropertiesOfLatestVersion_FilterNotValidException() throws Exception
-   {
-      if (!IS_VERSIONABLE)
-         return;
-
-      ContentStream cs = new BaseContentStream("zzz".getBytes(), null, new MimeType("text", "plain"));
-      DocumentData doc1 =
-         createDocument(testroot, "testGetPropertiesOfLatestVersion_FilterNotValidException", "1234567890aBcDE");
-      String pwcID = getConnection().checkout(doc1.getObjectId());
-      String chIn = getConnection().checkin(pwcID, true, null, cs, "", null, null, null);
-      try
-      {
-         CmisObject obj = getConnection().getPropertiesOfLatestVersion(doc1.getVersionSeriesId(), true, true, "(,*");
-         fail("FilterNotValidException must be thrown.");
-      }
-      catch (FilterNotValidException ex)
-      {
-         //OK
-      }
-   }
-
-   /**
-    * 2.2.7.5.3
-    * �  objectNotFound:  The Repository MUST throw this exception if the input parameter major is TRUE and the Version Series contains no major versions.
-    * @throws Exception
-    */
-   @Test
-   public void testGetPropertiesOfLatestVersion_ObjectNotFoundException() throws Exception
-   {
-      if (!IS_VERSIONABLE)
-         return;
-
-      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-      ContentStream cs2 = new BaseContentStream("zzz".getBytes(), null, new MimeType("text", "plain"));
-
-      DocumentData doc1 =
-         getStorage().createDocument(testroot, documentTypeDefinition,
-            getPropsMap(CmisConstants.DOCUMENT, "testGetPropertiesOfLatestVersion_ObjectNotFoundException"), cs, null,
-            null, VersioningState.MINOR);
-      String pwcID = getConnection().checkout(doc1.getObjectId());
-      String chIn = getConnection().checkin(pwcID, false, null, cs2, "", null, null, null);
-      try
-      {
-         CmisObject obj =
-            getConnection().getPropertiesOfLatestVersion(doc1.getVersionSeriesId(), true, true, PropertyFilter.ALL);
-         fail("ObjectNotFoundException must be thrown.");
-      }
-      catch (ObjectNotFoundException ex)
-      {
-         //OK
-      }
+      System.out.println("Running Versioning Service tests");
    }
 
    @AfterClass
    public static void stop() throws Exception
    {
-      if (testroot != null)
-         clear(testroot.getObjectId());
-      if (BaseTest.connection != null)
-         BaseTest.connection.close();
-      System.out.println("done;");
+      if (testRootFolderId != null)
+      {
+         clear(testRootFolderId);
+      }
    }
+
+   /**
+    * 2.2.7.1 checkout.
+    * <p>
+    * Create a private working copy of the document.
+    * </p>
+    * 
+    * @throws Exception
+    */
+   @Test
+   public void testCheckOut() throws Exception
+   {
+      if (documentTypeVersionable == null)
+      {
+         return;
+      }
+      String document =
+         createDocument(testRootFolderId, documentTypeVersionable.getId(), generateName(documentTypeVersionable, null),
+            null, null, null, null, null);
+      String pwc = connection.checkout(document);
+      CmisObject pwcObject = null;
+      try
+      {
+         pwcObject =
+            connection.getObject(pwc, false, IncludeRelationships.NONE, false, false, true, null, RenditionFilter.NONE);
+      }
+      catch (ObjectNotFoundException e)
+      {
+         fail("PWC not found. ");
+      }
+      assertNotNull(pwcObject);
+      validateVersionSeries(pwcObject.getObjectInfo().getVersionSeriesId(), document, pwc);
+      validateCheckedOutState(document, pwc);
+      validateCheckedOutState(pwc, pwc);
+
+   }
+
+   /**
+    * 2.2.7.1 checkout.
+    * <p>
+    * {@link ConstraintException} must be throw if document type is not
+    * versionable.
+    * </p>
+    * 
+    * @throws Exception
+    */
+   @Test
+   public void testCheckOut_ConstraintException() throws Exception
+   {
+      if (documentTypeNotVersionable == null)
+      {
+         return;
+      }
+      String document =
+         createDocument(testRootFolderId, documentTypeNotVersionable.getId(), generateName(documentTypeNotVersionable,
+            null), null, null, null, null, null);
+      try
+      {
+         connection.checkout(document);
+         fail("ConstraintException must be thrown since document type is not versionable. ");
+      }
+      catch (ConstraintException e)
+      {
+      }
+   }
+
+   /**
+    * 2.2.7.2 cancelCheckout.
+    * <p>
+    * Removes the private working copy of the checked-out document, allowing
+    * other documents in the version series to be checked out again. Call
+    * cancelCheckout on PWC.
+    * </p>
+    * 
+    * @throws Exception
+    */
+   @Test
+   public void testCancelCheckOut_PWC() throws Exception
+   {
+      if (documentTypeVersionable == null)
+      {
+         return;
+      }
+      String document =
+         createDocument(testRootFolderId, documentTypeVersionable.getId(), generateName(documentTypeVersionable, null),
+            null, null, null, null, null);
+      CmisObject documentObject =
+         connection.getObject(document, false, IncludeRelationships.NONE, false, false, true, null,
+            RenditionFilter.NONE);
+
+      String vs = documentObject.getObjectInfo().getVersionSeriesId();
+
+      String pwc = connection.checkout(document);
+      connection.cancelCheckout(pwc);
+
+      validateVersionSeries(vs, document);
+      validateCheckedInState(document);
+      try
+      {
+         connection.getObject(pwc, false, IncludeRelationships.NONE, false, false, true, null, RenditionFilter.NONE);
+         fail("PWC must be removed. ");
+      }
+      catch (ObjectNotFoundException e)
+      {
+      }
+   }
+
+   /**
+    * 2.2.7.2 cancelCheckout.
+    * <p>
+    * Removes the private working copy of the checked-out document, allowing
+    * other documents in the version series to be checked out again. Call
+    * cancelCheckout on original document.
+    * </p>
+    * 
+    * @throws Exception
+    */
+   @Test
+   public void testCancelCheckOut_Document() throws Exception
+   {
+      if (documentTypeVersionable == null)
+      {
+         return;
+      }
+      String document =
+         createDocument(testRootFolderId, documentTypeVersionable.getId(), generateName(documentTypeVersionable, null),
+            null, null, null, null, null);
+      CmisObject documentObject =
+         connection.getObject(document, false, IncludeRelationships.NONE, false, false, true, null,
+            RenditionFilter.NONE);
+      String vs = documentObject.getObjectInfo().getVersionSeriesId();
+
+      String pwc = connection.checkout(document);
+      connection.cancelCheckout(document);
+
+      validateVersionSeries(vs, document);
+      validateCheckedInState(document);
+
+      try
+      {
+         connection.getObject(pwc, false, IncludeRelationships.NONE, false, false, true, null, RenditionFilter.NONE);
+         fail("PWC must be removed. ");
+      }
+      catch (ObjectNotFoundException e)
+      {
+      }
+   }
+
+   /**
+    * 2.2.7.2 cancelCheckout.
+    * <p>
+    * {@link ConstraintException} must be throw if document type is not
+    * versionable.
+    * </p>
+    * 
+    * @throws Exception
+    */
+   @Test
+   public void testCancelCheckOut_ConstraintException() throws Exception
+   {
+      if (documentTypeNotVersionable == null)
+      {
+         return;
+      }
+      String document =
+         createDocument(testRootFolderId, documentTypeNotVersionable.getId(), generateName(documentTypeNotVersionable,
+            null), null, null, null, null, null);
+      try
+      {
+         connection.cancelCheckout(document);
+         fail("ConstraintException must be thrown since document type is not versionable. ");
+      }
+      catch (ConstraintException e)
+      {
+      }
+   }
+
+   /**
+    * 2.2.7.3 checkin.
+    * <p>
+    * Checks-in the Private Working Copy of document.
+    * </p>
+    * 
+    * @throws Exception
+    */
+   @Test
+   public void testCheckIn() throws Exception
+   {
+      if (documentTypeVersionable == null)
+      {
+         return;
+      }
+      String document =
+         createDocument(testRootFolderId, documentTypeVersionable.getId(), generateName(documentTypeVersionable, null),
+            null, null, null, null, null);
+      CmisObject documentObject =
+         connection.getObject(document, false, IncludeRelationships.NONE, false, false, true, null,
+            RenditionFilter.NONE);
+      String vs = documentObject.getObjectInfo().getVersionSeriesId();
+
+      String pwc = connection.checkout(document);
+      String v1 = connection.checkin(pwc, true, null, null, "testCheckIn", null, null, null);
+
+      validateVersionSeries(vs, document, v1);
+      validateCheckedInState(document);
+   }
+
+   /**
+    * 2.2.7.3 checkin.
+    * <p>
+    * Checks-in the Private Working Copy of document and apply ACL to it.
+    * </p>
+    * 
+    * @throws Exception
+    */
+   @Test
+   public void testCheckIn_ApplyACL() throws Exception
+   {
+      if (documentTypeVersionable == null)
+      {
+         return;
+      }
+      String document =
+         createDocument(testRootFolderId, documentTypeVersionable.getId(), generateName(documentTypeVersionable, null),
+            null, null, null, null, null);
+      CmisObject documentObject =
+         connection.getObject(document, false, IncludeRelationships.NONE, false, false, true, null,
+            RenditionFilter.NONE);
+      String vs = documentObject.getObjectInfo().getVersionSeriesId();
+
+      String pwc = connection.checkout(document);
+
+      List<AccessControlEntry> acl = createACL(principal, "cmis:all");
+
+      // Different behavior dependent to storage capabilities.
+      if (capabilities.getCapabilityACL() != CapabilityACL.MANAGE)
+      {
+         try
+         {
+            connection.checkin(pwc, true, null, null, "testCheckIn", acl, null, null);
+            fail("NotSupportedException must be thrown, managin ACL is not supported. ");
+         }
+         catch (NotSupportedException e)
+         {
+         }
+      }
+      else if (!documentTypeVersionable.isControllableACL())
+      {
+         try
+         {
+            connection.checkin(pwc, true, null, null, "testCheckIn", acl, null, null);
+            fail("ConstraintException must be thrown, type is not controllable by ACL. ");
+         }
+         catch (ConstraintException e)
+         {
+         }
+      }
+      else
+      {
+         String v1 = connection.checkin(pwc, true, null, null, "testCheckIn", acl, null, null);
+         validateVersionSeries(vs, document, v1);
+         validateCheckedInState(document);
+         List<AccessControlEntry> actualACL = connection.getACL(v1, false);
+         validateACL(actualACL);
+         checkACL(acl, actualACL);
+      }
+   }
+
+   /**
+    * 2.2.7.3 checkin.
+    * <p>
+    * Checks-in the Private Working Copy of document and apply ACL to it.
+    * </p>
+    * 
+    * @throws Exception
+    */
+   @Test
+   public void testCheckIn_ApplyPolicy() throws Exception
+   {
+      if (documentTypeVersionable == null || !isPoliciesSupported)
+      {
+         return;
+      }
+
+      TypeDefinition policyType = connection.getTypeDefinition(CmisConstants.POLICY);
+      String policy =
+         createPolicy(policyType.isFileable() ? testRootFolderId : null, policyType.getId(), generateName(policyType,
+            null), "policy1", null, null, null);
+      String document =
+         createDocument(testRootFolderId, documentTypeVersionable.getId(), generateName(documentTypeVersionable, null),
+            null, null, null, null, null);
+      CmisObject documentObject =
+         connection.getObject(document, false, IncludeRelationships.NONE, false, false, true, null,
+            RenditionFilter.NONE);
+      String vs = documentObject.getObjectInfo().getVersionSeriesId();
+
+      String pwc = connection.checkout(document);
+
+      // Different behavior dependent to storage capabilities.
+      if (!documentTypeVersionable.isControllablePolicy())
+      {
+         try
+         {
+            connection.checkin(pwc, true, null, null, "testCheckIn", null, null, Arrays.asList(policy));
+            fail("ConstraintException must be thrown, type is not controllable by policy. ");
+         }
+         catch (ConstraintException e)
+         {
+         }
+      }
+      else
+      {
+         String v1 = connection.checkin(pwc, true, null, null, "testCheckIn", null, null, Arrays.asList(policy));
+         validateVersionSeries(vs, document, v1);
+         validateCheckedInState(document);
+         List<CmisObject> policies = connection.getAppliedPolicies(v1, true, null);
+         assertTrue(policies.size() >= 1);
+         Set<String> policiesId = new HashSet<String>(policies.size());
+         for (CmisObject o : policies)
+         {
+            policiesId.add(o.getObjectInfo().getId());
+         }
+         assertTrue("Expected policy is not found. ", policiesId.contains(policy));
+      }
+   }
+
+   /**
+    * 2.2.7.3 checkin.
+    * <p>
+    * Update content when checkin. {@link ConstraintException} must be thrown if
+    * the "contentStreamAllowed" attribute of the object type definition
+    * specified by the cmis:objectTypeId property value is set to "not allowed"
+    * and a contentStream input parameter is provided.
+    * </p>
+    * 
+    * @throws Exception
+    */
+   @Test
+   public void testCheckIn_UpdateContent() throws Exception
+   {
+      if (documentTypeVersionable == null)
+      {
+         return;
+      }
+      String document =
+         createDocument(testRootFolderId, documentTypeVersionable.getId(), generateName(documentTypeVersionable, null),
+            null, null, null, null, null);
+      CmisObject documentObject =
+         connection.getObject(document, false, IncludeRelationships.NONE, false, false, true, null,
+            RenditionFilter.NONE);
+      String vs = documentObject.getObjectInfo().getVersionSeriesId();
+
+      String pwc = connection.checkout(document);
+
+      if (documentTypeVersionable.getContentStreamAllowed() == ContentStreamAllowed.NOT_ALLOWED)
+      {
+         try
+         {
+            connection.checkin(pwc, true, null, TEST_CONTENT_STREAM, "testCheckIn", null, null, null);
+            fail("ConstraintException must be thrown, content stream is not allowed. ");
+         }
+         catch (StreamNotSupportedException e)
+         {
+         }
+      }
+      else
+      {
+         byte[] newContent = "__CONTENT__".getBytes();
+         String v1 =
+            connection.checkin(pwc, true, null, new BaseContentStream(newContent, "", new MimeType("text", "plain")),
+               "testCheckIn", null, null, null);
+
+         validateVersionSeries(vs, document, v1);
+         validateCheckedInState(document);
+
+         ContentStream content = connection.getContentStream(v1, null);
+
+         assertEquals(content.getMediaType(), content.getMediaType());
+         byte[] buf = new byte[1024];
+         int read = content.getStream().read(buf);
+         byte[] res = new byte[read];
+         System.arraycopy(buf, 0, res, 0, read);
+         assertArrayEquals(newContent, res);
+      }
+   }
+
+   /**
+    * 2.2.7.4 getObjectOfLatestVersion.
+    * <p>
+    * Get latest version of document in the version series without any
+    * additional info about relationships, policies, renditions.
+    * </p>
+    * 
+    * @throws Exception
+    */
+   @Test
+   public void testGetObjectOfLatestVersion() throws Exception
+   {
+      if (documentTypeVersionable == null)
+      {
+         return;
+      }
+      String document =
+         createDocument(testRootFolderId, documentTypeVersionable.getId(), generateName(documentTypeVersionable, null),
+            null, null, null, null, null);
+      CmisObject documentObject =
+         connection.getObject(document, false, IncludeRelationships.NONE, false, false, true, null,
+            RenditionFilter.NONE);
+      String vs = documentObject.getObjectInfo().getVersionSeriesId();
+
+      String pwc = connection.checkout(document);
+      String v1 = connection.checkin(pwc, true, null, null, "testCheckIn", null, null, null);
+      pwc = connection.checkout(v1);
+      String v2 = connection.checkin(pwc, true, null, null, "testCheckIn", null, null, null);
+      CmisObject latest =
+         connection.getObjectOfLatestVersion(vs, false, false, IncludeRelationships.NONE, false, false, true, null,
+            RenditionFilter.NONE);
+      assertNotNull(latest);
+      assertEquals(v2, latest.getObjectInfo().getId());
+      assertNull(latest.getAllowableActions());
+      assertEquals(0, latest.getPolicyIds().size());
+      assertEquals(0, latest.getRelationship().size());
+      assertEquals(0, latest.getRenditions().size());
+   }
+
+   /**
+    * 2.2.7.4 getObjectOfLatestVersion.
+    * <p>
+    * Get latest version of document in the version series with additional info
+    * about allowable actions.
+    * </p>
+    * 
+    * @throws Exception
+    */
+   @Test
+   public void testGetObjectOfLatestVersion_AllowableActions() throws Exception
+   {
+      if (documentTypeVersionable == null)
+      {
+         return;
+      }
+      String document =
+         createDocument(testRootFolderId, documentTypeVersionable.getId(), generateName(documentTypeVersionable, null),
+            null, null, null, null, null);
+      CmisObject documentObject =
+         connection.getObject(document, false, IncludeRelationships.NONE, false, false, true, null,
+            RenditionFilter.NONE);
+      String vs = documentObject.getObjectInfo().getVersionSeriesId();
+
+      String pwc = connection.checkout(document);
+      String v1 = connection.checkin(pwc, true, null, null, "testCheckIn", null, null, null);
+      CmisObject latest =
+         connection.getObjectOfLatestVersion(vs, false, true, IncludeRelationships.NONE, false, false, true, null,
+            RenditionFilter.NONE);
+      assertNotNull(latest);
+      assertEquals(v1, latest.getObjectInfo().getId());
+      assertNotNull(latest.getAllowableActions());
+   }
+
+   /**
+    * 2.2.7.4 getObjectOfLatestVersion.
+    * <p>
+    * Get latest version of document in the version series with additional info
+    * about policies applied to object.
+    * </p>
+    * 
+    * @throws Exception
+    */
+   @Test
+   public void testGetObjectOfLatestVersion_IncludePolicies() throws Exception
+   {
+      if (documentTypeVersionable == null || !isPoliciesSupported || !documentTypeVersionable.isControllablePolicy())
+      {
+         return;
+      }
+
+      String document =
+         createDocument(testRootFolderId, documentTypeVersionable.getId(), generateName(documentTypeVersionable, null),
+            null, null, null, null, null);
+      CmisObject documentObject =
+         connection.getObject(document, false, IncludeRelationships.NONE, false, false, true, null,
+            RenditionFilter.NONE);
+      String vs = documentObject.getObjectInfo().getVersionSeriesId();
+
+      String pwc = connection.checkout(document);
+
+      TypeDefinition policyType = connection.getTypeDefinition(CmisConstants.POLICY);
+      String policy =
+         createPolicy(policyType.isFileable() ? testRootFolderId : null, policyType.getId(), generateName(policyType,
+            null), "policy1", null, null, null);
+      String v1 = connection.checkin(pwc, true, null, null, "testCheckIn", null, null, Arrays.asList(policy));
+
+      CmisObject latest =
+         connection.getObjectOfLatestVersion(vs, false, false, IncludeRelationships.NONE, true, false, true, null,
+            RenditionFilter.NONE);
+
+      assertNotNull(latest);
+      assertEquals(v1, latest.getObjectInfo().getId());
+      assertTrue(latest.getPolicyIds().size() >= 1);
+      assertTrue("Expected policy " + policy + " not found in result. ", latest.getPolicyIds().contains(policy));
+   }
+
+   /**
+    * 2.2.7.4 getObjectOfLatestVersion.
+    * <p>
+    * Get latest version of document in the version series with additional info
+    * about ACL.
+    * </p>
+    * 
+    * @throws Exception
+    */
+   @Test
+   public void testGetObjectOfLatestVersion_IncludeACL() throws Exception
+   {
+      if (documentTypeVersionable == null || capabilities.getCapabilityACL() != CapabilityACL.MANAGE
+         || !documentTypeVersionable.isControllableACL())
+      {
+         return;
+      }
+
+      String document =
+         createDocument(testRootFolderId, documentTypeVersionable.getId(), generateName(documentTypeVersionable, null),
+            null, null, null, null, null);
+      CmisObject documentObject =
+         connection.getObject(document, false, IncludeRelationships.NONE, false, false, true, null,
+            RenditionFilter.NONE);
+      String vs = documentObject.getObjectInfo().getVersionSeriesId();
+
+      String pwc = connection.checkout(document);
+
+      List<AccessControlEntry> acl = createACL(principal, "cmis:all");
+
+      String v1 = connection.checkin(pwc, true, null, null, "testCheckIn", acl, null, null);
+
+      CmisObject latest =
+         connection.getObjectOfLatestVersion(vs, false, false, IncludeRelationships.NONE, false, true, true, null,
+            RenditionFilter.NONE);
+
+      assertNotNull(latest);
+      assertEquals(v1, latest.getObjectInfo().getId());
+      List<AccessControlEntry> actualACL = latest.getACL();
+      validateACL(actualACL);
+      checkACL(acl, actualACL);
+   }
+
+   /**
+    * 2.2.7.4 getObjectOfLatestVersion.
+    * <p>
+    * If parameter "major" is true then latest major version must be returned.
+    * </p>
+    * 
+    * @throws Exception
+    */
+   @Test
+   public void testGetObjectOfLatestVersion_Major() throws Exception
+   {
+      if (documentTypeVersionable == null)
+      {
+         return;
+      }
+      String document =
+         createDocument(testRootFolderId, documentTypeVersionable.getId(), generateName(documentTypeVersionable, null),
+            null, null, null, null, null);
+      CmisObject documentObject =
+         connection.getObject(document, false, IncludeRelationships.NONE, false, false, true, null,
+            RenditionFilter.NONE);
+      String vs = documentObject.getObjectInfo().getVersionSeriesId();
+
+      String pwc = connection.checkout(document);
+      String v1 = connection.checkin(pwc, true, null, null, "testCheckIn", null, null, null);
+      pwc = connection.checkout(v1);
+      String v2 = connection.checkin(pwc, false, null, null, "testCheckIn", null, null, null);
+      CmisObject latest =
+         connection.getObjectOfLatestVersion(vs, true, false, IncludeRelationships.NONE, false, false, true, null,
+            RenditionFilter.NONE);
+      assertNotNull(latest);
+      assertEquals(v1, latest.getObjectInfo().getId()); // v1 is latest major, v2 is not major.
+   }
+
+   /**
+    * 2.2.7.4 getObjectOfLatestVersion.
+    * <p>
+    * {@link ObjectNotFoundException} must be thrown if parameter "major" is
+    * true and version series doe not have any major version.
+    * </p>
+    * 
+    * @throws Exception
+    */
+   @Test
+   public void testGetObjectOfLatestVersion_Major_ObjectNotFoundException() throws Exception
+   {
+      if (documentTypeVersionable == null)
+      {
+         return;
+      }
+      String document =
+         createDocument(testRootFolderId, documentTypeVersionable.getId(), generateName(documentTypeVersionable, null),
+            null, null, null, null, VersioningState.MINOR);
+      CmisObject documentObject =
+         connection.getObject(document, false, IncludeRelationships.NONE, false, false, true, null,
+            RenditionFilter.NONE);
+      String vs = documentObject.getObjectInfo().getVersionSeriesId();
+
+      String pwc = connection.checkout(document);
+      String v1 = connection.checkin(pwc, false, null, null, "testCheckIn", null, null, null);
+      pwc = connection.checkout(v1);
+      String v2 = connection.checkin(pwc, false, null, null, "testCheckIn", null, null, null);
+      try
+      {
+         connection.getObjectOfLatestVersion(vs, true, false, IncludeRelationships.NONE, false, false, true, null,
+            RenditionFilter.NONE);
+         fail("ObjectNotFoundException must be thrown, there is not major versions in version series.");
+      }
+      catch (ObjectNotFoundException e)
+      {
+      }
+   }
+
+   private void validateCheckedOutState(String d, String pwc) throws Exception
+   {
+      StringBuilder b = new StringBuilder();
+      b.append(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT);
+      b.append(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID);
+      CmisObject object = connection.getProperties(d, true, b.toString());
+      for (Map.Entry<String, Property<?>> p : object.getProperties().entrySet())
+      {
+         if (p.getKey().equals(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT))
+         {
+            Boolean checkedout = (Boolean)p.getValue().getValues().get(0);
+            assertTrue(checkedout);
+         }
+         if (p.getKey().equals(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID))
+         {
+            String pwc0 = (String)p.getValue().getValues().get(0);
+            assertEquals(pwc, pwc0);
+         }
+      }
+   }
+
+   private void validateCheckedInState(String d) throws Exception
+   {
+      StringBuilder b = new StringBuilder();
+      b.append(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT);
+      b.append(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID);
+      CmisObject object = connection.getProperties(d, true, b.toString());
+      for (Map.Entry<String, Property<?>> p : object.getProperties().entrySet())
+      {
+         if (p.getKey().equals(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT))
+         {
+            Boolean checkedout = (Boolean)p.getValue().getValues().get(0);
+            assertFalse(checkedout);
+         }
+         if (p.getKey().equals(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID))
+         {
+            assertTrue("cmis:versionSeriesCheckedOutId must not be set. ", p.getValue().getValues().isEmpty());
+         }
+      }
+   }
+
+   private void validateVersionSeries(String vs, String... exp) throws Exception
+   {
+      List<CmisObject> versions = connection.getAllVersions(vs, false, true, null);
+      assertEquals(exp.length, versions.size());
+      Set<String> ids = new HashSet<String>(versions.size());
+      for (CmisObject v : versions)
+      {
+         assertEquals(vs, v.getObjectInfo().getVersionSeriesId());
+         ids.add(v.getObjectInfo().getId());
+      }
+      for (String v : exp)
+      {
+         assertTrue("Expected version " + v + "not found in version series.", ids.contains(v));
+      }
+   }
+
 }

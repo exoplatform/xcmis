@@ -24,22 +24,16 @@ import static org.junit.Assert.fail;
 
 import org.exoplatform.services.security.ConversationState;
 import org.exoplatform.services.security.Identity;
-import org.xcmis.spi.BaseContentStream;
+import org.junit.BeforeClass;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRegistry;
 import org.xcmis.spi.Connection;
-import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentStream;
-import org.xcmis.spi.DocumentData;
 import org.xcmis.spi.FolderData;
 import org.xcmis.spi.ItemsTree;
-import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.ObjectNotFoundException;
-import org.xcmis.spi.PolicyData;
 import org.xcmis.spi.PropertyFilter;
 import org.xcmis.spi.RenditionFilter;
-import org.xcmis.spi.Storage;
-import org.xcmis.spi.StorageException;
 import org.xcmis.spi.TypeNotFoundException;
 import org.xcmis.spi.model.ACLCapability;
 import org.xcmis.spi.model.AccessControlEntry;
@@ -95,45 +89,53 @@ import java.util.UUID;
 public class BaseTest
 {
 
-   //   protected static StandaloneContainer container;
-
-   //   protected static StorageProvider storageProvider;
-
-   @Deprecated
-   protected static TypeDefinition documentTypeDefinition;
-
-   @Deprecated
-   protected static TypeDefinition folderTypeDefinition;
-
-   @Deprecated
-   protected static TypeDefinition policyTypeDefinition;
-
-   @Deprecated
-   protected static TypeDefinition relationshipTypeDefinition;
-
-   protected static String rootFolderID;
-
-   protected static FolderData rootFolder;
-
-   protected static Connection connection;
-
-   protected static boolean isRelationshipsSupported = false;
-
-   protected static boolean isPoliciesSupported = false;
-
-   protected static boolean IS_CAPABILITY_FOLDER_TREE = false;
-
-   protected static boolean IS_CAPABILITY_DESCENDANTS = false;
-
-   protected static boolean IS_CAN_CHECKOUT = true;
-
-   protected static boolean IS_VERSIONABLE = true;
+   protected static ACLCapability aclCapability;
 
    protected static RepositoryCapabilities capabilities;
 
-   public static void setUp() throws Exception
+   protected static Connection connection;
+
+   protected static boolean isPoliciesSupported = false;
+
+   protected static boolean isRelationshipsSupported = false;
+
+   protected static FolderData rootFolder;
+
+   protected static String rootFolderID;
+
+   protected static byte[] TEST_CONTENT = "__TEST_CONTENT__".getBytes();
+
+   protected static final ContentStream TEST_CONTENT_STREAM = new ContentStream()
    {
 
+      MimeType mimeType = new MimeType("text", "plain");
+
+      public String getFileName()
+      {
+         return "";
+      }
+
+      public MimeType getMediaType()
+      {
+         return mimeType;
+      }
+
+      public InputStream getStream() throws IOException
+      {
+         return new ByteArrayInputStream(TEST_CONTENT);
+      }
+
+      public long length()
+      {
+         return TEST_CONTENT.length;
+      }
+   };
+
+   protected static final String TEST_POLICY_TEXT = "__TEST_POLICY__";
+
+   @BeforeClass
+   public static void init() throws Exception
+   {
       CmisRegistry reg = CmisRegistry.getInstance();
       Iterator<RepositoryShortInfo> it = reg.getStorageInfos().iterator();
       connection = reg.getConnection(it.next().getRepositoryId());
@@ -141,8 +143,7 @@ public class BaseTest
       ConversationState state = new ConversationState(new Identity("root"));
       ConversationState.setCurrent(state);
 
-      rootFolderID = getStorage().getRepositoryInfo().getRootFolderId();
-      rootFolder = (FolderData)getStorage().getObjectById(rootFolderID);
+      rootFolderID = connection.getStorage().getRepositoryInfo().getRootFolderId();
 
       try
       {
@@ -162,378 +163,40 @@ public class BaseTest
       {
       }
 
-      if (getStorage().getRepositoryInfo().getCapabilities().isCapabilityGetFolderTree())
-         IS_CAPABILITY_FOLDER_TREE = true;
-
-      if (getStorage().getRepositoryInfo().getCapabilities().isCapabilityGetDescendants())
-         IS_CAPABILITY_DESCENDANTS = true;
-
-      documentTypeDefinition = getStorage().getTypeDefinition(CmisConstants.DOCUMENT, true);
-
-      IS_VERSIONABLE = documentTypeDefinition.isVersionable();
-
-      folderTypeDefinition = getStorage().getTypeDefinition(CmisConstants.FOLDER, true);
-
-      if (isPoliciesSupported)
-         policyTypeDefinition = getStorage().getTypeDefinition(CmisConstants.POLICY, true);
-      if (isRelationshipsSupported)
-         relationshipTypeDefinition = getStorage().getTypeDefinition(CmisConstants.RELATIONSHIP, true);
-
       capabilities = connection.getStorage().getRepositoryInfo().getCapabilities();
       aclCapability = connection.getStorage().getRepositoryInfo().getAclCapability();
    }
 
-   @Deprecated
-   protected static Connection getConnection()
+   public static void clear(String root)
    {
-      CmisRegistry reg = CmisRegistry.getInstance();
-      Iterator<RepositoryShortInfo> it = reg.getStorageInfos().iterator();
-      connection = reg.getConnection(it.next().getRepositoryId());
-      return connection;
-   }
-
-   /**
-    * Check that two ACL are matched. It minds <code>actual</code> contains at
-    * least all ACEs from <code>expected</code> but may have other ACEs.
-    *
-    * @param expected expected ACEs
-    * @param actual actual ACEs
-    */
-   protected void checkACL(List<AccessControlEntry> expected, List<AccessControlEntry> actual)
-   {
-      Map<String, Set<String>> m1 = new HashMap<String, Set<String>>();
-      CmisUtils.addAclToPermissionMap(m1, expected);
-      Map<String, Set<String>> m2 = new HashMap<String, Set<String>>();
-      CmisUtils.addAclToPermissionMap(m2, actual);
-      for (Map.Entry<String, Set<String>> e : m1.entrySet())
+      try
       {
-         String principal = e.getKey();
-         Set<String> permissions2 = m2.get(principal);
-         if (permissions2 == null)
+         if (isRelationshipsSupported)
          {
-            fail("ACLs are not matched.");
+            removeRelationships(root);
          }
-         if (!actual.contains("cmis:all"))
-         {
-            for (String permission : e.getValue())
-            {
-               assertTrue("ACLs are not matched. Permission " + permission + " for principal " + principal
-                  + " not found", permissions2.contains(permission));
-            }
-         }
+         connection.deleteTree(root, true, UnfileObject.DELETE, true);
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
       }
    }
 
-   protected static ACLCapability aclCapability;
-
-   /**
-    * Validate that ACL contains only valid permissions.
-    *
-    * @param actual actual ACEs
-    */
-   protected void validateACL(List<AccessControlEntry> actual)
+   protected static List<AccessControlEntry> createACL(String name, String... permission)
    {
-      Map<String, Set<String>> m1 = new HashMap<String, Set<String>>();
-      CmisUtils.addAclToPermissionMap(m1, actual);
-      Set<String> allowed = new HashSet<String>();
-      for (Permission p : aclCapability.getPermissions())
-      {
-         allowed.add(p.getPermission());
-      }
-      for (Map.Entry<String, Set<String>> e : m1.entrySet())
-      {
-         for (String permission : e.getValue())
-         {
-            assertTrue("ACLs contains unknown permission: " + permission, allowed.contains(permission));
-         }
-      }
-   }
-
-   protected static Storage getStorage()
-   {
-      return getConnection().getStorage();
-   }
-
-   /**
-    * @param testroot2
-    * @param string
-    * @param documentContent
-    * @param major
-    * @return
-    * @throws IOException
-    * @throws StorageException
-    * @throws NameConstraintViolationException
-    * @throws ConstraintException
-    */
-   @Deprecated
-   protected static DocumentData createDocument(FolderData parentFolder, String documentName, String documentContent)
-      throws ConstraintException, NameConstraintViolationException, StorageException, IOException
-   {
-      ContentStream cs = new BaseContentStream(documentContent.getBytes(), null, new MimeType("text", "plain"));
-      DocumentData doc =
-         getStorage().createDocument(parentFolder, documentTypeDefinition,
-            getPropsMap(CmisConstants.DOCUMENT, documentName), cs, null, null, VersioningState.NONE);
-      return doc;
-   }
-
-   static byte[] TEST_CONTENT = "__TEST_CONTENT__".getBytes();
-
-   static final ContentStream TEST_CONTENT_STREAM = new ContentStream()
-   {
-
-      MimeType mimeType = new MimeType("text", "plain");
-
-      public long length()
-      {
-         return TEST_CONTENT.length;
-      }
-
-      public InputStream getStream() throws IOException
-      {
-         return new ByteArrayInputStream(TEST_CONTENT);
-      }
-
-      public MimeType getMediaType()
-      {
-         return mimeType;
-      }
-
-      public String getFileName()
-      {
-         return "";
-      }
-   };
-
-   /**
-    * Find first type which supports ACL.
-    *
-    * @param types tree of all available types
-    * @return type which support ACL or <code>null</code> if there is no such
-    *         type
-    * @throws Exception if any error occurs
-    */
-   static TypeDefinition getControllableAclType(List<ItemsTree<TypeDefinition>> types) throws Exception
-   {
-      for (ItemsTree<TypeDefinition> item : types)
-      {
-         TypeDefinition container = item.getContainer();
-         if (container.isControllableACL())
-         {
-            return container;
-         }
-         List<ItemsTree<TypeDefinition>> children = item.getChildren();
-         if (children != null && !children.isEmpty())
-         {
-            return getControllableAclType(children);
-         }
-      }
-      return null;
-   }
-
-   /**
-    * Find first type which is controllable by policies.
-    *
-    * @param types tree of all available types
-    * @return type which is controllable by policies or <code>null</code> if
-    *         there is no such type
-    * @throws Exception if any error occurs
-    */
-   static TypeDefinition getControllablePolicyType(List<ItemsTree<TypeDefinition>> types) throws Exception
-   {
-      if (isPoliciesSupported)
-      {
-         for (ItemsTree<TypeDefinition> item : types)
-         {
-            TypeDefinition container = item.getContainer();
-            if (container.isControllablePolicy())
-            {
-               return container;
-            }
-            List<ItemsTree<TypeDefinition>> children = item.getChildren();
-            if (children != null && !children.isEmpty())
-            {
-               return getControllablePolicyType(children);
-            }
-         }
-      }
-      return null;
-   }
-
-   /**
-    * Find first type which is not controllable by policies.
-    *
-    * @param types tree of all available types
-    * @return type which is not controllable by policies or <code>null</code> if
-    *         there is no such type
-    * @throws Exception if any error occurs
-    */
-   static TypeDefinition getNotControllablePolicyType(List<ItemsTree<TypeDefinition>> types) throws Exception
-   {
-      for (ItemsTree<TypeDefinition> item : types)
-      {
-         TypeDefinition container = item.getContainer();
-         if (!container.isControllablePolicy())
-         {
-            return container;
-         }
-         List<ItemsTree<TypeDefinition>> children = item.getChildren();
-         if (children != null && !children.isEmpty())
-         {
-            return getNotControllablePolicyType(children);
-         }
-      }
-      return null;
-   }
-
-   /**
-    * Find first document type which does not support content stream (
-    * {@link TypeDefinition#getContentStreamAllowed()} is NOT_ALLOWED).
-    *
-    * @param types tree of all available types
-    * @return type which does not support content stream or <code>null</code> if
-    *         there is no such type
-    * @throws Exception if any error occurs
-    */
-   static TypeDefinition getStreamNotSupportedDocType(List<ItemsTree<TypeDefinition>> types) throws Exception
-   {
-      for (ItemsTree<TypeDefinition> item : types)
-      {
-         TypeDefinition container = item.getContainer();
-         if (container.getBaseId() == BaseType.DOCUMENT)
-         {
-            if (container.getContentStreamAllowed() == ContentStreamAllowed.NOT_ALLOWED)
-            {
-               return container;
-            }
-            List<ItemsTree<TypeDefinition>> children = item.getChildren();
-            if (children != null && !children.isEmpty())
-            {
-               return getStreamNotSupportedDocType(children);
-            }
-         }
-      }
-      return null;
-   }
-
-   /**
-    * Find first document type which required content stream (
-    * {@link TypeDefinition#getContentStreamAllowed()} is REQUIRED).
-    *
-    * @param types tree of all available types
-    * @return type which require content stream or <code>null</code> if there is
-    *         no such type
-    * @throws Exception if any error occurs
-    */
-   static TypeDefinition getStreamRequiredDocType(List<ItemsTree<TypeDefinition>> types) throws Exception
-   {
-      for (ItemsTree<TypeDefinition> item : types)
-      {
-         TypeDefinition container = item.getContainer();
-         if (container.getBaseId() == BaseType.DOCUMENT)
-         {
-            if (container.getContentStreamAllowed() == ContentStreamAllowed.REQUIRED)
-            {
-               return container;
-            }
-            List<ItemsTree<TypeDefinition>> children = item.getChildren();
-            if (children != null && !children.isEmpty())
-            {
-               return getStreamRequiredDocType(children);
-            }
-         }
-      }
-      return null;
-   }
-
-   /**
-    * Find first document type which is not versionable.
-    *
-    * @param types tree of all available types
-    * @return type which is not versionable or <code>null</code> if there is no
-    *         such type
-    * @throws Exception if any error occurs
-    */
-   static TypeDefinition getNotVersionableDocType(List<ItemsTree<TypeDefinition>> types) throws Exception
-   {
-      for (ItemsTree<TypeDefinition> item : types)
-      {
-         TypeDefinition container = item.getContainer();
-         if (container.getBaseId() == BaseType.DOCUMENT)
-         {
-            if (!container.isVersionable())
-            {
-               return container;
-            }
-            List<ItemsTree<TypeDefinition>> children = item.getChildren();
-            if (children != null && !children.isEmpty())
-            {
-               return getNotVersionableDocType(children);
-            }
-         }
-      }
-      return null;
-   }
-
-   /**
-    * Find first document type which is versionable.
-    *
-    * @param types tree of all available types
-    * @return type which is versionable or <code>null</code> if there is no such
-    *         type
-    * @throws Exception if any error occurs
-    */
-   static TypeDefinition getVersionableDocType(List<ItemsTree<TypeDefinition>> types) throws Exception
-   {
-      for (ItemsTree<TypeDefinition> item : types)
-      {
-         TypeDefinition container = item.getContainer();
-         if (container.getBaseId() == BaseType.DOCUMENT)
-         {
-            if (container.isVersionable())
-            {
-               return container;
-            }
-            List<ItemsTree<TypeDefinition>> children = item.getChildren();
-            if (children != null && !children.isEmpty())
-            {
-               return getVersionableDocType(children);
-            }
-         }
-      }
-      return null;
-   }
-
-   /**
-    * Find first type which does not support ACL.
-    *
-    * @param types tree of all available types
-    * @return type which does not support ACL or <code>null</code> if there is
-    *         no such type
-    * @throws Exception if any error occurs
-    */
-   static TypeDefinition getNotControllableAclType(List<ItemsTree<TypeDefinition>> types) throws Exception
-   {
-      for (ItemsTree<TypeDefinition> item : types)
-      {
-         TypeDefinition container = item.getContainer();
-         if (!container.isControllableACL())
-         {
-            return container;
-         }
-         List<ItemsTree<TypeDefinition>> children = item.getChildren();
-         if (children != null && !children.isEmpty())
-         {
-            return getNotControllableAclType(children);
-         }
-      }
-      return null;
+      AccessControlEntry acl = new AccessControlEntry();
+      acl.setPrincipal(name);
+      acl.getPermissions().addAll(Arrays.asList(permission));
+      ArrayList<AccessControlEntry> addACL = new ArrayList<AccessControlEntry>();
+      addACL.add(acl);
+      return addACL;
    }
 
    protected static String createDocument(String parentId, String typeId, String name, ContentStream content,
       List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, Collection<String> policies,
       VersioningState versioningState) throws Exception
    {
-      Connection connection = getConnection();
       TypeDefinition type = connection.getTypeDefinition(typeId, true);
 
       boolean versionable = type.isVersionable();
@@ -571,7 +234,6 @@ public class BaseTest
    protected static String createFolder(String parentId, String typeId, String name, List<AccessControlEntry> addACL,
       List<AccessControlEntry> removeACL, Collection<String> policies) throws Exception
    {
-      Connection connection = getConnection();
       TypeDefinition type = connection.getTypeDefinition(typeId, true);
       Map<String, Property<?>> properties = createPropertyMap(type);
       StringProperty nameProperty = (StringProperty)properties.get(CmisConstants.NAME);
@@ -587,8 +249,6 @@ public class BaseTest
       return folderId;
    }
 
-   static final String TEST_POLICY_TEXT = "__TEST_POLICY__";
-
    protected static String createPolicy(String parentId, String typeId, String name, String policyText,
       List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, Collection<String> policies)
       throws Exception
@@ -596,7 +256,6 @@ public class BaseTest
       String policyId = null;
       if (isPoliciesSupported)
       {
-         Connection connection = getConnection();
          TypeDefinition type = connection.getTypeDefinition(typeId, true);
          Map<String, Property<?>> properties = createPropertyMap(type);
          StringProperty nameProperty = (StringProperty)properties.get(CmisConstants.NAME);
@@ -612,36 +271,6 @@ public class BaseTest
          policyId = connection.createPolicy(type.isFileable() ? parentId : null, properties, null, null, null);
       }
       return policyId;
-   }
-
-   protected static String createRelationship(String typeId, String name, String sourceId, String targetId,
-      List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, Collection<String> policies)
-      throws Exception
-   {
-      String relationshipId = null;
-      if (isRelationshipsSupported)
-      {
-         Connection connection = getConnection();
-         TypeDefinition type = connection.getTypeDefinition(typeId, true);
-         Map<String, Property<?>> properties = createPropertyMap(type);
-         StringProperty nameProperty = (StringProperty)properties.get(CmisConstants.NAME);
-         if (nameProperty != null)
-         {
-            nameProperty.getValues().add(name);
-         }
-         IdProperty sourceIdProperty = (IdProperty)properties.get(CmisConstants.SOURCE_ID);
-         if (sourceIdProperty != null)
-         {
-            sourceIdProperty.getValues().add(sourceId);
-         }
-         IdProperty targetIdProperty = (IdProperty)properties.get(CmisConstants.TARGET_ID);
-         if (targetIdProperty != null)
-         {
-            targetIdProperty.getValues().add(targetId);
-         }
-         relationshipId = connection.createRelationship(properties, null, null, null);
-      }
-      return relationshipId;
    }
 
    protected static Map<String, Property<?>> createPropertyMap(TypeDefinition type) throws Exception
@@ -710,6 +339,35 @@ public class BaseTest
       return properties;
    }
 
+   protected static String createRelationship(String typeId, String name, String sourceId, String targetId,
+      List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, Collection<String> policies)
+      throws Exception
+   {
+      String relationshipId = null;
+      if (isRelationshipsSupported)
+      {
+         TypeDefinition type = connection.getTypeDefinition(typeId, true);
+         Map<String, Property<?>> properties = createPropertyMap(type);
+         StringProperty nameProperty = (StringProperty)properties.get(CmisConstants.NAME);
+         if (nameProperty != null)
+         {
+            nameProperty.getValues().add(name);
+         }
+         IdProperty sourceIdProperty = (IdProperty)properties.get(CmisConstants.SOURCE_ID);
+         if (sourceIdProperty != null)
+         {
+            sourceIdProperty.getValues().add(sourceId);
+         }
+         IdProperty targetIdProperty = (IdProperty)properties.get(CmisConstants.TARGET_ID);
+         if (targetIdProperty != null)
+         {
+            targetIdProperty.getValues().add(targetId);
+         }
+         relationshipId = connection.createRelationship(properties, null, null, null);
+      }
+      return relationshipId;
+   }
+
    protected static String generateName(TypeDefinition type, String suffix)
    {
       StringBuilder b = new StringBuilder();
@@ -737,156 +395,234 @@ public class BaseTest
    }
 
    /**
-    * @param parentFolder
-    * @param folderTypeDefinition2
-    * @return
+    * Find first type which supports ACL.
+    * 
+    * @param types tree of all available types
+    * @return type which support ACL or <code>null</code> if there is no such
+    *         type
+    * @throws Exception if any error occurs
     */
-   @Deprecated
-   protected static FolderData createFolder(FolderData parentFolder, String folderName) throws StorageException,
-      NameConstraintViolationException, ConstraintException
+   protected static TypeDefinition getControllableAclType(List<ItemsTree<TypeDefinition>> types) throws Exception
    {
-      FolderData testroot =
-         getStorage().createFolder(parentFolder, folderTypeDefinition, getPropsMap(CmisConstants.FOLDER, folderName),
-            null, null);
-      return testroot;
+      for (ItemsTree<TypeDefinition> item : types)
+      {
+         TypeDefinition container = item.getContainer();
+         if (container.isControllableACL())
+         {
+            return container;
+         }
+         List<ItemsTree<TypeDefinition>> children = item.getChildren();
+         if (children != null && !children.isEmpty())
+         {
+            return getControllableAclType(children);
+         }
+      }
+      return null;
    }
 
-   protected PolicyData createPolicy(FolderData where, String name) throws StorageException,
-      NameConstraintViolationException, ConstraintException
+   /**
+    * Find first type which is controllable by policies.
+    * 
+    * @param types tree of all available types
+    * @return type which is controllable by policies or <code>null</code> if
+    *         there is no such type
+    * @throws Exception if any error occurs
+    */
+   protected static TypeDefinition getControllablePolicyType(List<ItemsTree<TypeDefinition>> types) throws Exception
    {
       if (isPoliciesSupported)
       {
-         org.xcmis.spi.model.PropertyDefinition<?> def =
-            PropertyDefinitions.getPropertyDefinition(CmisConstants.POLICY, CmisConstants.POLICY_TEXT);
-         Map<String, Property<?>> properties2 = getPropsMap(CmisConstants.POLICY, name);
-         properties2.put(CmisConstants.POLICY_TEXT, new StringProperty(def.getId(), def.getQueryName(), def
-            .getLocalName(), def.getDisplayName(), "testPolicyText"));
-         PolicyData policy = getStorage().createPolicy(where, policyTypeDefinition, properties2, null, null);
-         return policy;
-      }
-      else
-      {
-         return null;
-      }
-   }
-
-   protected static List<AccessControlEntry> createACL(String name, String... permission)
-   {
-      AccessControlEntry acl = new AccessControlEntry();
-      acl.setPrincipal(name);
-      acl.getPermissions().addAll(Arrays.asList(permission));
-      ArrayList<AccessControlEntry> addACL = new ArrayList<AccessControlEntry>();
-      addACL.add(acl);
-      return addACL;
-   }
-
-   protected static void clearTree(String testroot)
-   {
-      try
-      {
-         FolderData rootFolder = (FolderData)getStorage().getObjectById(testroot);
-         getStorage().deleteTree(rootFolder, true, UnfileObject.DELETE, true);
-      }
-      catch (Exception e)
-      {
-         e.printStackTrace();
-      }
-   }
-
-   protected static void clear(String testroot)
-   {
-      try
-      {
-         if (isRelationshipsSupported)
-            removeRelationships(testroot);
-         FolderData rootFolder = (FolderData)getStorage().getObjectById(testroot);
-         getStorage().deleteTree(rootFolder, true, UnfileObject.DELETE, true);
-      }
-      catch (Exception e)
-      {
-         e.printStackTrace();
-      }
-   }
-
-   public List<CmisObject> objectTreeToList(List<ItemsTree<CmisObject>> source)
-   {
-      List<CmisObject> result = new ArrayList<CmisObject>();
-      for (ItemsTree<CmisObject> one : source)
-      {
-         CmisObject type = one.getContainer();
-         if (one.getChildren() != null)
+         for (ItemsTree<TypeDefinition> item : types)
          {
-            result.addAll(objectTreeToList(one.getChildren()));
+            TypeDefinition container = item.getContainer();
+            if (container.isControllablePolicy())
+            {
+               return container;
+            }
+            List<ItemsTree<TypeDefinition>> children = item.getChildren();
+            if (children != null && !children.isEmpty())
+            {
+               return getControllablePolicyType(children);
+            }
          }
-         result.add(type);
       }
-
-      return result;
+      return null;
    }
 
-   @Deprecated
-   protected static Map<String, Property<?>> getPropsMap(String baseType, String name)
+   /**
+    * Find first type which does not support ACL.
+    * 
+    * @param types tree of all available types
+    * @return type which does not support ACL or <code>null</code> if there is
+    *         no such type
+    * @throws Exception if any error occurs
+    */
+   protected static TypeDefinition getNotControllableAclType(List<ItemsTree<TypeDefinition>> types) throws Exception
    {
-      org.xcmis.spi.model.PropertyDefinition<?> def =
-         PropertyDefinitions.getPropertyDefinition(baseType, CmisConstants.NAME);
-      org.xcmis.spi.model.PropertyDefinition<?> def2 =
-         PropertyDefinitions.getPropertyDefinition(baseType, CmisConstants.OBJECT_TYPE_ID);
-      Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-      properties.put(CmisConstants.NAME, new StringProperty(def.getId(), def.getQueryName(), def.getLocalName(), def
-         .getDisplayName(), name));
-      properties.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(def2.getId(), def2.getQueryName(), def2
-         .getLocalName(), def2.getDisplayName(), baseType));
-
-      return properties;
+      for (ItemsTree<TypeDefinition> item : types)
+      {
+         TypeDefinition container = item.getContainer();
+         if (!container.isControllableACL())
+         {
+            return container;
+         }
+         List<ItemsTree<TypeDefinition>> children = item.getChildren();
+         if (children != null && !children.isEmpty())
+         {
+            return getNotControllableAclType(children);
+         }
+      }
+      return null;
    }
 
-   @Deprecated
-   protected static RepositoryCapabilities getCapabilities()
+   /**
+    * Find first type which is not controllable by policies.
+    * 
+    * @param types tree of all available types
+    * @return type which is not controllable by policies or <code>null</code> if
+    *         there is no such type
+    * @throws Exception if any error occurs
+    */
+   protected static TypeDefinition getNotControllablePolicyType(List<ItemsTree<TypeDefinition>> types) throws Exception
    {
-      return getStorage().getRepositoryInfo().getCapabilities();
+      for (ItemsTree<TypeDefinition> item : types)
+      {
+         TypeDefinition container = item.getContainer();
+         if (!container.isControllablePolicy())
+         {
+            return container;
+         }
+         List<ItemsTree<TypeDefinition>> children = item.getChildren();
+         if (children != null && !children.isEmpty())
+         {
+            return getNotControllablePolicyType(children);
+         }
+      }
+      return null;
    }
 
-   //   protected static void removeRelationships(String folderId)
-   //   {
-   //      try
-   //      {
-   //         Connection connection = getConnection();
-   //         ItemsList<CmisObject> childs =
-   //            connection.getChildren(folderId, false, IncludeRelationships.BOTH, false, true, PropertyFilter.ALL,
-   //               RenditionFilter.NONE, "", -1, 0);
-   //         for (CmisObject one : childs.getItems())
-   //         {
-   //
-   //            if (one.getObjectInfo().getBaseType().equals(BaseType.FOLDER))
-   //            {
-   //               removeRelationships(one.getObjectInfo().getId());
-   //            }
-   //            else
-   //            {
-   //               for (CmisObject relationship : one.getRelationship())
-   //               {
-   //                  try
-   //                  {
-   //                     connection.deleteObject(relationship.getObjectInfo().getId(), null);
-   //                  }
-   //                  catch (ObjectNotFoundException e)
-   //                  {
-   //                  }
-   //               }
-   //            }
-   //         }
-   //      }
-   //      catch (Exception e)
-   //      {
-   //         e.printStackTrace();
-   //      }
-   //   }
+   /**
+    * Find first document type which is not versionable.
+    * 
+    * @param types tree of all available types
+    * @return type which is not versionable or <code>null</code> if there is no
+    *         such type
+    * @throws Exception if any error occurs
+    */
+   protected static TypeDefinition getNotVersionableDocType(List<ItemsTree<TypeDefinition>> types) throws Exception
+   {
+      for (ItemsTree<TypeDefinition> item : types)
+      {
+         TypeDefinition container = item.getContainer();
+         if (container.getBaseId() == BaseType.DOCUMENT)
+         {
+            if (!container.isVersionable())
+            {
+               return container;
+            }
+            List<ItemsTree<TypeDefinition>> children = item.getChildren();
+            if (children != null && !children.isEmpty())
+            {
+               return getNotVersionableDocType(children);
+            }
+         }
+      }
+      return null;
+   }
+
+   /**
+    * Find first document type which does not support content stream (
+    * {@link TypeDefinition#getContentStreamAllowed()} is NOT_ALLOWED).
+    * 
+    * @param types tree of all available types
+    * @return type which does not support content stream or <code>null</code> if
+    *         there is no such type
+    * @throws Exception if any error occurs
+    */
+   protected static TypeDefinition getStreamNotSupportedDocType(List<ItemsTree<TypeDefinition>> types) throws Exception
+   {
+      for (ItemsTree<TypeDefinition> item : types)
+      {
+         TypeDefinition container = item.getContainer();
+         if (container.getBaseId() == BaseType.DOCUMENT)
+         {
+            if (container.getContentStreamAllowed() == ContentStreamAllowed.NOT_ALLOWED)
+            {
+               return container;
+            }
+            List<ItemsTree<TypeDefinition>> children = item.getChildren();
+            if (children != null && !children.isEmpty())
+            {
+               return getStreamNotSupportedDocType(children);
+            }
+         }
+      }
+      return null;
+   }
+
+   /**
+    * Find first document type which required content stream (
+    * {@link TypeDefinition#getContentStreamAllowed()} is REQUIRED).
+    * 
+    * @param types tree of all available types
+    * @return type which require content stream or <code>null</code> if there is
+    *         no such type
+    * @throws Exception if any error occurs
+    */
+   protected static TypeDefinition getStreamRequiredDocType(List<ItemsTree<TypeDefinition>> types) throws Exception
+   {
+      for (ItemsTree<TypeDefinition> item : types)
+      {
+         TypeDefinition container = item.getContainer();
+         if (container.getBaseId() == BaseType.DOCUMENT)
+         {
+            if (container.getContentStreamAllowed() == ContentStreamAllowed.REQUIRED)
+            {
+               return container;
+            }
+            List<ItemsTree<TypeDefinition>> children = item.getChildren();
+            if (children != null && !children.isEmpty())
+            {
+               return getStreamRequiredDocType(children);
+            }
+         }
+      }
+      return null;
+   }
+
+   /**
+    * Find first document type which is versionable.
+    * 
+    * @param types tree of all available types
+    * @return type which is versionable or <code>null</code> if there is no such
+    *         type
+    * @throws Exception if any error occurs
+    */
+   protected static TypeDefinition getVersionableDocType(List<ItemsTree<TypeDefinition>> types) throws Exception
+   {
+      for (ItemsTree<TypeDefinition> item : types)
+      {
+         TypeDefinition container = item.getContainer();
+         if (container.getBaseId() == BaseType.DOCUMENT)
+         {
+            if (container.isVersionable())
+            {
+               return container;
+            }
+            List<ItemsTree<TypeDefinition>> children = item.getChildren();
+            if (children != null && !children.isEmpty())
+            {
+               return getVersionableDocType(children);
+            }
+         }
+      }
+      return null;
+   }
 
    protected static void removeRelationships(String testroot)
    {
       try
       {
-         Connection connection = getConnection();
          List<ItemsTree<CmisObject>> descendants =
             connection.getDescendants(testroot, -1, false, IncludeRelationships.BOTH, false, true, PropertyFilter.ALL,
                RenditionFilter.NONE);
@@ -912,6 +648,91 @@ public class BaseTest
       catch (Exception e)
       {
          e.printStackTrace();
+      }
+   }
+
+   /**
+    * Check that two ACL are matched. It minds <code>actual</code> contains at
+    * least all ACEs from <code>expected</code> but may have other ACEs.
+    * 
+    * @param expected expected ACEs
+    * @param actual actual ACEs
+    */
+   protected void checkACL(List<AccessControlEntry> expected, List<AccessControlEntry> actual)
+   {
+      Map<String, Set<String>> m1 = new HashMap<String, Set<String>>();
+      CmisUtils.addAclToPermissionMap(m1, expected);
+      Map<String, Set<String>> m2 = new HashMap<String, Set<String>>();
+      CmisUtils.addAclToPermissionMap(m2, actual);
+      for (Map.Entry<String, Set<String>> e : m1.entrySet())
+      {
+         String principal = e.getKey();
+         Set<String> permissions2 = m2.get(principal);
+         if (permissions2 == null)
+         {
+            fail("ACLs are not matched.");
+         }
+         if (!actual.contains("cmis:all"))
+         {
+            for (String permission : e.getValue())
+            {
+               assertTrue("ACLs are not matched. Permission " + permission + " for principal " + principal
+                  + " not found", permissions2.contains(permission));
+            }
+         }
+      }
+   }
+
+   protected List<CmisObject> objectTreeAsList(List<ItemsTree<CmisObject>> source)
+   {
+      List<CmisObject> result = new ArrayList<CmisObject>();
+      for (ItemsTree<CmisObject> one : source)
+      {
+         CmisObject o = one.getContainer();
+         if (one.getChildren() != null)
+         {
+            result.addAll(objectTreeAsList(one.getChildren()));
+         }
+         result.add(o);
+      }
+      return result;
+   }
+
+   protected List<TypeDefinition> typeTreeAsList(List<ItemsTree<TypeDefinition>> source)
+   {
+      List<TypeDefinition> result = new ArrayList<TypeDefinition>();
+      for (ItemsTree<TypeDefinition> one : source)
+      {
+         TypeDefinition type = one.getContainer();
+         if (one.getChildren() != null)
+         {
+            result.addAll(typeTreeAsList(one.getChildren()));
+         }
+         result.add(type);
+      }
+      return result;
+   }
+
+   /**
+    * Validate that ACL contains only valid permissions.
+    * 
+    * @param actual actual ACEs
+    */
+   protected void validateACL(List<AccessControlEntry> actual)
+   {
+      Map<String, Set<String>> m1 = new HashMap<String, Set<String>>();
+      CmisUtils.addAclToPermissionMap(m1, actual);
+      Set<String> allowed = new HashSet<String>();
+      for (Permission p : aclCapability.getPermissions())
+      {
+         allowed.add(p.getPermission());
+      }
+      for (Map.Entry<String, Set<String>> e : m1.entrySet())
+      {
+         for (String permission : e.getValue())
+         {
+            assertTrue("ACLs contains unknown permission: " + permission, allowed.contains(permission));
+         }
       }
    }
 }

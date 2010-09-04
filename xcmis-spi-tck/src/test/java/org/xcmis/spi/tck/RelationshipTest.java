@@ -58,7 +58,6 @@ public class RelationshipTest extends BaseTest
    @BeforeClass
    public static void start() throws Exception
    {
-      BaseTest.setUp();
       TypeDefinition folderType = connection.getTypeDefinition(CmisConstants.FOLDER);
       testRootFolderId = createFolder(rootFolderID, folderType.getId(), "relationship_testroot", null, null, null);
       if (isRelationshipsSupported)

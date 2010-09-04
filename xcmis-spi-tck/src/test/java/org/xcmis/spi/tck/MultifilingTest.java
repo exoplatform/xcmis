@@ -67,7 +67,6 @@ public class MultifilingTest extends BaseTest
    @BeforeClass
    public static void start() throws Exception
    {
-      BaseTest.setUp();
       testRootFolderId = createFolder(rootFolderID, CmisConstants.FOLDER, "acl_testroot", null, null, null);
       System.out.println("Running Multifiling Service tests");
    }

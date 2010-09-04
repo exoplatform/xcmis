@@ -55,7 +55,6 @@ public class PolicyTest extends BaseTest
    @BeforeClass
    public static void start() throws Exception
    {
-      BaseTest.setUp();
       folderType = connection.getTypeDefinition(CmisConstants.FOLDER);
       if (isPoliciesSupported)
       {

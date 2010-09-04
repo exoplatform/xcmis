@@ -50,13 +50,11 @@ public class ACLTest extends BaseTest
 
    private static String notControllableAclObject;
 
-   private static String principal = "principal0";
+   private static String principal = "root";
 
    @BeforeClass
    public static void start() throws Exception
    {
-      BaseTest.setUp();
-
       testRootFolderId = createFolder(rootFolderID, CmisConstants.FOLDER, "acl_testroot", null, null, null);
 
       List<ItemsTree<TypeDefinition>> allTypes = connection.getTypeDescendants(null, -1, true);
@@ -138,11 +136,10 @@ public class ACLTest extends BaseTest
       }
    }
 
-
    /**
     * 2.2.10.2 Adds or removes the given ACEs to or from the ACL of document or
     * folder object.
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -174,7 +171,7 @@ public class ACLTest extends BaseTest
     * 2.2.10.2.3 At least one of the specified values for permission in ANY of
     * the ACEs does not match ANY of the permissionNames as returned by
     * getACLCapability and is not a CMIS Basic permission
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -201,7 +198,7 @@ public class ACLTest extends BaseTest
    /**
     * 2.2.10.2.3 The value for ACLPropagation does not match the values as
     * returned via getACLCapabilities.
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -235,7 +232,7 @@ public class ACLTest extends BaseTest
    /**
     * 2.2.10.2.3 The specified object's Object-Type definition's attribute for
     * controllableACL is FALSE.
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -261,7 +258,7 @@ public class ACLTest extends BaseTest
 
    /**
     * Managing of ACL is not supported but discovering may be supported.
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -286,13 +283,13 @@ public class ACLTest extends BaseTest
    /**
     * 2.2.10.1 Get the ACL currently applied to the specified document or folder
     * object.
-    *
+    * 
     * @throws Exception
     */
    @Test
-   public void testGetACL_Simple() throws Exception
+   public void testGetACL() throws Exception
    {
-      if (controllableAclObject == null)
+      if (capabilities.getCapabilityACL() == CapabilityACL.NONE || controllableAclObject == null)
       {
          return;
       }

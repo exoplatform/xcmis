@@ -29,10 +29,12 @@ import static org.junit.Assert.fail;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRegistry;
 import org.xcmis.spi.ItemsList;
 import org.xcmis.spi.ItemsTree;
 import org.xcmis.spi.TypeNotFoundException;
+import org.xcmis.spi.model.BaseType;
 import org.xcmis.spi.model.CapabilityACL;
 import org.xcmis.spi.model.PropertyDefinition;
 import org.xcmis.spi.model.RepositoryInfo;
@@ -50,7 +52,7 @@ import java.util.Set;
  * getRepositoryInfo, getTypeChildren, getTypeDescendants, getTypeDefinition)
  * are used to discover information about the repository, including information
  * about the repository and the object-types defined for the repository.
- *
+ * 
  * @author <a href="mailto:alexey.zavizionov@exoplatform.com">Alexey
  *         Zavizionov</a>
  * @version $Id$
@@ -61,29 +63,35 @@ public class RepositoryTest extends BaseTest
    @BeforeClass
    public static void start() throws Exception
    {
-      BaseTest.setUp();
       System.out.println("Running Repository Service tests");
+   }
+
+   @AfterClass
+   public static void stop() throws Exception
+   {
    }
 
    /**
     * 2.2.2.1 getRepositories
-    *
+    * <p>
     * Returns a list of CMIS repositories available from this CMIS service
     * endpoint.
+    * </p>
     */
    @Test
    public void testGetRepositories() throws Exception
    {
       Set<RepositoryShortInfo> storageInfos = CmisRegistry.getInstance().getStorageInfos();
-      assertNotNull("StorageInfo  is null.", storageInfos);
-      assertTrue("StorageInfo  is empty.", !storageInfos.isEmpty());
+      assertNotNull("StorageInfo is null.", storageInfos);
+      assertTrue("StorageInfo is empty.", !storageInfos.isEmpty());
       for (RepositoryShortInfo repositoryShortInfo : storageInfos)
       {
-         assertNotNull("Repository Short Info  is null.", repositoryShortInfo.getRepositoryId());
-         assertTrue("Repository Short Info  is empty.", !repositoryShortInfo.getRepositoryId().equals(""));
-         assertNotNull("Repository name  is null.", repositoryShortInfo.getRepositoryName());
-         assertTrue("Repository name  is empty.", !repositoryShortInfo.getRepositoryName().equals(""));
-         assertNotNull("Root folder ID  is null.", repositoryShortInfo.getRootFolderId());
+         assertTrue("Repository id is missing.", repositoryShortInfo.getRepositoryId() != null
+            && repositoryShortInfo.getRepositoryId().length() > 0);
+         assertTrue("Repository name is missing.", repositoryShortInfo.getRepositoryName() != null
+            && repositoryShortInfo.getRepositoryName().length() > 0);
+
+         assertNotNull("Root folder id is missing.", repositoryShortInfo.getRootFolderId());
       }
    }
 
@@ -93,39 +101,38 @@ public class RepositoryTest extends BaseTest
     * Returns information about the CMIS repository, the optional capabilities
     * it supports and its Access Control information if applicable.
     * </p>
-    *
+    * 
     * @throws Exception
     */
    @Test
    public void testGetRepositoryInfo() throws Exception
    {
       RepositoryInfo repositoryInfo = connection.getStorage().getRepositoryInfo();
-      assertNotNull("Repository Info  is null.", repositoryInfo);
-      assertNotNull("Repository Info ID  is null.", repositoryInfo.getRepositoryId());
-      assertTrue("Repository Info ID  is empty.", repositoryInfo.getRepositoryId().length() > 0);
-      assertNotNull("Repository Info Name  is null.", repositoryInfo.getRepositoryName());
-      assertNotNull("Repository Description  is null.", repositoryInfo.getRepositoryDescription());
+      assertNotNull("RepositoryInfo is null.", repositoryInfo);
+      assertTrue("Repository id is missing.", repositoryInfo.getRepositoryId() != null
+         && repositoryInfo.getRepositoryId().length() > 0);
+      assertNotNull("Repository name is missing.", repositoryInfo.getRepositoryName());
 
-      assertNotNull("Repository VendorName  is null.", repositoryInfo.getVendorName());
-      assertNotNull("Repository ProductName  is null.", repositoryInfo.getProductName());
-      assertNotNull("Repository PropductVersion  is null.", repositoryInfo.getProductVersion());
-      assertNotNull("Repository Root folder ID  is null.", repositoryInfo.getRootFolderId());
-      assertNotNull("Repository Capabilities  is null.", repositoryInfo.getCapabilities());
+      assertNotNull("Repository VendorName is missing.", repositoryInfo.getVendorName());
+      assertNotNull("Repository ProductName is missing.", repositoryInfo.getProductName());
+      assertNotNull("Repository PropductVersion is missing.", repositoryInfo.getProductVersion());
+      assertNotNull("Repository Root Folder id is missing.", repositoryInfo.getRootFolderId());
+      assertNotNull("Repository Capabilities is missing.", repositoryInfo.getCapabilities());
 
-      assertNotNull("Repository version supported  is null.", repositoryInfo.getCmisVersionSupported());
-      assertNotNull("Repository Changes on type  is null.", repositoryInfo.getChangesOnType());
-      assertNotNull("Repository ACL capability  is null.", repositoryInfo.getAclCapability());
+      assertNotNull("Repository version supported is missing.", repositoryInfo.getCmisVersionSupported());
+      assertNotNull("Repository Changes on type is missing.", repositoryInfo.getChangesOnType());
+      assertNotNull("Repository ACL capability is missing.", repositoryInfo.getAclCapability());
 
       if (!repositoryInfo.getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
       {
-         assertNotNull("Repository supported permissions  is null.", repositoryInfo.getAclCapability()
+         assertNotNull("Repository supported permissions is missing.", repositoryInfo.getAclCapability()
             .getSupportedPermissions());
-         assertNotNull("Repository ACL propagation  is null.", repositoryInfo.getAclCapability().getPropagation());
-         assertNotNull("Repository ACL permissions  is null.", repositoryInfo.getAclCapability().getPermissions());
-         assertNotNull("Repository ACL mapping  is null.", repositoryInfo.getAclCapability().getMapping());
+         assertNotNull("Repository ACL propagation is missing.", repositoryInfo.getAclCapability().getPropagation());
+         assertNotNull("Repository ACL permissions is missing.", repositoryInfo.getAclCapability().getPermissions());
+         assertNotNull("Repository ACL mapping is missing.", repositoryInfo.getAclCapability().getMapping());
       }
-      assertNotNull("Repository principal anonymous  is null.", repositoryInfo.getPrincipalAnonymous());
-      assertNotNull("Repository principal anyone  is null.", repositoryInfo.getPrincipalAnyone());
+      assertNotNull("Repository principal anonymous is missing.", repositoryInfo.getPrincipalAnonymous());
+      assertNotNull("Repository principal anyone is missing.", repositoryInfo.getPrincipalAnyone());
 
    }
 
@@ -135,17 +142,18 @@ public class RepositoryTest extends BaseTest
     * Returns the list of Object-Types defined for the Repository that are
     * children of the specified Type.
     * </p>
-    *
+    * 
     * @throws Exception
     */
    @Test
-   public void testGetTypeChildren_Root() throws Exception
+   public void testGetTypeChildren() throws Exception
    {
-      ItemsList<TypeDefinition> typeChildren = connection.getTypeChildren(null, true, -1, 0);
+      ItemsList<TypeDefinition> typeChildren = connection.getTypeChildren(null, false, -1, 0);
       List<String> tids = new ArrayList<String>();
       for (TypeDefinition t : typeChildren.getItems())
       {
          tids.add(t.getId());
+         assertNull(t.getPropertyDefinitions()); // was not requested.
       }
       List<String> exp = new ArrayList<String>();
       exp.add("cmis:document");
@@ -165,6 +173,25 @@ public class RepositoryTest extends BaseTest
    }
 
    /**
+    * 2.2.2.3 getTypeDescendants.
+    * <p>
+    * Returns the set of children object types defined for the Repository under
+    * the specified type and include property definitions.
+    * </p>
+    * 
+    * @exception Exception
+    */
+   @Test
+   public void testGetTypeChildren_IncludeProperty() throws Exception
+   {
+      ItemsList<TypeDefinition> typeChildren = connection.getTypeChildren(null, true, -1, 0);
+      for (TypeDefinition t : typeChildren.getItems())
+      {
+         assertNotNull("Property definitions not found.", t.getPropertyDefinitions());
+      }
+   }
+
+   /**
     * 2.2.2.3 getTypeChildren.
     * <p>
     * Returns the list of Object-Types defined for the Repository that are
@@ -172,33 +199,38 @@ public class RepositoryTest extends BaseTest
     * attribute 'maxItems' specified then number of items contained in the
     * response must not exceed specified value.
     * </p>
+    * 
+    * @throws Exception
     */
    @Test
-   public void testGetTypeChildren_RootWithMaxItems() throws Exception
+   public void testGetTypeChildren_MaxItems() throws Exception
    {
-      ItemsList<TypeDefinition> types = connection.getTypeChildren(null, true, 1, 0);
+      ItemsList<TypeDefinition> types = connection.getTypeChildren(null, false, 1, 0);
       assertNotNull("Root type childrens is null.", types);
       assertTrue("Incorrect Root type childrens size.", types.getItems().size() <= 1);
    }
 
    /**
     * 2.2.2.3 getTypeChildren.
-    *
+    * <p>
     * Returns the list of Object-Types defined for the Repository that are
     * children of the specified Type.
+    * </p>
+    * 
+    * @throws Exception
     */
    @Test
-   public void testGetTypeChildren_WithSkipCount() throws Exception
+   public void testGetTypeChildren_SkipCount() throws Exception
    {
       // Get all items first.
-      ItemsList<TypeDefinition> types = connection.getTypeChildren(null, true, -1, 0);
+      ItemsList<TypeDefinition> types = connection.getTypeChildren(null, false, -1, 0);
       List<String> tids = new ArrayList<String>();
       for (TypeDefinition t : types.getItems())
       {
          tids.add(t.getId());
       }
 
-      types = connection.getTypeChildren(null, true, -1, 1);
+      types = connection.getTypeChildren(null, false, -1, 1);
       List<String> tidsPage = new ArrayList<String>();
       for (TypeDefinition t : types.getItems())
       {
@@ -214,14 +246,17 @@ public class RepositoryTest extends BaseTest
 
    /**
     * 2.2.2.3 getTypeChildren.
-    *
+    * <p>
     * {@link TypeNotFoundException} must be thrown if type for which children
     * requested is not exists.
+    * </p>
+    * 
+    * @throws Exception
     */
    @Test
-   public void testGetTypeChildren_NonExistedType() throws Exception
+   public void testGetTypeChildren_TypeNotFoundException() throws Exception
    {
-      String type = "cmis:document0000";
+      String type = "cmis:document" + System.currentTimeMillis();
       try
       {
          connection.getTypeChildren(type, false, -1, 0);
@@ -233,215 +268,175 @@ public class RepositoryTest extends BaseTest
    }
 
    /**
-    * 2.2.2.4 getTypeDescendants for root
-    *
-    * Returns the set of descendant Object-Types defined for the Repository
-    * under the specified Type.
-    */
-   @Test
-   public void testGetTypeDescendants() throws Exception
-   {
-      List<ItemsTree<TypeDefinition>> typeDescendants = null;
-      typeDescendants = getConnection().getTypeDescendants(null, 2, true);
-      assertNotNull("Type Descendants is null.", typeDescendants);
-      assertTrue("Type Descendants is empty.", typeDescendants.size() > 0);
-
-      for (ItemsTree<TypeDefinition> itemsTree : typeDescendants)
-      {
-         assertNotNull("Items tree is null.", itemsTree);
-         assertNotNull("Items tree children is null.", itemsTree.getChildren());
-         assertNotNull("Items tree container is null.", itemsTree.getContainer());
-         assertNotNull("Items tree container ID is null.", itemsTree.getContainer().getId());
-
-         assertTrue("Items tree container ID is empty.", !itemsTree.getContainer().getId().equals(""));
-         assertNotNull("Items tree container DisplayName is empty.", itemsTree.getContainer().getDisplayName());
-         assertNotNull("Items tree container LocalName is empty.", itemsTree.getContainer().getLocalName());
-         assertNotNull("Items tree container QueryName is empty.", itemsTree.getContainer().getQueryName() == null);
-         assertNotNull("Items tree container BaseId is empty.", itemsTree.getContainer().getBaseId());
-         checkPropertyDefinitions(itemsTree.getContainer().getPropertyDefinitions());
-      }
-   }
-
-   /**
-    * 2.2.2.4 getTypeDescendants for Folder type
-    *
-    * Returns the set of descendant Object-Types defined for the Repository
-    * under the specified Type.
-    */
-   @Test
-   public void testGetTypeDescendants_Folder() throws Exception
-   {
-      List<ItemsTree<TypeDefinition>> typeDescendants = null;
-      typeDescendants = getConnection().getTypeDescendants("cmis:folder", 2, true);
-      assertNotNull("Type Descendants is null.", typeDescendants);
-   }
-
-   /**
-    * 2.2.2.4 getTypeDescendants for Document type
-    *
-    * Returns the set of descendant Object-Types defined for the Repository
-    * under the specified Type.
-    */
-   @Test
-   public void testGetTypeDescendants_Document() throws Exception
-   {
-      List<ItemsTree<TypeDefinition>> typeDescendants = null;
-      typeDescendants = getConnection().getTypeDescendants("cmis:document", 2, true);
-      assertNotNull("Type Descendants is null.", typeDescendants);
-   }
-
-   /**
-    * 2.2.2.4 getTypeDescendants for root with IncludePropertyDefinition is
-    * false.
-    *
-    * Returns the set of descendant Object-Types defined for the Repository
-    * under the specified Type.
-    */
-   @Test
-   public void testGetTypeDescendants_IncludePropertyDefinitionFalse() throws Exception
-   {
-      List<ItemsTree<TypeDefinition>> typeDescendants = null;
-      typeDescendants = getConnection().getTypeDescendants(null, 2, false);
-      assertNotNull("Type Descendants is null.", typeDescendants);
-      assertTrue("Type Descendants is  empty.", typeDescendants.size() > 0);
-      for (ItemsTree<TypeDefinition> itemsTree : typeDescendants)
-      {
-         assertNotNull("Items tree is null.", itemsTree);
-         assertNotNull("Items tree container is null.", itemsTree.getContainer());
-         assertNull("Property definitions must be empty.", itemsTree.getContainer().getPropertyDefinitions());
-      }
-   }
-
-   /**
-    * 2.2.2.4 getTypeDescendants for root with depth 1.
-    *
-    * Returns the set of descendant Object-Types defined for the Repository
-    * under the specified Type.
-    */
-   @Test
-   public void testGetTypeDescendants_RootWithDepth1() throws Exception
-   {
-      List<ItemsTree<TypeDefinition>> typeDescendants = null;
-      typeDescendants = getConnection().getTypeDescendants(null, 1, true);
-      assertNotNull("Type Descendants is null.", typeDescendants);
-      assertTrue("Type Descendants is empty.", typeDescendants.size() > 0);
-      for (ItemsTree<TypeDefinition> itemsTree : typeDescendants)
-      {
-         assertNotNull("Items tree is null.", itemsTree);
-         assertNull("Childrens must be empty.", itemsTree.getChildren());
-      }
-   }
-
-   /**
-    * 2.2.2.4 getTypeDescendants for non existed type.
-    *
-    * Returns the set of descendant Object-Types defined for the Repository
-    * under the specified Type.
-    */
-   @Test
-   public void testGetTypeDescendants_NonExistedType() throws Exception
-   {
-      try
-      {
-         getConnection().getTypeDescendants("cmis:kino", 2, true);
-         fail("The type definition \"cmis:kino\" shouldn't exist.'");
-      }
-      catch (TypeNotFoundException e)
-      {
-         //OK
-      }
-   }
-
-   /**
-    * 2.2.2.5 getTypeDefinition for Folder type
-    *
-    * Gets the definition of the specified Object-Type.
-    */
-   @Test
-   public void testGetTypeDefinition_Folder() throws Exception
-   {
-      assertNotNull("Folder type definition is null.", folderTypeDefinition);
-      assertNotNull("Folder type definition ID is null.", folderTypeDefinition.getId());
-
-      assertTrue("Folder type definition ID is empty.", !folderTypeDefinition.getId().equals(""));
-      assertNotNull("Folder type definition local name is empty.", folderTypeDefinition.getLocalName());
-      assertNotNull("Folder type definition query name is empty.", folderTypeDefinition.getQueryName());
-      checkPropertyDefinitions(folderTypeDefinition.getPropertyDefinitions());
-   }
-
-   /**
-    * 2.2.2.5 getTypeDefinition for Document type
-    *
-    * Gets the definition of the specified Object-Type.
+    * 2.2.2.5 getTypeDefinition.
+    * 
+    * @throws Exception
     */
    @Test
    public void testGetTypeDefinition_Document() throws Exception
    {
-      assertNotNull("Document type definition is null.", documentTypeDefinition);
-      assertNotNull("Document type definition ID is null.", documentTypeDefinition.getId());
-
-      assertTrue("Document type definition ID is empty.", !documentTypeDefinition.getId().equals(""));
-      assertNotNull("Document type definition local name is empty.", documentTypeDefinition.getLocalName());
-      assertNotNull("Document type definition query name is empty.", documentTypeDefinition.getQueryName());
-      checkPropertyDefinitions(documentTypeDefinition.getPropertyDefinitions());
+      TypeDefinition type = connection.getTypeDefinition(CmisConstants.DOCUMENT, false);
+      assertEquals(CmisConstants.DOCUMENT, type.getId());
+      assertEquals(BaseType.DOCUMENT, type.getBaseId());
+      assertNotNull("Query name required. " + type.getQueryName());
+      assertNull("Root type may not have parent type. ", type.getParentId());
+      assertNull("Property definitions was not requested. ", type.getPropertyDefinitions());
    }
 
    /**
-    * 2.2.2.5 getTypeDefinition for non existed type
-    *
-    * Gets the definition of the specified Object-Type.
+    * 2.2.2.5 getTypeDefinition.
+    * 
+    * @throws Exception
     */
    @Test
-   public void testGetTypeDefinition_NonExistedType() throws Exception
+   public void testGetTypeDefinition_Folder() throws Exception
    {
+      TypeDefinition type = connection.getTypeDefinition(CmisConstants.FOLDER, false);
+      assertEquals(CmisConstants.FOLDER, type.getId());
+      assertEquals(BaseType.FOLDER, type.getBaseId());
+      assertNotNull("Query name required. " + type.getQueryName());
+      assertNull("Root type may not have parent type. ", type.getParentId());
+      assertTrue("Folder type is fileable. ", type.isFileable());
+      assertNull("Property definitions was not requested. ", type.getPropertyDefinitions());
+   }
+
+   /**
+    * 2.2.2.5 getTypeDefinition.
+    * 
+    * @throws Exception
+    */
+   @Test
+   public void testGetTypeDefinition_Policy() throws Exception
+   {
+      TypeDefinition type = connection.getTypeDefinition(CmisConstants.POLICY, false);
+      assertEquals(CmisConstants.POLICY, type.getId());
+      assertEquals(BaseType.POLICY, type.getBaseId());
+      assertNotNull("Query name required. " + type.getQueryName());
+      assertNull("Root type may not have parent type. ", type.getParentId());
+      assertNull("Property definitions was not requested. ", type.getPropertyDefinitions());
+   }
+
+   /**
+    * 2.2.2.5 getTypeDefinition.
+    * 
+    * @throws Exception
+    */
+   @Test
+   public void testGetTypeDefinition_Relationship() throws Exception
+   {
+      if (!isRelationshipsSupported)
+      {
+         return;
+      }
+      TypeDefinition type = connection.getTypeDefinition(CmisConstants.RELATIONSHIP, false);
+      assertEquals(CmisConstants.RELATIONSHIP, type.getId());
+      assertEquals(BaseType.RELATIONSHIP, type.getBaseId());
+      assertNotNull("Query name required. " + type.getQueryName());
+      assertNull("Root type may not have parent type. ", type.getParentId());
+      assertFalse("Relationship type is not fileable. ", type.isFileable());
+      assertNull("Property definitions was not requested. ", type.getPropertyDefinitions());
+   }
+
+   /**
+    * 2.2.2.5 getTypeDefinition.
+    * <p>
+    * {@link TypeNotFoundException} must be thrown if type for which children
+    * requested is not exists.
+    * </p>
+    * 
+    * @throws Exception
+    */
+   @Test
+   public void testGetTypeDefinition_TypeNotFoundException() throws Exception
+   {
+      String type = "cmis:document" + System.currentTimeMillis();
       try
       {
-         getConnection().getTypeDefinition("cmis:kino", false);
-         fail("The type definition \"cmis:kino\" shouldn't exist.'");
+         connection.getTypeDefinition(type, false);
+         fail("TypeNotFoundException must be thrown, type definition " + type + " shouldn't exist. ");
       }
       catch (TypeNotFoundException e)
       {
-         //OK
       }
    }
 
    /**
-    * 2.2.2.5 getTypeDefinition for Folder type with IncludePropertyDefinition
-    * is false.
-    *
-    * Gets the definition of the specified Object-Type.
+    * 2.2.2.4 getTypeDescendants.
+    * <p>
+    * Returns the set of descendant object types defined for the Repository
+    * under the specified Type.
+    * </p>
+    * 
+    * @throws Exception
     */
    @Test
-   public void testGetTypeDefinition_IncludePropertyDefinitionFalse() throws Exception
+   public void testGetTypeDescendants() throws Exception
    {
-      TypeDefinition typeDefinition = null;
-      typeDefinition = getConnection().getTypeDefinition("cmis:folder", false);
-      assertNotNull("Type definition is null.", typeDefinition);
-      assertNotNull("Type definition ID is null.", typeDefinition.getId());
-      assertFalse("Type definition ID is empty.", typeDefinition.getId().equals(""));
-      assertNotNull("Type definition local name is empty.", typeDefinition.getLocalName());
-      assertNotNull("Type definition query name is empty.", typeDefinition.getQueryName());
-
-      Collection<PropertyDefinition<?>> propertyDefinitions = typeDefinition.getPropertyDefinitions();
-      assertNull("Property definitions must not be included;", propertyDefinitions);
-   }
-
-   private void checkPropertyDefinitions(Collection<PropertyDefinition<?>> propertyDefinitions) throws Exception
-   {
-      assertNotNull("PropertyDefinitions is null.", propertyDefinitions);
-      for (PropertyDefinition<?> propertyDefinition : propertyDefinitions)
+      List<ItemsTree<TypeDefinition>> typeDescendants = connection.getTypeDescendants(null, -1, false);
+      List<TypeDefinition> treeAsList = typeTreeAsList(typeDescendants);
+      List<String> tids = new ArrayList<String>();
+      for (TypeDefinition t : treeAsList)
       {
-         assertNotNull("Type definition is null.", propertyDefinition);
-         assertNotNull("Type definition ID is null.", propertyDefinition.getId());
-         assertFalse("Type definition ID is empty.", propertyDefinition.getId().equals(""));
-         assertNotNull("Type definition local name is empty.", propertyDefinition.getLocalName());
-         assertNotNull("Type definition query name is empty.", propertyDefinition.getQueryName());
-         assertNotNull("Type definition property type is empty.", propertyDefinition.getPropertyType());
+         tids.add(t.getId());
+         assertNull(t.getPropertyDefinitions()); // was not requested.
+      }
+      List<String> exp = new ArrayList<String>();
+      exp.add("cmis:document");
+      exp.add("cmis:folder");
+      if (isPoliciesSupported)
+      {
+         exp.add("cmis:policy");
+      }
+      if (isRelationshipsSupported)
+      {
+         exp.add("cmis:relationship");
+      }
+      for (String s : exp)
+      {
+         assertTrue("Expected type " + s + " is not found in result. ", tids.contains(s));
       }
    }
 
-   @AfterClass
-   public static void stop() throws Exception
+   /**
+    * 2.2.2.4 getTypeDescendants.
+    * <p>
+    * Returns the set of descendant object types defined for the Repository
+    * under the specified type and include property definitions.
+    * </p>
+    * 
+    * @exception Exception
+    */
+   @Test
+   public void testGetTypeDescendants_IncludeProperty() throws Exception
    {
+      List<ItemsTree<TypeDefinition>> typeDescendants = connection.getTypeDescendants(null, -1, true);
+      List<TypeDefinition> treeAsList = typeTreeAsList(typeDescendants);
+      for (TypeDefinition t : treeAsList)
+      {
+         assertNotNull("Property definitions not found.", t.getPropertyDefinitions());
+      }
+   }
+
+   /**
+    * 2.2.2.4 getTypeChildren.
+    * <p>
+    * {@link TypeNotFoundException} must be thrown if type for which children
+    * requested is not exists.
+    * </p>
+    * 
+    * @throws Exception
+    */
+   @Test
+   public void testGetTypeDescendants_TypeNotFoundException() throws Exception
+   {
+      String type = "cmis:document" + System.currentTimeMillis();
+      try
+      {
+         connection.getTypeDescendants(type, -1, false);
+         fail("TypeNotFoundException must be thrown, type definition " + type + " shouldn't exist. ");
+      }
+      catch (TypeNotFoundException e)
+      {
+      }
    }
 }

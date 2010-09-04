@@ -123,8 +123,6 @@ public class ObjectTest extends BaseTest
    @BeforeClass
    public static void start() throws Exception
    {
-      BaseTest.setUp();
-
       folderType = connection.getTypeDefinition(CmisConstants.FOLDER);
       List<ItemsTree<TypeDefinition>> allFolders = connection.getTypeDescendants(folderType.getId(), -1, true);
       if (folderType.isControllableACL())
@@ -376,7 +374,7 @@ public class ObjectTest extends BaseTest
     * Create document and apply policies to the newly-created document object.
     * If policies is not supported then this test will be skipped.
     * </p>
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -416,7 +414,7 @@ public class ObjectTest extends BaseTest
     * {@link RepositoryCapabilities#getCapabilityACL()} returns something other
     * then CapabilityACL.MANAGE) this test will be skipped.
     * </p>
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -455,7 +453,7 @@ public class ObjectTest extends BaseTest
     * {@link NameConstraintViolationException} or at least second document must
     * get different name then provide when it created.
     * </p>
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -500,7 +498,7 @@ public class ObjectTest extends BaseTest
     * content stream input parameter is provided. If there is no any type for
     * which content stream is not allowed this test will be skipped.
     * </p>
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -534,7 +532,7 @@ public class ObjectTest extends BaseTest
     * {@link ConstraintException} must be thrown if cmis:objectTypeId property
     * value is not an object type whose baseType is cmis:document.
     * </p>
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -573,7 +571,7 @@ public class ObjectTest extends BaseTest
     * stream input parameter is not provided. If there is no any type for which
     * content stream is "required" this test will be skipped.
     * </p>
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -609,7 +607,7 @@ public class ObjectTest extends BaseTest
     * value is set to <code>true</code> and the value for the versioningState
     * input parameter is provided that is "none".
     * </p>
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -646,7 +644,7 @@ public class ObjectTest extends BaseTest
     * value is set to <code>false</code> and the value for the versioningState
     * input parameter is other then "none".
     * </p>
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -686,7 +684,7 @@ public class ObjectTest extends BaseTest
     * property value is set to <code>false</code> and at least one policy is
     * provided.
     * </p>
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -726,7 +724,7 @@ public class ObjectTest extends BaseTest
     * of the object type definition specified by the cmis:objectTypeId property
     * value is set to <code>false</code> and at least one ACE is provided.
     * </p>
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -762,7 +760,7 @@ public class ObjectTest extends BaseTest
     * permissions is used in an ACE provided which is not supported by the
     * repository.
     * </p>
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -802,7 +800,7 @@ public class ObjectTest extends BaseTest
     * Creates a document object as a copy of the given source document in the
     * specified location.
     * </p>
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -860,7 +858,7 @@ public class ObjectTest extends BaseTest
     * Create a folder object of the specified type in the specified location
     * without any additional attributes, such as policies, ACL, etc.
     * </p>
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -902,7 +900,7 @@ public class ObjectTest extends BaseTest
     * Create folder and apply policies to the newly-created folder object. If
     * policies is not supported then this test will be skipped.
     * </p>
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -939,7 +937,7 @@ public class ObjectTest extends BaseTest
     * {@link RepositoryCapabilities#getCapabilityACL()} returns something other
     * then CapabilityACL.MANAGE) this test will be skipped.
     * </p>
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -974,7 +972,7 @@ public class ObjectTest extends BaseTest
     * or at least second folder must get different name then provide when it
     * created.
     * </p>
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -1010,7 +1008,7 @@ public class ObjectTest extends BaseTest
     * {@link ConstraintException} must be thrown if cmis:objectTypeId property
     * value is not an object type whose baseType is cmis:folder.
     * </p>
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -1045,7 +1043,7 @@ public class ObjectTest extends BaseTest
     * property value is set to <code>false</code> and at least one policy is
     * provided.
     * </p>
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -1085,7 +1083,7 @@ public class ObjectTest extends BaseTest
     * permissions is used in an ACE provided which is not supported by the
     * repository.
     * </p>
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -1119,7 +1117,7 @@ public class ObjectTest extends BaseTest
     * of the object type definition specified by the cmis:objectTypeId property
     * value is set to <code>false</code> and at least one ACE is provided.
     * </p>
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -1154,7 +1152,7 @@ public class ObjectTest extends BaseTest
     * Create a relationship object of the specified type without any additional
     * attributes, such as policies, ACL, etc.
     * </p>
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -1204,7 +1202,7 @@ public class ObjectTest extends BaseTest
     * <p>
     * Create a relationship object of the specified and apply policies to it.
     * </p>
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -1256,7 +1254,7 @@ public class ObjectTest extends BaseTest
     * {@link RepositoryCapabilities#getCapabilityACL()} returns something other
     * then CapabilityACL.MANAGE) this test will be skipped.
     * </p>
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -1308,7 +1306,7 @@ public class ObjectTest extends BaseTest
     * least second relationship must get different name then provide when it
     * created.
     * </p>
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -1371,7 +1369,7 @@ public class ObjectTest extends BaseTest
     * {@link ConstraintException} must be thrown if cmis:objectTypeId property
     * value is not an object type whose baseType is cmis:relationship.
     * </p>
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -1439,7 +1437,7 @@ public class ObjectTest extends BaseTest
     * property value is set to <code>false</code> and at least one policy is
     * provided.
     * </p>
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -1493,7 +1491,7 @@ public class ObjectTest extends BaseTest
     * of the object type definition specified by the cmis:objectTypeId property
     * value is set to <code>false</code> and at least one ACEs is provided.
     * </p>
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -1546,7 +1544,7 @@ public class ObjectTest extends BaseTest
     * permissions is used in an ACE provided which is not supported by the
     * repository.
     * </p>
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -1597,7 +1595,7 @@ public class ObjectTest extends BaseTest
     * Create a relationship object of the specified type without any additional
     * attributes, such as policies, ACL, etc.
     * </p>
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -1645,7 +1643,7 @@ public class ObjectTest extends BaseTest
     * <p>
     * Create a policy object of the specified and apply policies to it.
     * </p>
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -1688,7 +1686,7 @@ public class ObjectTest extends BaseTest
     * {@link RepositoryCapabilities#getCapabilityACL()} returns something other
     * then CapabilityACL.MANAGE) this test will be skipped.
     * </p>
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -1733,7 +1731,7 @@ public class ObjectTest extends BaseTest
     * fileable this test will be skipped since name may not be important for not
     * hierarchical object.</i>
     * </p>
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -1780,7 +1778,7 @@ public class ObjectTest extends BaseTest
     * {@link ConstraintException} must be thrown if cmis:objectTypeId property
     * value is not an object type whose baseType is cmis:policy.
     * </p>
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -1825,7 +1823,7 @@ public class ObjectTest extends BaseTest
     * property value is set to <code>false</code> and at least one policy is
     * provided.
     * </p>
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -1869,7 +1867,7 @@ public class ObjectTest extends BaseTest
     * of the object type definition specified by the cmis:objectTypeId property
     * value is set to <code>false</code> and at least one ACEs is provided.
     * </p>
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -1910,7 +1908,7 @@ public class ObjectTest extends BaseTest
     * permissions is used in an ACE provided which is not supported by the
     * repository.
     * </p>
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -1948,12 +1946,12 @@ public class ObjectTest extends BaseTest
    // TODO
 
    /**
-    *
+    * 
     * 2.2.4.6 getAllowableActions.
     * <p>
     * Gets the list of allowable actions for an object.
     * </p>
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -1969,7 +1967,7 @@ public class ObjectTest extends BaseTest
     * Get the specified information for the object without any additional info
     * about relationships, policies, renditions.
     * </p>
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -1992,7 +1990,7 @@ public class ObjectTest extends BaseTest
     * properties. Result SHOULD contains only the properties specified in the
     * property filter if they exist on the object's type definition.
     * </p>
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -2023,7 +2021,7 @@ public class ObjectTest extends BaseTest
     * Get object with id <code>testRootFolderId</code> with additional
     * information about relationships.
     *</p>
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -2054,7 +2052,7 @@ public class ObjectTest extends BaseTest
     * Get object with id <code>testRootFolderId</code> with additional
     * information about policies.
     *</p>
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -2080,7 +2078,7 @@ public class ObjectTest extends BaseTest
     *<p>
     * Get object with id with additional information about ACL.
     *</p>
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -2108,7 +2106,7 @@ public class ObjectTest extends BaseTest
     *<p>
     * Get object with id with additional information about allowable actions.
     *</p>
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -2129,7 +2127,7 @@ public class ObjectTest extends BaseTest
     * Get the specified information for the object without any additional info
     * about relationships, policies, renditions.
     * </p>
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -2152,7 +2150,7 @@ public class ObjectTest extends BaseTest
     * only the properties specified in the property filter if they exist on the
     * object's type definition.
     * </p>
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -2182,7 +2180,7 @@ public class ObjectTest extends BaseTest
     *<p>
     * Get object by path with additional information about relationships.
     *</p>
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -2212,7 +2210,7 @@ public class ObjectTest extends BaseTest
     *<p>
     * Get object by path with additional information about policies.
     *</p>
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -2238,7 +2236,7 @@ public class ObjectTest extends BaseTest
     *<p>
     * Get object by path with additional information about allowable actions.
     *</p>
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -2252,7 +2250,7 @@ public class ObjectTest extends BaseTest
 
    /**
     * 2.2.4.10 getContentStream.
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -2301,7 +2299,7 @@ public class ObjectTest extends BaseTest
 
    /**
     * 2.2.4.17 deleteContentStream.
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -2340,7 +2338,7 @@ public class ObjectTest extends BaseTest
     * <p>
     * Move object from one folder to other.
     * </p>
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -2364,7 +2362,7 @@ public class ObjectTest extends BaseTest
     * {@link InvalidArgumentException} must be thrown if sourceFolderId is
     * missing or the sourceFolderId doesn't match the specified object's.
     * </p>
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -2391,7 +2389,7 @@ public class ObjectTest extends BaseTest
     * {@link InvalidArgumentException} must be thrown if sourceFolderId is
     * missing or the sourceFolderId doesn't match the specified object's.
     * </p>
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -2414,7 +2412,7 @@ public class ObjectTest extends BaseTest
 
    /**
     * 2.2.4.14 deleteObject.
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -2441,7 +2439,7 @@ public class ObjectTest extends BaseTest
     * {@link ConstraintException} must be thrown if the method is invoked on a
     * folder object that contains one or more objects.
     * </p>
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -2462,7 +2460,7 @@ public class ObjectTest extends BaseTest
 
    /**
     * 2.2.4.15 deleteTree.
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -2494,7 +2492,7 @@ public class ObjectTest extends BaseTest
 
    /**
     * 2.2.4.16 setContentStream.
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -2527,7 +2525,7 @@ public class ObjectTest extends BaseTest
     *{@link ContentAlreadyExistsException} must be thrown if object has content
     * and overwriteFlag is <code>false</code>.
     * </p>
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -2561,11 +2559,11 @@ public class ObjectTest extends BaseTest
     * by the cmis:objectTypeId property value of the given document is set to
     * NOT_ALLOWED.
     * </p>
-    *
+    * 
     * @throws Exception
     */
    @Test
-   public void testSetContentStream_ContentAlreadyExistsException_() throws Exception
+   public void testSetContentStream_StreamNotSupportedException() throws Exception
    {
       if (documentTypeStreamNotSupported == null)
       {
@@ -2586,5 +2584,4 @@ public class ObjectTest extends BaseTest
       {
       }
    }
-
 }

@@ -28,17 +28,18 @@ import junit.framework.TestSuite;
 public class AllTests
 {
    //Old manner:
-   public static junit.framework.Test suite() {
+   public static junit.framework.Test suite()
+   {
       TestSuite suite = new TestSuite("All tests");
       suite.addTest(new JUnit4TestAdapter(RepositoryTest.class));
-      suite.addTest(new JUnit4TestAdapter(ACLTest.class));
-      suite.addTest(new JUnit4TestAdapter(DiscoveryTest.class));
-      suite.addTest(new JUnit4TestAdapter(MultifilingTest.class));
       suite.addTest(new JUnit4TestAdapter(NavigationTest.class));
       suite.addTest(new JUnit4TestAdapter(ObjectTest.class));
-      suite.addTest(new JUnit4TestAdapter(VersioningTest.class));
       suite.addTest(new JUnit4TestAdapter(RelationshipTest.class));
+      suite.addTest(new JUnit4TestAdapter(MultifilingTest.class));
+      suite.addTest(new JUnit4TestAdapter(DiscoveryTest.class));
+      suite.addTest(new JUnit4TestAdapter(ACLTest.class));
       suite.addTest(new JUnit4TestAdapter(PolicyTest.class));
+      suite.addTest(new JUnit4TestAdapter(VersioningTest.class));
       return suite;
-  }
    }
+}

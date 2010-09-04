@@ -89,11 +89,11 @@ public class NavigationTest extends BaseTest
    private static String rel3;
 
    @AfterClass
-   public static void shutDown() throws Exception
+   public static void stop() throws Exception
    {
       if (testRootFolderId != null)
       {
-         clearTree(testRootFolderId);
+         clear(testRootFolderId);
       }
    }
 
@@ -120,8 +120,6 @@ public class NavigationTest extends BaseTest
    @BeforeClass
    public static void start() throws Exception
    {
-      BaseTest.setUp();
-
       TypeDefinition documentType = connection.getTypeDefinition(CmisConstants.DOCUMENT);
       TypeDefinition folderType = connection.getTypeDefinition(CmisConstants.FOLDER);
 
@@ -825,7 +823,7 @@ public class NavigationTest extends BaseTest
       validateTree(descendants, exp);
 
       // Be sure there is no any additional information since we did not request it.
-      for (CmisObject o : objectTreeToList(descendants))
+      for (CmisObject o : objectTreeAsList(descendants))
       {
          assertNull(o.getPathSegment());
          assertNull(o.getAllowableActions());
@@ -856,7 +854,7 @@ public class NavigationTest extends BaseTest
          connection.getDescendants(testRootFolderId, -1, true, IncludeRelationships.NONE, false, true, null,
             RenditionFilter.NONE);
       // All items from tree in plain form.
-      List<CmisObject> list = objectTreeToList(descendants);
+      List<CmisObject> list = objectTreeAsList(descendants);
       assertEquals(9, list.size());
       for (CmisObject o : list)
       {
@@ -1004,7 +1002,7 @@ public class NavigationTest extends BaseTest
       List<ItemsTree<CmisObject>> descendants =
          connection.getDescendants(testRootFolderId, -1, false, IncludeRelationships.NONE, true, true, null,
             RenditionFilter.NONE);
-      List<CmisObject> list = objectTreeToList(descendants);
+      List<CmisObject> list = objectTreeAsList(descendants);
       assertEquals(9, list.size());
       for (CmisObject o : list)
       {
@@ -1036,7 +1034,7 @@ public class NavigationTest extends BaseTest
       List<ItemsTree<CmisObject>> descendants =
          connection.getDescendants(testRootFolderId, -1, false, IncludeRelationships.NONE, false, true,
             "cmis:name,cmis:path", RenditionFilter.NONE);
-      List<CmisObject> list = objectTreeToList(descendants);
+      List<CmisObject> list = objectTreeAsList(descendants);
       assertEquals(9, list.size());
       for (CmisObject o : list)
       {
@@ -1086,7 +1084,7 @@ public class NavigationTest extends BaseTest
       List<ItemsTree<CmisObject>> descendants =
          connection.getDescendants(testRootFolderId, -1, false, IncludeRelationships.SOURCE, false, true, null,
             RenditionFilter.NONE);
-      List<CmisObject> list = objectTreeToList(descendants);
+      List<CmisObject> list = objectTreeAsList(descendants);
       assertEquals(9, list.size());
 
       // Check relationships. NOTE only sources must be present!
@@ -1149,7 +1147,7 @@ public class NavigationTest extends BaseTest
       List<ItemsTree<CmisObject>> descendants =
          connection.getDescendants(testRootFolderId, -1, false, IncludeRelationships.NONE, false, true, null,
             RenditionFilter.NONE);
-      List<CmisObject> list = objectTreeToList(descendants);
+      List<CmisObject> list = objectTreeAsList(descendants);
       assertEquals(9, list.size());
       for (CmisObject o : list)
       {
@@ -1287,7 +1285,7 @@ public class NavigationTest extends BaseTest
       validateTree(tree, exp);
 
       // Be sure there is no any additional information since we did not request it.
-      for (CmisObject o : objectTreeToList(tree))
+      for (CmisObject o : objectTreeAsList(tree))
       {
          assertNull(o.getPathSegment());
          assertNull(o.getAllowableActions());
@@ -1319,7 +1317,7 @@ public class NavigationTest extends BaseTest
          connection.getFolderTree(testRootFolderId, -1, true, IncludeRelationships.NONE, false, true, null,
             RenditionFilter.NONE);
       // All items from tree in plain form.
-      List<CmisObject> list = objectTreeToList(tree);
+      List<CmisObject> list = objectTreeAsList(tree);
       assertEquals(3, list.size());
       for (CmisObject o : list)
       {
@@ -1462,7 +1460,7 @@ public class NavigationTest extends BaseTest
       List<ItemsTree<CmisObject>> tree =
          connection.getFolderTree(testRootFolderId, -1, false, IncludeRelationships.NONE, true, true, null,
             RenditionFilter.NONE);
-      List<CmisObject> list = objectTreeToList(tree);
+      List<CmisObject> list = objectTreeAsList(tree);
       assertEquals(3, list.size());
       for (CmisObject o : list)
       {
@@ -1494,7 +1492,7 @@ public class NavigationTest extends BaseTest
       List<ItemsTree<CmisObject>> tree =
          connection.getFolderTree(testRootFolderId, -1, false, IncludeRelationships.NONE, false, true,
             "cmis:name,cmis:path", RenditionFilter.NONE);
-      List<CmisObject> list = objectTreeToList(tree);
+      List<CmisObject> list = objectTreeAsList(tree);
       assertEquals(3, list.size());
       for (CmisObject o : list)
       {
@@ -1535,7 +1533,7 @@ public class NavigationTest extends BaseTest
       List<ItemsTree<CmisObject>> tree =
          connection.getFolderTree(testRootFolderId, -1, false, IncludeRelationships.SOURCE, false, true, null,
             RenditionFilter.NONE);
-      List<CmisObject> list = objectTreeToList(tree);
+      List<CmisObject> list = objectTreeAsList(tree);
       assertEquals(3, list.size());
 
       // Check relationships. NOTE only sources must be present!
@@ -1587,7 +1585,7 @@ public class NavigationTest extends BaseTest
       List<ItemsTree<CmisObject>> tree =
          connection.getFolderTree(testRootFolderId, -1, false, IncludeRelationships.NONE, false, true, null,
             RenditionFilter.NONE);
-      List<CmisObject> list = objectTreeToList(tree);
+      List<CmisObject> list = objectTreeAsList(tree);
       assertEquals(3, list.size());
       for (CmisObject o : list)
       {
