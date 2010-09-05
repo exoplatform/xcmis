@@ -176,6 +176,7 @@ public class BaseTest
             removeRelationships(root);
          }
          connection.deleteTree(root, true, UnfileObject.DELETE, true);
+         connection.close();
       }
       catch (Exception e)
       {
