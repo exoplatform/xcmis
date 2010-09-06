@@ -1,0 +1,30 @@
+<assembly>
+  <id>1.1-SNAPSHOT</id>
+  <formats>
+    <format>dir</format>
+  </formats>
+  <includeBaseDirectory>false</includeBaseDirectory>
+    
+  <fileSets>
+    <fileSet>
+      <directory>target/classes</directory>
+      <outputDirectory>/</outputDirectory>
+    </fileSet>
+  </fileSets>
+
+  <dependencySets>
+    <dependencySet>
+      <unpack>false</unpack>
+      <scope>runtime</scope>
+      <outputDirectory>/</outputDirectory>
+
+      <includes>
+        <include>org.xcmis:xcmis-server-tomcat-demo</include>
+      </includes>
+
+    </dependencySet>
+  </dependencySets>
+
+  <componentDescriptors />
+
+</assembly>
