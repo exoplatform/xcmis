@@ -34,8 +34,8 @@
       <url>http://jira.exoplatform.org/</url>
    </issueManagement>
    <scm>
-      <connection>scm:svn:http://xcmis.googlecode.com/svn/trunk/</connection>
-      <developerConnection>scm:svn:https://xcmis.googlecode.com/svn/trunk/</developerConnection>
+      <connection>scm:svn:http://xcmis.googlecode.com/svn/branches/1.1.0/</connection>
+      <developerConnection>scm:svn:https://xcmis.googlecode.com/svn/branches/1.1.0/</developerConnection>
       <url>http://code.google.com/p/xcmis/source/browse/</url>
    </scm>
    <distributionManagement>
@@ -56,7 +56,7 @@
       </xcmis.snapshots.repo.url>
       <exo.product.name>xcmis</exo.product.name>
       <exo.product.specification>1.0</exo.product.specification>
-      <source.url>http://xcmis.googlecode.com/svn/trunk</source.url>
+      <source.url>http://xcmis.googlecode.com/svn/branches/1.1.0</source.url>
       <wiki.url>http://code.google.com/p/xcmis/w/list</wiki.url>
       <maven.build.timestamp.format>yyyy.MM.dd-HH:mm</maven.build.timestamp.format>
       <eclipse.projectNameTemplate>[artifactId]-[version]</eclipse.projectNameTemplate>
