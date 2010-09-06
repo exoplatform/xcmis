@@ -36,13 +36,11 @@ import org.xcmis.spi.ItemsTree;
 import org.xcmis.spi.TypeNotFoundException;
 import org.xcmis.spi.model.BaseType;
 import org.xcmis.spi.model.CapabilityACL;
-import org.xcmis.spi.model.PropertyDefinition;
 import org.xcmis.spi.model.RepositoryInfo;
 import org.xcmis.spi.model.RepositoryShortInfo;
 import org.xcmis.spi.model.TypeDefinition;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -52,7 +50,7 @@ import java.util.Set;
  * getRepositoryInfo, getTypeChildren, getTypeDescendants, getTypeDefinition)
  * are used to discover information about the repository, including information
  * about the repository and the object-types defined for the repository.
- * 
+ *
  * @author <a href="mailto:alexey.zavizionov@exoplatform.com">Alexey
  *         Zavizionov</a>
  * @version $Id$
@@ -101,7 +99,7 @@ public class RepositoryTest extends BaseTest
     * Returns information about the CMIS repository, the optional capabilities
     * it supports and its Access Control information if applicable.
     * </p>
-    * 
+    *
     * @throws Exception
     */
    @Test
@@ -142,7 +140,7 @@ public class RepositoryTest extends BaseTest
     * Returns the list of Object-Types defined for the Repository that are
     * children of the specified Type.
     * </p>
-    * 
+    *
     * @throws Exception
     */
    @Test
@@ -178,7 +176,7 @@ public class RepositoryTest extends BaseTest
     * Returns the set of children object types defined for the Repository under
     * the specified type and include property definitions.
     * </p>
-    * 
+    *
     * @exception Exception
     */
    @Test
@@ -199,7 +197,7 @@ public class RepositoryTest extends BaseTest
     * attribute 'maxItems' specified then number of items contained in the
     * response must not exceed specified value.
     * </p>
-    * 
+    *
     * @throws Exception
     */
    @Test
@@ -216,7 +214,7 @@ public class RepositoryTest extends BaseTest
     * Returns the list of Object-Types defined for the Repository that are
     * children of the specified Type.
     * </p>
-    * 
+    *
     * @throws Exception
     */
    @Test
@@ -250,7 +248,7 @@ public class RepositoryTest extends BaseTest
     * {@link TypeNotFoundException} must be thrown if type for which children
     * requested is not exists.
     * </p>
-    * 
+    *
     * @throws Exception
     */
    @Test
@@ -269,7 +267,7 @@ public class RepositoryTest extends BaseTest
 
    /**
     * 2.2.2.5 getTypeDefinition.
-    * 
+    *
     * @throws Exception
     */
    @Test
@@ -285,7 +283,7 @@ public class RepositoryTest extends BaseTest
 
    /**
     * 2.2.2.5 getTypeDefinition.
-    * 
+    *
     * @throws Exception
     */
    @Test
@@ -302,7 +300,7 @@ public class RepositoryTest extends BaseTest
 
    /**
     * 2.2.2.5 getTypeDefinition.
-    * 
+    *
     * @throws Exception
     */
    @Test
@@ -322,7 +320,7 @@ public class RepositoryTest extends BaseTest
 
    /**
     * 2.2.2.5 getTypeDefinition.
-    * 
+    *
     * @throws Exception
     */
    @Test
@@ -347,7 +345,7 @@ public class RepositoryTest extends BaseTest
     * {@link TypeNotFoundException} must be thrown if type for which children
     * requested is not exists.
     * </p>
-    * 
+    *
     * @throws Exception
     */
    @Test
@@ -370,7 +368,7 @@ public class RepositoryTest extends BaseTest
     * Returns the set of descendant object types defined for the Repository
     * under the specified Type.
     * </p>
-    * 
+    *
     * @throws Exception
     */
    @Test
@@ -407,7 +405,7 @@ public class RepositoryTest extends BaseTest
     * Returns the set of descendant object types defined for the Repository
     * under the specified type and include property definitions.
     * </p>
-    * 
+    *
     * @exception Exception
     */
    @Test
@@ -427,7 +425,7 @@ public class RepositoryTest extends BaseTest
     * {@link TypeNotFoundException} must be thrown if type for which children
     * requested is not exists.
     * </p>
-    * 
+    *
     * @throws Exception
     */
    @Test
