@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project>
    <modelVersion>4.0.0</modelVersion>
    <parent>
       <groupId>org.xcmis</groupId>
       <artifactId>xcmis-parent</artifactId>
-      <version>1.1.0-GA</version>
+      <version>1.1-SNAPSHOT</version>
    </parent>
    <artifactId>xcmis-server-tomcat</artifactId>
    <name>xCMIS :: Server :: Tomcat</name>
@@ -52,7 +52,8 @@
                   <artifactId>maven-antrun-plugin</artifactId>
                   <configuration>
                      <tasks>
-                        <delete dir="${project.build.directory}/xcmis-tomcat" includeEmptyDirs="true" quiet="yes" />
+                        <delete dir="${project.build.directory}/xcmis-tomcat" includeEmptyDirs="true"
+                           quiet="yes" />
                         <copy todir="${project.build.directory}/xcmis-tomcat" verbose="false" overwrite="true">
                            <fileset dir="${tomcat.distrib}" />
                         </copy>
@@ -61,14 +62,16 @@
                               <exclude name="**/*.war" />
                            </fileset>
                         </copy>
-                        <copy todir="${project.build.directory}/xcmis-tomcat/webapps/" verbose="true" flatten="true" overwrite="true">
-                           <fileset dir="${project.build.directory}/lib-${project.version}.dir/" casesensitive="yes">
+                        <copy todir="${project.build.directory}/xcmis-tomcat/webapps/" verbose="true"
+                           flatten="true" overwrite="true">
+                           <fileset dir="${project.build.directory}/lib-${project.version}.dir/"
+                              casesensitive="yes">
                               <include name="**/*.war" />
                            </fileset>
                            <mapper>
                               <chainedmapper>
                                  <flattenmapper />
-                                 <mergemapper from="xcmis-server-war-*.war" to="xcmis.war" />
+                                 <mergemapper from="xcmis-server-war-*.war" to="xcmis.war"/>
                               </chainedmapper>
                            </mapper>
                         </copy>
