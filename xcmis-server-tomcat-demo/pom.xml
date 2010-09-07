@@ -253,8 +253,7 @@
                            <mapper>
                               <chainedmapper>
                                  <flattenmapper />
-                                 <globmapper from="xcmis-server-tomcat-demo-${project.version}.war"
-                                    to="xcmis.war" casesensitive="no" />
+                                 <mergemapper from="xcmis-server-tomcat-demo-*.war" to="xcmis.war"/>
                               </chainedmapper>
                            </mapper>
                         </copy>

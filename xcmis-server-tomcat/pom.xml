@@ -71,8 +71,7 @@
                            <mapper>
                               <chainedmapper>
                                  <flattenmapper />
-                                 <globmapper from="xcmis-server-war-${project.version}.war" to="xcmis.war"
-                                    casesensitive="no" />
+                                 <mergemapper from="xcmis-server-war-*.war" to="xcmis.war"/>
                               </chainedmapper>
                            </mapper>
                         </copy>
