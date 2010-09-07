@@ -34,8 +34,8 @@
       <url>http://jira.exoplatform.org/</url>
    </issueManagement>
    <scm>
-      <connection>scm:svn:http://xcmis.googlecode.com/svn/branches/1.1.0/</connection>
-      <developerConnection>scm:svn:https://xcmis.googlecode.com/svn/branches/1.1.0/</developerConnection>
+      <connection>scm:svn:http://xcmis.googlecode.com/svn/branches/1.1.x/</connection>
+      <developerConnection>scm:svn:https://xcmis.googlecode.com/svn/branches/1.1.x/</developerConnection>
       <url>http://code.google.com/p/xcmis/source/browse/</url>
    </scm>
    <distributionManagement>
