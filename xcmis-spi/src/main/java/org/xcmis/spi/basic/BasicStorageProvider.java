@@ -98,7 +98,7 @@ public abstract class BasicStorageProvider implements StorageProvider
 
    protected static List<Permission> ACL_CAPABILITY_PERMISSIONS = null;
 
-   protected static AccessControlPropagation ACL_CAPABILITY_PROPAGATION = AccessControlPropagation.OBJECTONLY;
+   protected static AccessControlPropagation ACL_CAPABILITY_PROPAGATION = AccessControlPropagation.REPOSITORYDETERMINED;
 
    protected static SupportedPermissions SUPPORTED_PERMISSIONS = SupportedPermissions.BASIC;
 
