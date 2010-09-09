@@ -22,10 +22,8 @@ package org.xcmis.restatom;
 import org.apache.abdera.protocol.server.ResponseContext;
 import org.apache.abdera.protocol.server.context.EmptyResponseContext;
 import org.apache.abdera.protocol.server.context.MediaResponseContext;
-import org.exoplatform.services.rest.provider.EntityProvider;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
@@ -36,14 +34,16 @@ import java.nio.charset.Charset;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id: AbderaResponseEntityProvider.java 44 2010-02-08 17:36:56Z andrew00x $
+ * @version $Id: AbderaResponseEntityProvider.java 44 2010-02-08 17:36:56Z
+ *          andrew00x $
  */
 @Provider
-public class AbderaResponseEntityProvider implements EntityProvider<ResponseContext>
+public class AbderaResponseEntityProvider implements MessageBodyWriter<ResponseContext>
 {
 
    /**
@@ -57,27 +57,9 @@ public class AbderaResponseEntityProvider implements EntityProvider<ResponseCont
    /**
     * {@inheritDoc}
     */
-   public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType)
-   {
-      return false;
-   }
-
-   /**
-    * {@inheritDoc}
-    */
    public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType)
    {
       return ResponseContext.class.isAssignableFrom(type);
-   }
-
-   /**
-    * {@inheritDoc}
-    */
-   public ResponseContext readFrom(Class<ResponseContext> type, Type genericType, Annotation[] annotations,
-      MediaType mediaType, MultivaluedMap<String, String> httpHeaders, InputStream entityStream) throws IOException,
-      WebApplicationException
-   {
-      throw new UnsupportedOperationException();
    }
 
    /**

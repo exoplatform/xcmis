@@ -22,7 +22,6 @@ package org.xcmis.restatom;
 import org.apache.abdera.model.Document;
 import org.apache.abdera.model.Element;
 import org.apache.abdera.parser.Parser;
-import org.exoplatform.services.rest.provider.EntityProvider;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,18 +34,20 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.ext.MessageBodyReader;
+import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 
 /**
  * Created by The eXo Platform SAS .
- * 
+ *
  * @version $Id: AbderaElementEntityProvider.java 2192 2009-07-17 13:19:12Z
  *          sunman $
  */
 @Provider
 @Consumes({MediaType.APPLICATION_ATOM_XML})
 @Produces({MediaType.APPLICATION_ATOM_XML, "application/cmis+xml;type=allowableActions", "application/cmisacl+xml"})
-public class AbderaElementEntityProvider implements EntityProvider<Element>
+public class AbderaElementEntityProvider implements MessageBodyReader<Element>, MessageBodyWriter<Element>
 {
 
    /**
