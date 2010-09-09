@@ -34,7 +34,6 @@ import org.apache.abdera.protocol.server.impl.AbstractCollectionAdapter;
 import org.apache.abdera.protocol.server.impl.AbstractEntityCollectionAdapter;
 import org.apache.abdera.protocol.server.servlet.ServletRequestContext;
 import org.apache.commons.fileupload.FileItem;
-import org.exoplatform.services.rest.resource.ResourceContainer;
 import org.xcmis.restatom.abdera.AccessControlEntryTypeElement;
 import org.xcmis.restatom.abdera.AllowableActionsElement;
 import org.xcmis.restatom.abdera.RepositoryInfoTypeElement;
@@ -88,7 +87,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
  * @version $Id: AtomCmisService.java 216 2010-02-12 17:19:50Z andrew00x $
  */
 @Path(AtomCMIS.CMIS_REST_RESOURCE_PATH)
-public class AtomCmisService implements ResourceContainer
+public class AtomCmisService
 {
 
    /** The provider. */
