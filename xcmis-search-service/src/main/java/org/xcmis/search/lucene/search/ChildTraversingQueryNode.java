@@ -73,7 +73,6 @@ public class ChildTraversingQueryNode extends Query
    public ChildTraversingQueryNode(Query parentQuery, boolean isDeep)
    {
       super();
-      assert (log!=null);
       this.parentQuery = parentQuery;
       this.isDeep = isDeep;
       this.isIncludeParent = false;
