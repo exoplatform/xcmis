@@ -21,7 +21,6 @@ package org.xcmis.sp.inmemory;
 
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import org.exoplatform.services.security.ConversationState;
 import org.xcmis.search.InvalidQueryException;
 import org.xcmis.search.SearchService;
 import org.xcmis.search.SearchServiceException;
@@ -62,6 +61,7 @@ import org.xcmis.spi.Storage;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.TypeNotFoundException;
 import org.xcmis.spi.UpdateConflictException;
+import org.xcmis.spi.UserContext;
 import org.xcmis.spi.VersioningException;
 import org.xcmis.spi.model.ACLCapability;
 import org.xcmis.spi.model.AccessControlEntry;
@@ -367,10 +367,8 @@ public class StorageImpl implements Storage
     */
    public AllowableActions calculateAllowableActions(ObjectData object)
    {
-      ConversationState state = ConversationState.getCurrent();
       AllowableActions actions =
-         permissionService.calculateAllowableActions(object, state != null ? state.getIdentity() : null,
-            getRepositoryInfo());
+         permissionService.calculateAllowableActions(object, getCurrentUser(), getRepositoryInfo());
       return actions;
    }
 
@@ -1330,12 +1328,8 @@ public class StorageImpl implements Storage
 
    protected String getCurrentUser()
    {
-      ConversationState state = ConversationState.getCurrent();
-      if (state != null)
-      {
-         return state.getIdentity().getUserId();
-      }
-      return getRepositoryInfo().getPrincipalAnonymous();
+      UserContext ctx = UserContext.getCurrent();
+      return ctx != null ? ctx.getUserId() : getRepositoryInfo().getPrincipalAnonymous();
    }
 
    void validateMaxItemsNumber(ObjectData object) throws StorageException

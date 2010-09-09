@@ -22,19 +22,18 @@ import org.apache.cxf.interceptor.Fault;
 import org.apache.cxf.phase.Phase;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import org.exoplatform.services.security.ConversationState;
-import org.exoplatform.services.security.Identity;
+import org.xcmis.spi.UserContext;
 
 /**
  * Created by The eXo Platform SAS .
- * 
+ *
  * @author <a href="mailto:max.shaposhnik@exoplatform.com.ua">Max
  *         Shaposhnik</a>
  * @version $Id$ Dec 17, 2008
  */
 public class IdentityInterceptor extends AbstractSoapInterceptor
 {
-   
+
    /** Logger. */
    private static final Log LOG = ExoLogger.getLogger(IdentityInterceptor.class);
 
@@ -49,7 +48,7 @@ public class IdentityInterceptor extends AbstractSoapInterceptor
          LOG.debug(">> > IdentityInterceptor.IdentityInterceptor() entered");
       }
    }
-   
+
    /* (non-Javadoc)
     * @see org.apache.cxf.interceptor.Interceptor#handleMessage(org.apache.cxf.message.Message)
     */
@@ -59,8 +58,8 @@ public class IdentityInterceptor extends AbstractSoapInterceptor
       {
          LOG.debug(">> > IdentityInterceptor.handleMessage() entered");
       }
-      ConversationState state = new ConversationState(new Identity("root"));
-      ConversationState.setCurrent(state);
+      UserContext ctx = new UserContext("root");
+      UserContext.setCurrent(ctx);
    }
 
 }

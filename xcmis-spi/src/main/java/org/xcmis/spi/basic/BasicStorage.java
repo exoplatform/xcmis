@@ -18,7 +18,6 @@
  */
 package org.xcmis.spi.basic;
 
-import org.exoplatform.services.security.ConversationState;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentStream;
@@ -38,6 +37,7 @@ import org.xcmis.spi.StorageException;
 import org.xcmis.spi.TypeManager;
 import org.xcmis.spi.TypeNotFoundException;
 import org.xcmis.spi.UpdateConflictException;
+import org.xcmis.spi.UserContext;
 import org.xcmis.spi.VersioningException;
 import org.xcmis.spi.model.AccessControlEntry;
 import org.xcmis.spi.model.AllowableActions;
@@ -92,9 +92,9 @@ public abstract class BasicStorage implements Storage
     */
    public AllowableActions calculateAllowableActions(ObjectData object)
    {
-      ConversationState state = ConversationState.getCurrent();
+      UserContext ctx = UserContext.getCurrent();
       AllowableActions actions =
-         permissionService.calculateAllowableActions(object, state != null ? state.getIdentity() : null,
+         permissionService.calculateAllowableActions(object, ctx != null ? ctx.getUserId() : null,
             getRepositoryInfo());
       return actions;
    }

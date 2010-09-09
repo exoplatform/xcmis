@@ -35,8 +35,6 @@ import org.exoplatform.services.rest.impl.InputHeadersMap;
 import org.exoplatform.services.rest.impl.MultivaluedMapImpl;
 import org.exoplatform.services.rest.impl.RequestHandlerImpl;
 import org.exoplatform.services.rest.tools.DummyContainerResponseWriter;
-import org.exoplatform.services.security.ConversationState;
-import org.exoplatform.services.security.Identity;
 import org.exoplatform.services.test.mock.MockHttpServletRequest;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -49,6 +47,7 @@ import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.ItemsList;
 import org.xcmis.spi.ObjectNotFoundException;
+import org.xcmis.spi.UserContext;
 import org.xcmis.spi.model.BaseType;
 import org.xcmis.spi.model.CmisObject;
 import org.xcmis.spi.model.ObjectParent;
@@ -126,8 +125,8 @@ public abstract class BaseTest extends TestCase
       factory = abdera.getFactory();
       factory.registerExtension(new CMISExtensionFactory());
 
-      ConversationState state = new ConversationState(new Identity("root"));
-      ConversationState.setCurrent(state);
+      UserContext ctx = new UserContext("root");
+      UserContext.setCurrent(ctx);
 
       conn = CmisRegistry.getInstance().getConnection(cmisRepositoryId);
 

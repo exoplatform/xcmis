@@ -22,8 +22,6 @@ package org.xcmis.spi.tck;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import org.exoplatform.services.security.ConversationState;
-import org.exoplatform.services.security.Identity;
 import org.junit.BeforeClass;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRegistry;
@@ -35,6 +33,7 @@ import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.PropertyFilter;
 import org.xcmis.spi.RenditionFilter;
 import org.xcmis.spi.TypeNotFoundException;
+import org.xcmis.spi.UserContext;
 import org.xcmis.spi.model.ACLCapability;
 import org.xcmis.spi.model.AccessControlEntry;
 import org.xcmis.spi.model.BaseType;
@@ -140,8 +139,8 @@ public class BaseTest
       Iterator<RepositoryShortInfo> it = reg.getStorageInfos().iterator();
       connection = reg.getConnection(it.next().getRepositoryId());
 
-      ConversationState state = new ConversationState(new Identity("root"));
-      ConversationState.setCurrent(state);
+      UserContext ctx = new UserContext("root");
+      UserContext.setCurrent(ctx);
 
       rootFolderID = connection.getStorage().getRepositoryInfo().getRootFolderId();
 
@@ -397,7 +396,7 @@ public class BaseTest
 
    /**
     * Find first type which supports ACL.
-    * 
+    *
     * @param types tree of all available types
     * @return type which support ACL or <code>null</code> if there is no such
     *         type
@@ -423,7 +422,7 @@ public class BaseTest
 
    /**
     * Find first type which is controllable by policies.
-    * 
+    *
     * @param types tree of all available types
     * @return type which is controllable by policies or <code>null</code> if
     *         there is no such type
@@ -452,7 +451,7 @@ public class BaseTest
 
    /**
     * Find first type which does not support ACL.
-    * 
+    *
     * @param types tree of all available types
     * @return type which does not support ACL or <code>null</code> if there is
     *         no such type
@@ -478,7 +477,7 @@ public class BaseTest
 
    /**
     * Find first type which is not controllable by policies.
-    * 
+    *
     * @param types tree of all available types
     * @return type which is not controllable by policies or <code>null</code> if
     *         there is no such type
@@ -504,7 +503,7 @@ public class BaseTest
 
    /**
     * Find first document type which is not versionable.
-    * 
+    *
     * @param types tree of all available types
     * @return type which is not versionable or <code>null</code> if there is no
     *         such type
@@ -534,7 +533,7 @@ public class BaseTest
    /**
     * Find first document type which does not support content stream (
     * {@link TypeDefinition#getContentStreamAllowed()} is NOT_ALLOWED).
-    * 
+    *
     * @param types tree of all available types
     * @return type which does not support content stream or <code>null</code> if
     *         there is no such type
@@ -564,7 +563,7 @@ public class BaseTest
    /**
     * Find first document type which required content stream (
     * {@link TypeDefinition#getContentStreamAllowed()} is REQUIRED).
-    * 
+    *
     * @param types tree of all available types
     * @return type which require content stream or <code>null</code> if there is
     *         no such type
@@ -593,7 +592,7 @@ public class BaseTest
 
    /**
     * Find first document type which is versionable.
-    * 
+    *
     * @param types tree of all available types
     * @return type which is versionable or <code>null</code> if there is no such
     *         type
@@ -655,7 +654,7 @@ public class BaseTest
    /**
     * Check that two ACL are matched. It minds <code>actual</code> contains at
     * least all ACEs from <code>expected</code> but may have other ACEs.
-    * 
+    *
     * @param expected expected ACEs
     * @param actual actual ACEs
     */
@@ -716,7 +715,7 @@ public class BaseTest
 
    /**
     * Validate that ACL contains only valid permissions.
-    * 
+    *
     * @param actual actual ACEs
     */
    protected void validateACL(List<AccessControlEntry> actual)

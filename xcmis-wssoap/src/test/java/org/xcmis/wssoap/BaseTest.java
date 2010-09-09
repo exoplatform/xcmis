@@ -33,8 +33,6 @@ import org.apache.cxf.service.invoker.BeanInvoker;
 import org.exoplatform.container.StandaloneContainer;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import org.exoplatform.services.security.ConversationState;
-import org.exoplatform.services.security.Identity;
 import org.xcmis.core.CmisObjectType;
 import org.xcmis.core.CmisPropertiesType;
 import org.xcmis.core.CmisProperty;
@@ -48,6 +46,7 @@ import org.xcmis.spi.Connection;
 import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.ItemsList;
 import org.xcmis.spi.ObjectNotFoundException;
+import org.xcmis.spi.UserContext;
 import org.xcmis.spi.model.BaseType;
 import org.xcmis.spi.model.CmisObject;
 import org.xcmis.spi.model.VersioningState;
@@ -86,8 +85,8 @@ public abstract class BaseTest extends TestCase
       StandaloneContainer.setConfigurationURL(containerConf);
       container = StandaloneContainer.getInstance();
 
-      ConversationState state = new ConversationState(new Identity("root"));
-      ConversationState.setCurrent(state);
+      UserContext ctx = new UserContext("root");
+      UserContext.setCurrent(ctx);
 
       conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
