@@ -19,13 +19,12 @@
 
 package org.xcmis.wssoap.impl;
 
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
 import org.xcmis.messaging.CmisExtensionType;
 import org.xcmis.soap.CmisException;
 import org.xcmis.soap.MultiFilingServicePort;
 import org.xcmis.spi.CmisRegistry;
 import org.xcmis.spi.Connection;
+import org.xcmis.spi.utils.Logger;
 
 /**
  * @author <a href="mailto:max.shaposhnik@exoplatform.com">Max Shaposhnik</a>
@@ -43,7 +42,7 @@ public class MultiFilingServicePortImpl implements MultiFilingServicePort
 {
 
    /** Logger. */
-   private static final Log LOG = ExoLogger.getLogger(MultiFilingServicePortImpl.class);
+   private static final Logger LOG = Logger.getLogger(MultiFilingServicePortImpl.class);
 
    /**
     * Constructs instance of <code>MultiFilingServicePortImpl</code> .

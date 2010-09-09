@@ -18,9 +18,8 @@
  */
 package org.xcmis.search.lucene.index.merge;
 
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
 import org.xcmis.search.lucene.index.LuceneIndexDataManager;
+import org.xcmis.spi.utils.Logger;
 
 import java.util.Collection;
 
@@ -35,7 +34,7 @@ public abstract class InheritanceAggregationPolicy implements AggregatePolicy
    /**
     * Class logger.
     */
-   private static final Log LOG = ExoLogger.getLogger(InheritanceAggregationPolicy.class);
+   private static final Logger LOG = Logger.getLogger(InheritanceAggregationPolicy.class);
 
    private final AggregatePolicy superAggregatePolicy;
 

@@ -19,10 +19,9 @@
 package org.xcmis.search.lucene.index;
 
 import org.apache.lucene.document.Document;
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
 import org.xcmis.search.config.IndexConfigurationException;
 import org.xcmis.search.config.IndexConfiguration;
+import org.xcmis.spi.utils.Logger;
 
 /**
  * Created by The eXo Platform SAS.
@@ -35,7 +34,7 @@ public class LocalIndexDataManagerProxy extends LocalStorageIndexDataManager
    /**
     * Class logger.
     */
-   private final Log log = ExoLogger.getLogger(LocalIndexDataManagerProxy.class);
+   private final Logger log = Logger.getLogger(LocalIndexDataManagerProxy.class);
 
    public LocalIndexDataManagerProxy(final IndexConfiguration indexConfuguration) throws IndexException,
       IndexConfigurationException

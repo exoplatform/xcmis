@@ -25,8 +25,6 @@ import static org.mockito.Mockito.mock;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.NotImplementedException;
 import org.exoplatform.services.document.DocumentReaderService;
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
 import org.junit.After;
 import org.junit.Before;
 import org.xcmis.search.SearchService;
@@ -52,6 +50,7 @@ import org.xcmis.search.value.NameConverter;
 import org.xcmis.search.value.PropertyType;
 import org.xcmis.search.value.SlashSplitter;
 import org.xcmis.search.value.ToStringNameConverter;
+import org.xcmis.spi.utils.Logger;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -70,7 +69,7 @@ import java.util.UUID;
 public abstract class AbstractQueryTest
 {
    /** Logger. */
-   private static final Log LOG = ExoLogger.getLogger(AbstractQueryTest.class);
+   private static final Logger LOG = Logger.getLogger(AbstractQueryTest.class);
 
    /**
     * Resolved Name for jcr:score

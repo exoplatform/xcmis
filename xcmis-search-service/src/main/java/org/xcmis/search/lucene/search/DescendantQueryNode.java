@@ -29,9 +29,8 @@ import org.apache.lucene.search.Searcher;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.Weight;
 import org.apache.lucene.search.BooleanClause.Occur;
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
 import org.xcmis.search.lucene.index.FieldNames;
+import org.xcmis.spi.utils.Logger;
 
 import java.io.IOException;
 import java.util.Set;
@@ -51,7 +50,7 @@ public class DescendantQueryNode extends Query
    /**
     * Class logger.
     */
-   private final static Log log = ExoLogger.getLogger(DescendantQueryNode.class);
+   private final static Logger log = Logger.getLogger(DescendantQueryNode.class);
 
    private final Query context;
 

@@ -19,8 +19,6 @@
 
 package org.xcmis.sp.inmemory;
 
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
 import org.xcmis.spi.BaseItemsIterator;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRuntimeException;
@@ -56,6 +54,7 @@ import org.xcmis.spi.model.impl.IntegerProperty;
 import org.xcmis.spi.model.impl.StringProperty;
 import org.xcmis.spi.model.impl.UriProperty;
 import org.xcmis.spi.utils.CmisUtils;
+import org.xcmis.spi.utils.Logger;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -79,7 +78,7 @@ import java.util.Set;
 abstract class BaseObjectData implements ObjectData
 {
 
-   private static final Log LOG = ExoLogger.getLogger(BaseObjectData.class);
+   private static final Logger LOG = Logger.getLogger(BaseObjectData.class);
 
    protected final TypeDefinition type;
 

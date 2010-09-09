@@ -18,9 +18,8 @@
  */
 package org.xcmis.search.result;
 
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
 import org.xcmis.search.SearchServiceException;
+import org.xcmis.spi.utils.Logger;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -36,7 +35,7 @@ public class ScoredRow
    /**
     * Class logger.
     */
-   private final Log log = ExoLogger.getLogger(getClass().getName());
+   private final Logger log = Logger.getLogger(getClass().getName());
 
    private final Map<String, String> nodesMap;
 

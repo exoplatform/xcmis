@@ -20,8 +20,6 @@
 package org.xcmis.sp.inmemory.query;
 
 import org.apache.commons.lang.Validate;
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
 import org.xcmis.search.SearchService;
 import org.xcmis.search.content.ContentEntry;
 import org.xcmis.search.content.IndexModificationException;
@@ -38,6 +36,7 @@ import org.xcmis.spi.ObjectData;
 import org.xcmis.spi.PolicyData;
 import org.xcmis.spi.RelationshipData;
 import org.xcmis.spi.Storage;
+import org.xcmis.spi.utils.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -54,7 +53,7 @@ import java.util.Set;
 public class IndexListener
 {
 
-   private static final Log LOG = ExoLogger.getLogger(IndexListener.class);
+   private static final Logger LOG = Logger.getLogger(IndexListener.class);
 
    /**
     * Index storage.

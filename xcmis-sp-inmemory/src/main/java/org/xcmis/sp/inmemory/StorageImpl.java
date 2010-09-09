@@ -19,8 +19,6 @@
 
 package org.xcmis.sp.inmemory;
 
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
 import org.xcmis.search.InvalidQueryException;
 import org.xcmis.search.SearchService;
 import org.xcmis.search.SearchServiceException;
@@ -95,6 +93,7 @@ import org.xcmis.spi.query.Result;
 import org.xcmis.spi.query.Score;
 import org.xcmis.spi.utils.CmisDocumentReaderService;
 import org.xcmis.spi.utils.CmisUtils;
+import org.xcmis.spi.utils.Logger;
 import org.xcmis.spi.utils.MimeType;
 
 import java.io.IOException;
@@ -132,7 +131,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
  */
 public class StorageImpl implements Storage
 {
-   private static final Log LOG = ExoLogger.getLogger(StorageImpl.class);
+   private static final Logger LOG = Logger.getLogger(StorageImpl.class);
 
    public static String generateId()
    {

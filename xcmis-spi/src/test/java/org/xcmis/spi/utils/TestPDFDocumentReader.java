@@ -21,8 +21,6 @@ package org.xcmis.spi.utils;
 import junit.framework.TestCase;
 
 import org.exoplatform.services.document.DocumentReaderService;
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
 
 import java.io.InputStream;
 
@@ -35,7 +33,7 @@ import java.io.InputStream;
 
 public class TestPDFDocumentReader extends TestCase
 {
-   private static final Log LOG = ExoLogger.getLogger(TestPDFDocumentReader.class);
+   private static final Logger LOG = Logger.getLogger(TestPDFDocumentReader.class);
 
    DocumentReaderService service_;
 

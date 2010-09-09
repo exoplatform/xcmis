@@ -18,8 +18,6 @@
  */
 package org.xcmis.spi;
 
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
 import org.xcmis.spi.model.AccessControlEntry;
 import org.xcmis.spi.model.AccessControlPropagation;
 import org.xcmis.spi.model.AllowableActions;
@@ -47,6 +45,7 @@ import org.xcmis.spi.query.Query;
 import org.xcmis.spi.query.Result;
 import org.xcmis.spi.query.Score;
 import org.xcmis.spi.utils.CmisUtils;
+import org.xcmis.spi.utils.Logger;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -79,7 +78,7 @@ public abstract class Connection
 
    protected static final int VERSION = 4;
 
-   private static final Log LOG = ExoLogger.getLogger(Connection.class);
+   private static final Logger LOG = Logger.getLogger(Connection.class);
 
    protected Storage storage;
 

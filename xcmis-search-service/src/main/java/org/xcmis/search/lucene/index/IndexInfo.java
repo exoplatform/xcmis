@@ -18,8 +18,7 @@
  */
 package org.xcmis.search.lucene.index;
 
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
+import org.xcmis.spi.utils.Logger;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -46,7 +45,7 @@ public class IndexInfo
    /**
     * Class logger.
     */
-   private final Log log = ExoLogger.getLogger(IndexInfo.class);
+   private final Logger log = Logger.getLogger(IndexInfo.class);
 
    /**
     * For new segment names.

@@ -19,8 +19,6 @@
 
 package org.xcmis.wssoap.impl;
 
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
 import org.xcmis.core.EnumRelationshipDirection;
 import org.xcmis.messaging.CmisExtensionType;
 import org.xcmis.messaging.CmisObjectListType;
@@ -30,6 +28,7 @@ import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRegistry;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.model.RelationshipDirection;
+import org.xcmis.spi.utils.Logger;
 
 import java.math.BigInteger;
 
@@ -49,7 +48,7 @@ public class RelationshipServicePortImpl implements RelationshipServicePort
 {
 
    /** Logger. */
-   private static final Log LOG = ExoLogger.getLogger(RelationshipServicePortImpl.class);
+   private static final Logger LOG = Logger.getLogger(RelationshipServicePortImpl.class);
 
    /**
     * Constructs instance of <code>RelationshipServicePortImpl</code> .

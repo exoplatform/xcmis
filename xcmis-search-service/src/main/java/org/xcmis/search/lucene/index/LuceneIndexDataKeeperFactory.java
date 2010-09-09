@@ -21,15 +21,14 @@ package org.xcmis.search.lucene.index;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexReader;
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
+import org.xcmis.spi.utils.Logger;
 
 public abstract class LuceneIndexDataKeeperFactory implements IndexDataKeeperFactory<Document, Analyzer, IndexReader>
 {
    /**
     * Class logger.
     */
-   private static final Log LOG = ExoLogger.getLogger(LuceneIndexDataKeeperFactory.class);
+   private static final Logger LOG = Logger.getLogger(LuceneIndexDataKeeperFactory.class);
 
    /**
     * 

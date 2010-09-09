@@ -18,10 +18,9 @@
  */
 package org.xcmis.search.lucene.index;
 
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
 
 import java.util.Set;
+import org.xcmis.spi.utils.Logger;
 
 /**
  * Created by The eXo Platform SAS.
@@ -34,7 +33,7 @@ public class IndexTransactionModificationReportImpl implements IndexTransactionM
    /**
     * Class logger.
     */
-   private static final Log LOG = ExoLogger.getLogger(IndexTransactionModificationReportImpl.class);
+   private static final Logger LOG = Logger.getLogger(IndexTransactionModificationReportImpl.class);
 
    /**
     * Set of uuid of successfully added documents

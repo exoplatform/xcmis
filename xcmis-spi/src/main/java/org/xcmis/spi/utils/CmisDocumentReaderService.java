@@ -32,8 +32,6 @@ import org.exoplatform.services.document.impl.OpenOfficeDocumentReader;
 import org.exoplatform.services.document.impl.PPTDocumentReader;
 import org.exoplatform.services.document.impl.TextPlainDocumentReader;
 import org.exoplatform.services.document.impl.XMLDocumentReader;
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
 
 import java.io.InputStream;
 import java.util.HashMap;
@@ -45,7 +43,7 @@ import java.util.Map;
 public class CmisDocumentReaderService implements DocumentReaderService
 {
 
-   private static final Log LOG = ExoLogger.getLogger(CmisDocumentReaderService.class);
+   private static final Logger LOG = Logger.getLogger(CmisDocumentReaderService.class);
 
    private Map<String, BaseDocumentReader> readers;
 

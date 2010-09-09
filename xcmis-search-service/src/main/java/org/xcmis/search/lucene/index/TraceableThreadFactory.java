@@ -18,8 +18,7 @@
  */
 package org.xcmis.search.lucene.index;
 
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
+import org.xcmis.spi.utils.Logger;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -38,7 +37,7 @@ public class TraceableThreadFactory
    /**
     * Class logger.
     */
-   private static final Log LOG = ExoLogger.getLogger(TraceableThreadFactory.class);
+   private static final Logger LOG = Logger.getLogger(TraceableThreadFactory.class);
 
    private static final AtomicInteger factoryNumber = new AtomicInteger(1);
 

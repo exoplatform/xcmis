@@ -24,8 +24,7 @@ import org.apache.cxf.BusFactory;
 import org.apache.cxf.transport.servlet.CXFNonSpringServlet;
 import org.exoplatform.container.ExoContainer;
 import org.exoplatform.container.ExoContainerContext;
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
+import org.xcmis.spi.utils.Logger;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -43,7 +42,7 @@ public class CmisSoapServlet extends CXFNonSpringServlet
    private static final long serialVersionUID = 8525887555654944318L;
 
    /** Logger.  */
-   private static final Log LOG = ExoLogger.getLogger(CmisSoapServlet.class);
+   private static final Logger LOG = Logger.getLogger(CmisSoapServlet.class);
 
    /**
     * Load bus.

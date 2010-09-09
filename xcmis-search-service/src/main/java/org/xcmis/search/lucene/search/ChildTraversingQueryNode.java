@@ -30,9 +30,8 @@ import org.apache.lucene.search.Searcher;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.Weight;
 import org.apache.lucene.search.BooleanClause.Occur;
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
 import org.xcmis.search.lucene.index.FieldNames;
+import org.xcmis.spi.utils.Logger;
 
 import java.io.IOException;
 import java.util.Set;
@@ -53,7 +52,7 @@ public class ChildTraversingQueryNode extends Query
    /**
     * Class logger.
     */
-   private final static Log log = ExoLogger.getLogger(ChildTraversingQueryNode.class);
+   private final static Logger log = Logger.getLogger(ChildTraversingQueryNode.class);
 
    /**
     * Query what return parent node.
@@ -74,6 +73,7 @@ public class ChildTraversingQueryNode extends Query
    public ChildTraversingQueryNode(Query parentQuery, boolean isDeep)
    {
       super();
+      assert (log!=null);
       this.parentQuery = parentQuery;
       this.isDeep = isDeep;
       this.isIncludeParent = false;
@@ -178,7 +178,6 @@ public class ChildTraversingQueryNode extends Query
          this.searcher = searcher;
          this.parentScorer = parentScorer;
          this.reader = reader;
-
       }
 
       /**

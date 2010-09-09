@@ -18,8 +18,6 @@
  */
 package org.xcmis.sp.inmemory.query;
 
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
 import org.xcmis.search.content.Schema;
 import org.xcmis.search.lucene.content.SchemaTableResolver;
 import org.xcmis.search.value.NameConverter;
@@ -27,6 +25,7 @@ import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.TypeManager;
 import org.xcmis.spi.TypeNotFoundException;
 import org.xcmis.spi.model.TypeDefinition;
+import org.xcmis.spi.utils.Logger;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -40,7 +39,7 @@ public class CmisSchemaTableResolver extends SchemaTableResolver
 
    private final TypeManager typeManager;
 
-   private static final Log LOG = ExoLogger.getLogger(CmisSchemaTableResolver.class);
+   private static final Logger LOG = Logger.getLogger(CmisSchemaTableResolver.class);
 
    /**
     * @param nameConverter

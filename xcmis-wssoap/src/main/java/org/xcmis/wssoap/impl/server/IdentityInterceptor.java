@@ -20,9 +20,8 @@ import org.apache.cxf.binding.soap.SoapMessage;
 import org.apache.cxf.binding.soap.interceptor.AbstractSoapInterceptor;
 import org.apache.cxf.interceptor.Fault;
 import org.apache.cxf.phase.Phase;
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
 import org.xcmis.spi.UserContext;
+import org.xcmis.spi.utils.Logger;
 
 /**
  * Created by The eXo Platform SAS .
@@ -35,7 +34,7 @@ public class IdentityInterceptor extends AbstractSoapInterceptor
 {
 
    /** Logger. */
-   private static final Log LOG = ExoLogger.getLogger(IdentityInterceptor.class);
+   private static final Logger LOG = Logger.getLogger(IdentityInterceptor.class);
 
    /**
     * Instantiates a new instance of Identity interceptor.

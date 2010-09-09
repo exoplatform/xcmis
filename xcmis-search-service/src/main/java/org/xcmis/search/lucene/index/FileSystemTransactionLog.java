@@ -18,8 +18,6 @@
  */
 package org.xcmis.search.lucene.index;
 
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
 
 import java.io.BufferedOutputStream;
 import java.io.EOFException;
@@ -31,6 +29,8 @@ import java.io.OutputStream;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+
+import org.xcmis.spi.utils.Logger;
 
 /**
  * Created by The eXo Platform SAS.
@@ -48,7 +48,7 @@ public class FileSystemTransactionLog implements TransactionLog
    /**
     * Class logger.
     */
-   private static final Log LOG = ExoLogger.getLogger(FileSystemTransactionLog.class);
+   private static final Logger LOG = Logger.getLogger(FileSystemTransactionLog.class);
 
    private static final int REMOVED_DOCUMENTS = 3;
 

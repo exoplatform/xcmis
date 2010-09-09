@@ -30,8 +30,6 @@ import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.SortField;
 import org.apache.lucene.search.TopFieldDocs;
 import org.apache.lucene.search.BooleanClause.Occur;
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
 import org.xcmis.search.VisitException;
 import org.xcmis.search.Visitors;
 import org.xcmis.search.config.IndexConfiguration;
@@ -64,6 +62,7 @@ import org.xcmis.search.model.ordering.Ordering;
 import org.xcmis.search.result.ScoredRow;
 import org.xcmis.search.value.NameConverter;
 import org.xcmis.search.value.PathSplitter;
+import org.xcmis.spi.utils.Logger;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -82,7 +81,7 @@ public abstract class AbstractLuceneQueryableIndexStorage extends QueryableIndex
    /**
     * Class logger.
     */
-   private static final Log LOG = ExoLogger.getLogger(AbstractLuceneQueryableIndexStorage.class);
+   private static final Logger LOG = Logger.getLogger(AbstractLuceneQueryableIndexStorage.class);
 
    /**
     * The upper limit for the initial fetch size.

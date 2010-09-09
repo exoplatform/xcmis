@@ -30,6 +30,10 @@
          <groupId>org.xcmis</groupId>
          <artifactId>xcmis-search-model</artifactId>
       </dependency>
+      <dependency>
+         <groupId>org.xcmis</groupId>
+         <artifactId>xcmis-spi</artifactId>
+      </dependency>
       <!-- Logger -->
       <dependency>
          <groupId>org.exoplatform.kernel</groupId>

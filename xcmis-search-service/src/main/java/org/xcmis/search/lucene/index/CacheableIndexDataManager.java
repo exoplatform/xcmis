@@ -25,14 +25,13 @@ import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.MultiReader;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.RAMDirectory;
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
 import org.xcmis.search.config.IndexConfiguration;
 import org.xcmis.search.config.IndexConfigurationException;
 import org.xcmis.search.lucene.index.merge.AggregatePolicy;
 import org.xcmis.search.lucene.index.merge.DocumentCountAggregatePolicy;
 import org.xcmis.search.lucene.index.merge.MaxCandidatsCountAggrigatePolicy;
 import org.xcmis.search.lucene.index.merge.PendingAggregatePolicy;
+import org.xcmis.spi.utils.Logger;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -66,7 +65,7 @@ public class CacheableIndexDataManager extends LocalIndexDataManagerProxy
    /**
     * Class logger.
     */
-   private static final Log LOG = ExoLogger.getLogger(CacheableIndexDataManager.class);
+   private static final Logger LOG = Logger.getLogger(CacheableIndexDataManager.class);
 
    /**
     * Index chains.

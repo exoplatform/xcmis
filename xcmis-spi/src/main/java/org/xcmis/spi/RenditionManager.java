@@ -19,11 +19,10 @@
 
 package org.xcmis.spi;
 
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
 import org.xcmis.spi.model.BaseType;
 import org.xcmis.spi.model.Rendition;
 import org.xcmis.spi.utils.CmisUtils;
+import org.xcmis.spi.utils.Logger;
 import org.xcmis.spi.utils.MimeType;
 
 import java.io.IOException;
@@ -43,7 +42,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class RenditionManager
 {
 
-   private static final Log LOG = ExoLogger.getLogger(RenditionManager.class);
+   private static final Logger LOG = Logger.getLogger(RenditionManager.class);
 
    private static AtomicReference<RenditionManager> manager = new AtomicReference<RenditionManager>();
 

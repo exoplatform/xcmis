@@ -33,12 +33,11 @@ import org.apache.abdera.protocol.server.context.BaseResponseContext;
 import org.apache.abdera.protocol.server.context.EmptyResponseContext;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
 import org.apache.abdera.protocol.server.impl.AbstractEntityCollectionAdapter;
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.ProviderImpl;
 import org.xcmis.spi.CmisRegistry;
 import org.xcmis.spi.Connection;
+import org.xcmis.spi.utils.Logger;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -54,7 +53,7 @@ public abstract class AbstractCmisCollection<T> extends AbstractEntityCollection
 {
 
    /** The logger. */
-   private static final Log LOG = ExoLogger.getLogger(AbstractCmisCollection.class);
+   private static final Logger LOG = Logger.getLogger(AbstractCmisCollection.class);
 
    /**
     * Instantiates a new abstract cmis collection.

@@ -20,9 +20,8 @@ package org.xcmis.search.lucene.search;
 
 import org.apache.lucene.document.FieldSelector;
 import org.apache.lucene.document.FieldSelectorResult;
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
 import org.xcmis.search.lucene.index.FieldNames;
+import org.xcmis.spi.utils.Logger;
 
 /**
  * Created by The eXo Platform SAS.
@@ -39,7 +38,7 @@ public class UUIDFieldSelector implements FieldSelector
    /**
     * Class logger.
     */
-   private final Log log = ExoLogger.getLogger(getClass().getName());
+   private final Logger log = Logger.getLogger(getClass().getName());
 
    /**
     * {@inheritDoc}

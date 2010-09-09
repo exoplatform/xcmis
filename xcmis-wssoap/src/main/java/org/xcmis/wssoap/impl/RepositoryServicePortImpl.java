@@ -19,8 +19,6 @@
 
 package org.xcmis.wssoap.impl;
 
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
 import org.xcmis.core.CmisTypeDefinitionType;
 import org.xcmis.messaging.CmisExtensionType;
 import org.xcmis.messaging.CmisRepositoryEntryType;
@@ -33,6 +31,7 @@ import org.xcmis.spi.CmisRegistry;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.model.RepositoryShortInfo;
 import org.xcmis.spi.model.RepositoryInfo;
+import org.xcmis.spi.utils.Logger;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -54,7 +53,7 @@ wsdlLocation = "/wsdl/CMISWS-Service.wsdl" //,
 public class RepositoryServicePortImpl implements RepositoryServicePort
 {
    /** Logger. */
-   private static final Log LOG = ExoLogger.getLogger(RepositoryServicePortImpl.class);
+   private static final Logger LOG = Logger.getLogger(RepositoryServicePortImpl.class);
 
    /**
     * Constructs instance of <code>RepositoryServicePortImpl</code> .

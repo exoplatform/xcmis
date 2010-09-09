@@ -19,8 +19,6 @@
 
 package org.xcmis.sp.inmemory;
 
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
 import org.xcmis.spi.BaseItemsIterator;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRuntimeException;
@@ -38,6 +36,7 @@ import org.xcmis.spi.VersioningException;
 import org.xcmis.spi.model.BaseType;
 import org.xcmis.spi.model.RelationshipDirection;
 import org.xcmis.spi.model.TypeDefinition;
+import org.xcmis.spi.utils.Logger;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -53,7 +52,7 @@ import java.util.Set;
 class FolderDataImpl extends BaseObjectData implements FolderData
 {
 
-   private static final Log LOG = ExoLogger.getLogger(FolderDataImpl.class);
+   private static final Logger LOG = Logger.getLogger(FolderDataImpl.class);
 
    public FolderDataImpl(Entry entry, TypeDefinition type, StorageImpl storage)
    {

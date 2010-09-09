@@ -19,8 +19,6 @@
 
 package org.xcmis.wssoap.impl;
 
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
 import org.xcmis.core.CmisObjectType;
 import org.xcmis.core.EnumIncludeRelationships;
 import org.xcmis.messaging.CmisExtensionType;
@@ -35,6 +33,7 @@ import org.xcmis.spi.CmisRegistry;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.model.IncludeRelationships;
 import org.xcmis.spi.model.ObjectParent;
+import org.xcmis.spi.utils.Logger;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -56,7 +55,7 @@ public class NavigationServicePortImpl implements NavigationServicePort
 {
 
    /** Logger. */
-   private static final Log LOG = ExoLogger.getLogger(NavigationServicePortImpl.class);
+   private static final Logger LOG = Logger.getLogger(NavigationServicePortImpl.class);
 
    /**
     * Constructs instance of <code>NavigationServicePortImpl</code> .

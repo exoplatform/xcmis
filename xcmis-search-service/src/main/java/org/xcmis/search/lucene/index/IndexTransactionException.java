@@ -18,8 +18,8 @@
  */
 package org.xcmis.search.lucene.index;
 
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
+import org.xcmis.spi.utils.Logger;
+
 
 /**
  * Created by The eXo Platform SAS.
@@ -37,7 +37,7 @@ public class IndexTransactionException extends IndexException
    /**
     * Class logger.
     */
-   private static final Log LOG = ExoLogger.getLogger(IndexTransactionException.class);
+   private static final Logger LOG = Logger.getLogger(IndexTransactionException.class);
 
    /**
     * 

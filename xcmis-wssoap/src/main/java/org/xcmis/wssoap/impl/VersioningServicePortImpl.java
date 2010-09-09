@@ -19,8 +19,6 @@
 
 package org.xcmis.wssoap.impl;
 
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
 import org.xcmis.core.CmisAccessControlListType;
 import org.xcmis.core.CmisObjectType;
 import org.xcmis.core.CmisPropertiesType;
@@ -34,6 +32,7 @@ import org.xcmis.spi.CmisRegistry;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.model.CmisObject;
 import org.xcmis.spi.model.IncludeRelationships;
+import org.xcmis.spi.utils.Logger;
 import org.xcmis.spi.utils.MimeType;
 
 import java.util.ArrayList;
@@ -55,7 +54,7 @@ public class VersioningServicePortImpl implements VersioningServicePort
 {
 
    /** Logger. */
-   private static final Log LOG = ExoLogger.getLogger(VersioningServicePortImpl.class);
+   private static final Logger LOG = Logger.getLogger(VersioningServicePortImpl.class);
 
    /**
     * Constructs instance of <code>VersioningServicePortImpl</code> .

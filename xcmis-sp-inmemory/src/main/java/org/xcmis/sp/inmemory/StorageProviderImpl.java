@@ -21,13 +21,12 @@ package org.xcmis.sp.inmemory;
 
 import org.exoplatform.container.xml.InitParams;
 import org.exoplatform.container.xml.ObjectParameter;
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.PermissionService;
 import org.xcmis.spi.RenditionManager;
 import org.xcmis.spi.StorageProvider;
+import org.xcmis.spi.utils.Logger;
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
@@ -36,7 +35,7 @@ import org.xcmis.spi.StorageProvider;
 public class StorageProviderImpl implements StorageProvider
 {
 
-   private static final Log LOG = ExoLogger.getLogger(StorageProviderImpl.class);
+   private static final Logger LOG = Logger.getLogger(StorageProviderImpl.class);
 
    private StorageImpl storageImpl = null;
 

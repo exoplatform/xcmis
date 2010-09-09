@@ -30,8 +30,7 @@ import org.apache.lucene.index.IndexWriter.MaxFieldLength;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.LockObtainFailedException;
 import org.apache.lucene.store.RAMDirectory;
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
+import org.xcmis.spi.utils.Logger;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -51,7 +50,7 @@ public class ReducibleInMemoryIndexDataKeeper implements TransactionableLuceneIn
    /**
     * Class logger.g
     */
-   private static final Log LOG = ExoLogger.getLogger(ReducibleInMemoryIndexDataKeeper.class);
+   private static final Logger LOG = Logger.getLogger(ReducibleInMemoryIndexDataKeeper.class);
 
    /**
     * Index storage.

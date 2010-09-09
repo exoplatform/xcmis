@@ -27,9 +27,8 @@ import org.apache.lucene.index.Term;
 import org.apache.lucene.index.TermDocs;
 import org.apache.lucene.index.IndexWriter.MaxFieldLength;
 import org.apache.lucene.store.Directory;
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
 import org.xcmis.search.Startable;
+import org.xcmis.spi.utils.Logger;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -47,7 +46,7 @@ public class PersistedIndex implements LuceneIndexDataManager, Startable
    /**
     * Class logger.
     */
-   private static final Log LOG = ExoLogger.getLogger(PersistedIndex.class);
+   private static final Logger LOG = Logger.getLogger(PersistedIndex.class);
 
    private final Directory indexDirectiry;
 

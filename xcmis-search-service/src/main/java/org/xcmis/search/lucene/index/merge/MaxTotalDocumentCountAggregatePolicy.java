@@ -18,9 +18,8 @@
  */
 package org.xcmis.search.lucene.index.merge;
 
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
 import org.xcmis.search.lucene.index.LuceneIndexDataManager;
+import org.xcmis.spi.utils.Logger;
 
 import java.util.Collection;
 
@@ -64,5 +63,5 @@ public class MaxTotalDocumentCountAggregatePolicy extends InheritanceAggregation
    /**
     * Class logger.
     */
-   private final Log log = ExoLogger.getLogger(MaxTotalDocumentCountAggregatePolicy.class);
+   private final Logger log = Logger.getLogger(MaxTotalDocumentCountAggregatePolicy.class);
 }

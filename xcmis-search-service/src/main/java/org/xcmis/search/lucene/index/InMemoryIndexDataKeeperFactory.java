@@ -24,8 +24,7 @@ import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriter.MaxFieldLength;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.RAMDirectory;
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
+import org.xcmis.spi.utils.Logger;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -46,7 +45,7 @@ public class InMemoryIndexDataKeeperFactory extends LuceneIndexDataKeeperFactory
     * Class logger.
     */
 
-   private static final Log LOG = ExoLogger.getLogger(InMemoryIndexDataKeeperFactory.class);
+   private static final Logger LOG = Logger.getLogger(InMemoryIndexDataKeeperFactory.class);
 
    /**
     * {@inheritDoc}

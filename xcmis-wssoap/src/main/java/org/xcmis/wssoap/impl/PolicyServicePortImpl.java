@@ -19,14 +19,13 @@
 
 package org.xcmis.wssoap.impl;
 
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
 import org.xcmis.core.CmisObjectType;
 import org.xcmis.messaging.CmisExtensionType;
 import org.xcmis.soap.CmisException;
 import org.xcmis.soap.PolicyServicePort;
 import org.xcmis.spi.CmisRegistry;
 import org.xcmis.spi.Connection;
+import org.xcmis.spi.utils.Logger;
 
 /**
  * @author <a href="mailto:max.shaposhnik@exoplatform.com">Max Shaposhnik</a>
@@ -43,7 +42,7 @@ public class PolicyServicePortImpl implements PolicyServicePort
 {
 
    /** Logger. */
-   private static final Log LOG = ExoLogger.getLogger(PolicyServicePortImpl.class);
+   private static final Logger LOG = Logger.getLogger(PolicyServicePortImpl.class);
 
    /**
     * Constructs instance of <code>PolicyServicePortImpl</code> .

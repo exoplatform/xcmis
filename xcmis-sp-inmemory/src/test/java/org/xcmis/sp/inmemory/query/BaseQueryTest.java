@@ -19,8 +19,6 @@
 
 package org.xcmis.sp.inmemory.query;
 
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
 import org.xcmis.sp.inmemory.BaseTest;
 import org.xcmis.spi.BaseContentStream;
 import org.xcmis.spi.ContentStream;
@@ -36,6 +34,7 @@ import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.model.Updatability;
 import org.xcmis.spi.query.Query;
 import org.xcmis.spi.query.Result;
+import org.xcmis.spi.utils.Logger;
 import org.xcmis.spi.utils.MimeType;
 
 import java.util.HashMap;
@@ -52,7 +51,7 @@ import java.util.Set;
  */
 public abstract class BaseQueryTest extends BaseTest
 {
-   private static final Log LOG = ExoLogger.getLogger(BaseQueryTest.class.getName());
+   private static final Logger LOG = Logger.getLogger(BaseQueryTest.class.getName());
 
    protected final static String NASA_DOCUMENT = "cmis:nasa-mission";
 

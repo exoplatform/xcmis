@@ -28,8 +28,6 @@ import org.exoplatform.commons.utils.ISO8601;
 import org.exoplatform.services.document.DCMetaData;
 import org.exoplatform.services.document.DocumentReadException;
 import org.exoplatform.services.document.impl.BaseDocumentReader;
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -56,7 +54,7 @@ import javax.xml.parsers.ParserConfigurationException;
 public class CmisPDFDocumentReader extends BaseDocumentReader
 {
 
-   private static final Log LOG = ExoLogger.getLogger(CmisPDFDocumentReader.class);
+   private static final Logger LOG = Logger.getLogger(CmisPDFDocumentReader.class);
 
    /**
     * Get the application/pdf mime type.

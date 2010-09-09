@@ -26,8 +26,7 @@ import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.RangeQuery;
 import org.apache.lucene.search.TermQuery;
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
+import org.xcmis.spi.utils.Logger;
 
 import java.io.IOException;
 
@@ -46,7 +45,7 @@ public class CaseInsensitiveRangeQuery extends RangeQuery
    /**
     * Class logger.
     */
-   private final static Log log = ExoLogger.getLogger(CaseInsensitiveRangeQuery.class);
+   private final static Logger log = Logger.getLogger(CaseInsensitiveRangeQuery.class);
 
    public CaseInsensitiveRangeQuery(Term lowerTerm, Term upperTerm, boolean inclusive)
    {
@@ -111,7 +110,7 @@ public class CaseInsensitiveRangeQuery extends RangeQuery
       }
       if (log.isDebugEnabled())
       {
-         log.debug(query);
+         log.debug(query.toString());
       }
       return query;
    }

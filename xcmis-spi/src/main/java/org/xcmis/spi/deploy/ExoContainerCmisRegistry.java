@@ -34,7 +34,7 @@ import java.util.Iterator;
 public class ExoContainerCmisRegistry extends CmisRegistry implements Startable, CmisRegistryFactory
 {
 
-   //   private static final Log LOG = ExoLogger.getLogger(ExoContainerCmisRegistry.class);
+   //   private static final Logger LOG = Logger.getLogger(ExoContainerCmisRegistry.class);
 
    protected final InitParams initParams;
 

@@ -22,8 +22,7 @@ import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.FilteredTermEnum;
 import org.apache.lucene.search.MultiTermQuery;
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
+import org.xcmis.spi.utils.Logger;
 
 import java.io.IOException;
 
@@ -42,7 +41,7 @@ public class CaseInsensitiveTermQuery extends MultiTermQuery
    /**
     * Class logger.
     */
-   private final static Log log = ExoLogger.getLogger(CaseInsensitiveTermQuery.class);
+   private final static Logger log = Logger.getLogger(CaseInsensitiveTermQuery.class);
 
    public CaseInsensitiveTermQuery(Term term)
    {

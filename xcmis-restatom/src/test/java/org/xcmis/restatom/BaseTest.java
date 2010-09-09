@@ -25,8 +25,6 @@ import junit.framework.TestCase;
 import org.apache.abdera.Abdera;
 import org.apache.abdera.factory.Factory;
 import org.exoplatform.container.StandaloneContainer;
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
 import org.exoplatform.services.rest.ContainerResponseWriter;
 import org.exoplatform.services.rest.impl.ContainerRequest;
 import org.exoplatform.services.rest.impl.ContainerResponse;
@@ -55,6 +53,7 @@ import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.VersioningState;
 import org.xcmis.spi.model.impl.IdProperty;
 import org.xcmis.spi.model.impl.StringProperty;
+import org.xcmis.spi.utils.Logger;
 
 import java.io.ByteArrayInputStream;
 import java.net.URI;
@@ -77,7 +76,7 @@ import javax.xml.xpath.XPathFactory;
  */
 public abstract class BaseTest extends TestCase
 {
-   protected final Log LOG = ExoLogger.getLogger(BaseTest.class);
+   protected final Logger LOG = Logger.getLogger(BaseTest.class);
 
    protected final String cmisRepositoryId = "cmis1";
 

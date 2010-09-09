@@ -18,9 +18,8 @@
  */
 package org.xcmis.search.lucene.index.merge;
 
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
 import org.xcmis.search.lucene.index.LuceneIndexDataManager;
+import org.xcmis.spi.utils.Logger;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,7 +38,7 @@ public class DocumentCountAggregatePolicy extends IndexSizeAggregatePolicy
    /**
     * Class logger.
     */
-   private final Log log = ExoLogger.getLogger(DocumentCountAggregatePolicy.class);
+   private final Logger log = Logger.getLogger(DocumentCountAggregatePolicy.class);
 
    /**
     * Maximum number documents for memory index chain.

@@ -24,10 +24,9 @@ import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriter.MaxFieldLength;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
 import org.xcmis.search.config.IndexConfiguration;
 import org.xcmis.search.config.IndexConfigurationException;
+import org.xcmis.spi.utils.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -47,7 +46,7 @@ public class PersistentIndexDataKeeperFactory extends LuceneIndexDataKeeperFacto
    /**
     * Class logger.
     */
-   private static final Log LOG = ExoLogger.getLogger(PersistentIndexDataKeeperFactory.class);
+   private static final Logger LOG = Logger.getLogger(PersistentIndexDataKeeperFactory.class);
 
    private final File indexDir;
 

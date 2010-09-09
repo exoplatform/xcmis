@@ -29,14 +29,13 @@ import org.exoplatform.services.document.DocumentReadException;
 import org.exoplatform.services.document.DocumentReader;
 import org.exoplatform.services.document.DocumentReaderService;
 import org.exoplatform.services.document.HandlerNotFoundException;
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
 import org.xcmis.search.config.IndexConfiguration;
 import org.xcmis.search.content.ContentEntry;
 import org.xcmis.search.content.ContentIndexer;
 import org.xcmis.search.content.Property;
 import org.xcmis.search.content.Property.BinaryValue;
 import org.xcmis.search.content.Property.ContentValue;
+import org.xcmis.spi.utils.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -59,7 +58,7 @@ public class LuceneIndexer implements ContentIndexer<Document>
    /**
     * Class logger.
     */
-   private static final Log LOG = ExoLogger.getLogger(LuceneIndexer.class);
+   private static final Logger LOG = Logger.getLogger(LuceneIndexer.class);
 
    /**
     * @param extractor

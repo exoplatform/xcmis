@@ -18,8 +18,8 @@
  */
 package org.xcmis.search.lucene.index.merge;
 
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
+import org.xcmis.spi.utils.Logger;
+
 
 /**
  * Created by The eXo Platform SAS.
@@ -33,7 +33,7 @@ public class MaxTotalSizeAggrigatePolicy extends InheritanceAggregationPolicy
    /**
     * Class logger.
     */
-   private static final Log LOG = ExoLogger.getLogger(MaxTotalSizeAggrigatePolicy.class);
+   private static final Logger LOG = Logger.getLogger(MaxTotalSizeAggrigatePolicy.class);
 
    private static final long DEFAULT_TOTAL_MAX_DIR_SIZE = 30 * IndexSizeAggregatePolicy.DEFAULT_MAX_DIR_SIZE;
 

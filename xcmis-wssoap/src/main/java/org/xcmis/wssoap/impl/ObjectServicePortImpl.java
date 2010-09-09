@@ -19,8 +19,6 @@
 
 package org.xcmis.wssoap.impl;
 
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
 import org.xcmis.core.CmisAccessControlListType;
 import org.xcmis.core.CmisAllowableActionsType;
 import org.xcmis.core.CmisObjectType;
@@ -43,6 +41,7 @@ import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.model.IncludeRelationships;
 import org.xcmis.spi.model.UnfileObject;
 import org.xcmis.spi.model.VersioningState;
+import org.xcmis.spi.utils.Logger;
 import org.xcmis.spi.utils.MimeType;
 
 import java.math.BigInteger;
@@ -65,7 +64,7 @@ public class ObjectServicePortImpl implements ObjectServicePort
 {
 
    /** Logger. */
-   private static final Log LOG = ExoLogger.getLogger(ObjectServicePortImpl.class);
+   private static final Logger LOG = Logger.getLogger(ObjectServicePortImpl.class);
 
    /**
     * Constructs instance of <code>ObjectServicePortImpl</code> .

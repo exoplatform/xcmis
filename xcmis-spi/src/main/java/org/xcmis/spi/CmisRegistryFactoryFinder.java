@@ -19,7 +19,7 @@
 
 package org.xcmis.spi;
 
-import org.exoplatform.services.log.ExoLogger;
+import org.xcmis.spi.utils.Logger;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -36,7 +36,7 @@ import java.nio.charset.Charset;
 class CmisRegistryFactoryFinder
 {
    /** Logger. */
-   private static final org.exoplatform.services.log.Log LOG = ExoLogger.getLogger(CmisRegistryFactoryFinder.class);
+   private static final Logger LOG = Logger.getLogger(CmisRegistryFactoryFinder.class);
 
    /**
     * Find implementation of CmisRegistryFactory Class. Lookup done in next

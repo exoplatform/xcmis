@@ -22,8 +22,7 @@ package org.xcmis.wssoap.impl.server;
 import org.apache.cxf.endpoint.ServerImpl;
 import org.apache.cxf.interceptor.LoggingInInterceptor;
 import org.apache.cxf.interceptor.LoggingOutInterceptor;
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
+import org.xcmis.spi.utils.Logger;
 import org.xcmis.wssoap.impl.ACLServicePortImpl;
 import org.xcmis.wssoap.impl.DiscoveryServicePortImpl;
 import org.xcmis.wssoap.impl.MultiFilingServicePortImpl;
@@ -51,7 +50,7 @@ public class WebServiceLoader
    /**
     * Logger.
     */
-   private static final Log LOG = ExoLogger.getLogger(WebServiceLoader.class);
+   private static final Logger LOG = Logger.getLogger(WebServiceLoader.class);
 
 
    /**

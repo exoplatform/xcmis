@@ -19,11 +19,10 @@
 package org.xcmis.search.lucene.index;
 
 import org.apache.lucene.document.Document;
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
 import org.xcmis.search.config.IndexConfiguration;
 import org.xcmis.search.config.IndexConfigurationException;
 import org.xcmis.search.lucene.IndexRecoveryTool;
+import org.xcmis.spi.utils.Logger;
 
 import java.io.File;
 import java.util.HashSet;
@@ -44,7 +43,7 @@ public class TransactionableIndexDataManager extends CacheableIndexDataManager
    /**
     * Class logger.
     */
-   private final Log log = ExoLogger.getLogger(TransactionableIndexDataManager.class);
+   private final Logger log = Logger.getLogger(TransactionableIndexDataManager.class);
 
    private final IndexRecoveryTool indexRecoveryTool;
 

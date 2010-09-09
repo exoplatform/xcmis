@@ -31,8 +31,6 @@ import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.service.Service;
 import org.apache.cxf.service.invoker.BeanInvoker;
 import org.exoplatform.container.StandaloneContainer;
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
 import org.xcmis.core.CmisObjectType;
 import org.xcmis.core.CmisPropertiesType;
 import org.xcmis.core.CmisProperty;
@@ -50,6 +48,7 @@ import org.xcmis.spi.UserContext;
 import org.xcmis.spi.model.BaseType;
 import org.xcmis.spi.model.CmisObject;
 import org.xcmis.spi.model.VersioningState;
+import org.xcmis.spi.utils.Logger;
 import org.xcmis.wssoap.impl.TypeConverter;
 
 import java.util.Iterator;
@@ -58,7 +57,7 @@ import java.util.List;
 public abstract class BaseTest extends TestCase
 {
 
-   protected final Log LOG = ExoLogger.getLogger(BaseTest.class);
+   protected final Logger LOG = Logger.getLogger(BaseTest.class);
 
    protected String repositoryId = "cmis1";
 

@@ -18,9 +18,8 @@
  */
 package org.xcmis.search.lucene.index.merge;
 
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
 import org.xcmis.search.lucene.index.LuceneIndexDataManager;
+import org.xcmis.spi.utils.Logger;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -78,7 +77,7 @@ public class ModificationTimeAggregatePolicy extends DocumentCountAggregatePolic
    /**
     * Class logger.
     */
-   private static final Log LOG = ExoLogger.getLogger(ModificationTimeAggregatePolicy.class);
+   private static final Logger LOG = Logger.getLogger(ModificationTimeAggregatePolicy.class);
 
    @Override
    public Collection<LuceneIndexDataManager> findIndexDataManagerToAggrigate(

@@ -27,11 +27,10 @@ import org.apache.lucene.index.IndexWriter.MaxFieldLength;
 import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.LockObtainFailedException;
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
 import org.xcmis.search.config.IndexConfiguration;
 import org.xcmis.search.config.IndexConfigurationException;
 import org.xcmis.search.lucene.IndexRecoveryTool;
+import org.xcmis.spi.utils.Logger;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -59,7 +58,7 @@ public class LuceneIndexingService extends TransactionableIndexDataManager
    }
 
    /** Class logger. */
-   private static final Log LOG = ExoLogger.getLogger(LuceneIndexingService.class);
+   private static final Logger LOG = Logger.getLogger(LuceneIndexingService.class);
 
    /**
     * {@inheritDoc}
