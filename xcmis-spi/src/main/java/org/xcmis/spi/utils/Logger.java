@@ -51,12 +51,12 @@ public class Logger
       {
          throw new NullPointerException();
       }
+
       Logger logger = loggers.get(name);
       if (logger == null)
       {
-
          logger = loggers.putIfAbsent(name, new Logger(name));
-         //logger = Collections.putIfAbsent(loggers, name, new Logger(name));
+         logger = loggers.get(name);
       }
       return logger;
    }
