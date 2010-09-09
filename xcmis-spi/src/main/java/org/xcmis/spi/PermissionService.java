@@ -20,7 +20,6 @@
 package org.xcmis.spi;
 
 import org.exoplatform.services.security.Identity;
-import org.exoplatform.services.security.MembershipEntry;
 import org.xcmis.spi.model.AccessControlEntry;
 import org.xcmis.spi.model.AllowableActions;
 import org.xcmis.spi.model.BaseType;
@@ -34,7 +33,6 @@ import org.xcmis.spi.utils.CmisUtils;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -57,16 +55,33 @@ public class PermissionService
     * @return allowable actions for object
     * @see Identity
     */
+   @Deprecated
    public AllowableActions calculateAllowableActions(ObjectData object, Identity userIdentity,
       RepositoryInfo repositoryInfo)
    {
+      return calculateAllowableActions(object, userIdentity != null ? userIdentity.getUserId() : null, repositoryInfo);
+   }
+
+   /**
+    * Calculate allowable actions for specified object.
+    *
+    * @param object object
+    * @param userIdentity user's identity
+    * @param repositoryInfo RepositoryInfo
+    * @return allowable actions for object
+    * @see Identity
+    */
+   public AllowableActions calculateAllowableActions(ObjectData object, String userId, RepositoryInfo repositoryInfo)
+   {
 
       if (repositoryInfo.getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
-         return AllowableActions.ALL();
-
-      if (userIdentity == null)
       {
-         userIdentity = new Identity(repositoryInfo.getPrincipalAnonymous(), new HashSet<MembershipEntry>());
+         return AllowableActions.ALL();
+      }
+
+      if (userId == null)
+      {
+         userId = repositoryInfo.getPrincipalAnonymous();
       }
 
       PermissionMapping permissionMapping = repositoryInfo.getAclCapability().getMapping();
@@ -82,7 +97,7 @@ public class PermissionService
             if (capabilities.isCapabilityGetDescendants()
                && BaseType.FOLDER == type.getBaseId()
                && hasPermission(object, permissionMapping.getPermissions(PermissionMapping.CAN_GET_DESCENDENTS_FOLDER),
-                  userIdentity, repositoryInfo))
+                  userId, repositoryInfo))
             {
                actions.setCanGetDescendants(true);
             }
@@ -92,7 +107,7 @@ public class PermissionService
             if (capabilities.isCapabilityGetFolderTree()
                && BaseType.FOLDER == type.getBaseId()
                && hasPermission(object, permissionMapping.getPermissions(PermissionMapping.CAN_GET_FOLDER_TREE_FOLDER),
-                  userIdentity, repositoryInfo))
+                  userId, repositoryInfo))
             {
                actions.setCanGetFolderTree(true);
             }
@@ -101,7 +116,7 @@ public class PermissionService
          {
             if (BaseType.FOLDER == type.getBaseId()
                && hasPermission(object, permissionMapping.getPermissions(PermissionMapping.CAN_GET_CHILDREN_FOLDER),
-                  userIdentity, repositoryInfo))
+                  userId, repositoryInfo))
             {
                actions.setCanGetChildren(true);
             }
@@ -110,7 +125,7 @@ public class PermissionService
          {
             if (type.isFileable()
                && hasPermission(object, permissionMapping
-                  .getPermissions(PermissionMapping.CAN_GET_OBJECT_PARENTS_OBJECT), userIdentity, repositoryInfo))
+                  .getPermissions(PermissionMapping.CAN_GET_OBJECT_PARENTS_OBJECT), userId, repositoryInfo))
             {
                actions.setCanGetObjectParents(true);
             }
@@ -119,7 +134,7 @@ public class PermissionService
          {
             if (BaseType.FOLDER == type.getBaseId()
                && hasPermission(object, permissionMapping
-                  .getPermissions(PermissionMapping.CAN_GET_FOLDER_PARENT_FOLDER), userIdentity, repositoryInfo))
+                  .getPermissions(PermissionMapping.CAN_GET_FOLDER_PARENT_FOLDER), userId, repositoryInfo))
             {
                actions.setCanGetFolderParent(true);
             }
@@ -128,7 +143,7 @@ public class PermissionService
          {
             if (BaseType.FOLDER == type.getBaseId()
                && hasPermission(object, permissionMapping.getPermissions(PermissionMapping.CAN_CREATE_DOCUMENT_FOLDER),
-                  userIdentity, repositoryInfo))
+                  userId, repositoryInfo))
             {
                actions.setCanCreateDocument(true);
             }
@@ -137,7 +152,7 @@ public class PermissionService
          {
             if (BaseType.FOLDER == type.getBaseId()
                && hasPermission(object, permissionMapping.getPermissions(PermissionMapping.CAN_CREATE_FOLDER_FOLDER),
-                  userIdentity, repositoryInfo))
+                  userId, repositoryInfo))
             {
                actions.setCanCreateFolder(true);
             }
@@ -146,9 +161,9 @@ public class PermissionService
          {
             if (BaseType.RELATIONSHIP != type.getBaseId()
                && hasPermission(object, permissionMapping
-                  .getPermissions(PermissionMapping.CAN_CREATE_RELATIONSHIP_SOURCE), userIdentity, repositoryInfo)
+                  .getPermissions(PermissionMapping.CAN_CREATE_RELATIONSHIP_SOURCE), userId, repositoryInfo)
                && hasPermission(object, permissionMapping
-                  .getPermissions(PermissionMapping.CAN_CREATE_RELATIONSHIP_TARGET), userIdentity, repositoryInfo))
+                  .getPermissions(PermissionMapping.CAN_CREATE_RELATIONSHIP_TARGET), userId, repositoryInfo))
             {
                actions.setCanCreateRelationship(true);
             }
@@ -156,7 +171,7 @@ public class PermissionService
          else if (AllowableActions.CAN_GET_PROPERTIES.equals(action))
          {
             if (hasPermission(object, permissionMapping.getPermissions(PermissionMapping.CAN_GET_PROPERTIES_OBJECT),
-               userIdentity, repositoryInfo))
+               userId, repositoryInfo))
             {
                actions.setCanGetProperties(true);
             }
@@ -165,7 +180,7 @@ public class PermissionService
          {
             if (BaseType.DOCUMENT == type.getBaseId()
                && hasPermission(object, permissionMapping
-                  .getPermissions(PermissionMapping.CAN_GET_CONTENT_STREAM_OBJECT), userIdentity, repositoryInfo))
+                  .getPermissions(PermissionMapping.CAN_GET_CONTENT_STREAM_OBJECT), userId, repositoryInfo))
             {
                actions.setCanGetContentStream(true);
             }
@@ -173,7 +188,7 @@ public class PermissionService
          else if (AllowableActions.CAN_UPDATE_PROPERTIES.equals(action))
          {
             if (hasPermission(object, permissionMapping.getPermissions(PermissionMapping.CAN_UPDATE_PROPERTIES_OBJECT),
-               userIdentity, repositoryInfo))
+               userId, repositoryInfo))
             {
                actions.setCanUpdateProperties(true);
             }
@@ -182,7 +197,7 @@ public class PermissionService
          {
             if (type.isFileable()
                && hasPermission(object, permissionMapping.getPermissions(PermissionMapping.CAN_MOVE_OBJECT_OBJECT),
-                  userIdentity, repositoryInfo))
+                  userId, repositoryInfo))
             {
                actions.setCanMoveObject(true);
             }
@@ -193,13 +208,13 @@ public class PermissionService
             {
                if (!((FolderData)object).hasChildren()
                   && hasPermission(object, permissionMapping.getPermissions(PermissionMapping.CAN_DELETE_OBJECT),
-                     userIdentity, repositoryInfo))
+                     userId, repositoryInfo))
                {
                   actions.setCanDeleteObject(true);
                }
             }
             else if (hasPermission(object, permissionMapping.getPermissions(PermissionMapping.CAN_DELETE_OBJECT),
-               userIdentity, repositoryInfo))
+               userId, repositoryInfo))
             {
                actions.setCanDeleteObject(true);
             }
@@ -208,7 +223,7 @@ public class PermissionService
          {
             if (BaseType.FOLDER == type.getBaseId()
                && hasPermission(object, permissionMapping.getPermissions(PermissionMapping.CAN_DELETE_TREE_FOLDER),
-                  userIdentity, repositoryInfo))
+                  userId, repositoryInfo))
             {
                actions.setCanDeleteTree(true);
             }
@@ -217,7 +232,7 @@ public class PermissionService
          {
             if (BaseType.DOCUMENT == type.getBaseId()
                && hasPermission(object, permissionMapping.getPermissions(PermissionMapping.CAN_SET_CONTENT_DOCUMENT),
-                  userIdentity, repositoryInfo))
+                  userId, repositoryInfo))
             {
                actions.setCanSetContentStream(true);
             }
@@ -226,7 +241,7 @@ public class PermissionService
          {
             if (BaseType.DOCUMENT == type.getBaseId()
                && hasPermission(object,
-                  permissionMapping.getPermissions(PermissionMapping.CAN_DELETE_CONTENT_DOCUMENT), userIdentity,
+                  permissionMapping.getPermissions(PermissionMapping.CAN_DELETE_CONTENT_DOCUMENT), userId,
                   repositoryInfo))
             {
                actions.setCanDeleteContentStream(true);
@@ -236,7 +251,7 @@ public class PermissionService
          {
             if (BaseType.DOCUMENT == type.getBaseId()
                && hasPermission(object, permissionMapping.getPermissions(PermissionMapping.CAN_GET_RENDITIONS_OBJECT),
-                  userIdentity, repositoryInfo))
+                  userId, repositoryInfo))
             {
                actions.setCanGetRenditions(true);
             }
@@ -245,7 +260,7 @@ public class PermissionService
          {
             if (type.isFileable()
                && hasPermission(object, permissionMapping.getPermissions(PermissionMapping.CAN_ADD_TO_FOLDER_OBJECT),
-                  userIdentity, repositoryInfo))
+                  userId, repositoryInfo))
             {
                actions.setCanAddObjectToFolder(true);
             }
@@ -255,7 +270,7 @@ public class PermissionService
             if (type.isFileable() //
                && type.getBaseId() != BaseType.FOLDER //
                && hasPermission(object, permissionMapping
-                  .getPermissions(PermissionMapping.CAN_REMOVE_OBJECT_FROM_FOLDER_OBJECT), userIdentity, repositoryInfo) //
+                  .getPermissions(PermissionMapping.CAN_REMOVE_OBJECT_FROM_FOLDER_OBJECT), userId, repositoryInfo) //
                && (repositoryInfo.getCapabilities().isCapabilityUnfiling() || object.getParents().size() > 1))
             {
                actions.setCanRemoveObjectFromFolder(true);
@@ -265,7 +280,7 @@ public class PermissionService
          {
             if (type.isVersionable()
                && hasPermission(object, permissionMapping.getPermissions(PermissionMapping.CAN_CHECKOUT_DOCUMENT),
-                  userIdentity, repositoryInfo))
+                  userId, repositoryInfo))
             {
                actions.setCanCheckOut(true);
             }
@@ -275,7 +290,7 @@ public class PermissionService
             if (type.isVersionable()
                && ((DocumentData)object).isVersionSeriesCheckedOut()
                && hasPermission(object, permissionMapping
-                  .getPermissions(PermissionMapping.CAN_CANCEL_CHECKOUT_DOCUMENT), userIdentity, repositoryInfo))
+                  .getPermissions(PermissionMapping.CAN_CANCEL_CHECKOUT_DOCUMENT), userId, repositoryInfo))
             {
                actions.setCanCancelCheckOut(true);
             }
@@ -285,7 +300,7 @@ public class PermissionService
             if (type.isVersionable()
                && ((DocumentData)object).isPWC()
                && hasPermission(object, permissionMapping.getPermissions(PermissionMapping.CAN_CHECKIN_DOCUMENT),
-                  userIdentity, repositoryInfo))
+                  userId, repositoryInfo))
             {
                actions.setCanCancelCheckOut(true);
             }
@@ -294,7 +309,7 @@ public class PermissionService
          {
             if (BaseType.DOCUMENT == type.getBaseId()
                && hasPermission(object, permissionMapping
-                  .getPermissions(PermissionMapping.CAN_GET_ALL_VERSIONS_DOCUMENT), userIdentity, repositoryInfo))
+                  .getPermissions(PermissionMapping.CAN_GET_ALL_VERSIONS_DOCUMENT), userId, repositoryInfo))
             {
                actions.setCanGetAllVersions(true);
             }
@@ -303,7 +318,7 @@ public class PermissionService
          {
             if (BaseType.RELATIONSHIP != type.getBaseId()
                && hasPermission(object, permissionMapping
-                  .getPermissions(PermissionMapping.CAN_GET_OBJECT_RELATIONSHIPS_OBJECT), userIdentity, repositoryInfo))
+                  .getPermissions(PermissionMapping.CAN_GET_OBJECT_RELATIONSHIPS_OBJECT), userId, repositoryInfo))
             {
                actions.setCanGetObjectRelationships(true);
             }
@@ -312,7 +327,7 @@ public class PermissionService
          {
             if (type.isControllablePolicy()
                && hasPermission(object, permissionMapping.getPermissions(PermissionMapping.CAN_ADD_POLICY_OBJECT),
-                  userIdentity, repositoryInfo))
+                  userId, repositoryInfo))
             {
                actions.setCanApplyPolicy(true);
             }
@@ -321,7 +336,7 @@ public class PermissionService
          {
             if (type.isControllablePolicy()
                && hasPermission(object, permissionMapping.getPermissions(PermissionMapping.CAN_REMOVE_POLICY_OBJECT),
-                  userIdentity, repositoryInfo))
+                  userId, repositoryInfo))
             {
                actions.setCanRemovePolicy(true);
             }
@@ -330,7 +345,7 @@ public class PermissionService
          {
             if (type.isControllablePolicy()
                && hasPermission(object, permissionMapping
-                  .getPermissions(PermissionMapping.CAN_GET_APPLIED_POLICIES_OBJECT), userIdentity, repositoryInfo))
+                  .getPermissions(PermissionMapping.CAN_GET_APPLIED_POLICIES_OBJECT), userId, repositoryInfo))
             {
                actions.setCanGetAppliedPolicies(true);
             }
@@ -338,8 +353,8 @@ public class PermissionService
          else if (AllowableActions.CAN_GET_ACL.equals(action))
          {
             if (type.isControllableACL()
-               && hasPermission(object, permissionMapping.getPermissions(PermissionMapping.CAN_GET_ACL_OBJECT),
-                  userIdentity, repositoryInfo))
+               && hasPermission(object, permissionMapping.getPermissions(PermissionMapping.CAN_GET_ACL_OBJECT), userId,
+                  repositoryInfo))
             {
                actions.setCanGetACL(true);
             }
@@ -348,7 +363,7 @@ public class PermissionService
          {
             if (type.isControllableACL()
                && hasPermission(object, permissionMapping.getPermissions(PermissionMapping.CAN_APPLY_ACL_OBJECT),
-                  userIdentity, repositoryInfo))
+                  userId, repositoryInfo))
             {
                actions.setCanApplyACL(true);
             }
@@ -366,16 +381,62 @@ public class PermissionService
     * @return <code>true</code> if user has all <code>permissions</code> and
     *         <code>false</code> otherwise
     */
+   @Deprecated
    public boolean hasPermission(ObjectData object, Collection<String> permissions, Identity userIdentity,
+      RepositoryInfo repositoryInfo)
+   {
+      //      if (permissions == null || permissions.size() == 0)
+      //      {
+      //         throw new CmisRuntimeException("Permissions set may not be null or empty.");
+      //      }
+      //      if (userIdentity == null)
+      //      {
+      //         userIdentity = new Identity(repositoryInfo.getPrincipalAnonymous(), new HashSet<MembershipEntry>());
+      //      }
+      //      List<AccessControlEntry> acl = object.getACL(false);
+      //      if (acl.size() == 0)
+      //      {
+      //         return true;
+      //      }
+      //      Map<String, Set<String>> map = new HashMap<String, Set<String>>();
+      //      CmisUtils.addAclToPermissionMap(map, acl);
+      //
+      //      // Check for 'any principal' first the for current principal.
+      //      for (String principal : new String[]{repositoryInfo.getPrincipalAnyone(), userIdentity.getUserId()})
+      //      {
+      //         Set<String> p = map.get(principal);
+      //         if (p != null)
+      //         {
+      //            if (p.contains(BasicPermissions.CMIS_ALL.value()))
+      //            {
+      //               // All operations allowed.
+      //               return true;
+      //            }
+      //            return p.containsAll(permissions);
+      //         }
+      //      }
+      //      return false;
+      return hasPermission(object, permissions, userIdentity != null ? userIdentity.getUserId() : null, repositoryInfo);
+   }
+
+   /**
+    * @param object object
+    * @param permissions set of actions to be checked
+    * @param userId user's id
+    * @param repositoryInfo
+    * @return <code>true</code> if user has all <code>permissions</code> and
+    *         <code>false</code> otherwise
+    */
+   public boolean hasPermission(ObjectData object, Collection<String> permissions, String userId,
       RepositoryInfo repositoryInfo)
    {
       if (permissions == null || permissions.size() == 0)
       {
          throw new CmisRuntimeException("Permissions set may not be null or empty.");
       }
-      if (userIdentity == null)
+      if (userId == null)
       {
-         userIdentity = new Identity(repositoryInfo.getPrincipalAnonymous(), new HashSet<MembershipEntry>());
+         userId = repositoryInfo.getPrincipalAnonymous();
       }
       List<AccessControlEntry> acl = object.getACL(false);
       if (acl.size() == 0)
@@ -386,7 +447,7 @@ public class PermissionService
       CmisUtils.addAclToPermissionMap(map, acl);
 
       // Check for 'any principal' first the for current principal.
-      for (String principal : new String[]{repositoryInfo.getPrincipalAnyone(), userIdentity.getUserId()})
+      for (String principal : new String[]{repositoryInfo.getPrincipalAnyone(), userId})
       {
          Set<String> p = map.get(principal);
          if (p != null)
@@ -401,5 +462,4 @@ public class PermissionService
       }
       return false;
    }
-
 }
