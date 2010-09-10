@@ -69,6 +69,20 @@ public class IndexConfiguration
     * @throws MimeTypeException
     * @throws IOException
     */
+   public IndexConfiguration(String rootUuid) throws IndexConfigurationException, MimeTypeException, IOException
+   {
+      this(null, "", rootUuid, DEFAULT_QUERYABLEINDEXSTORAGE, new TikaConfig());
+   }
+
+   /**
+    * In memory index storage with default Tika configuration
+    * 
+    * @param rootParentUuid
+    * @param rootUuid
+    * @throws IndexConfigurationException
+    * @throws MimeTypeException
+    * @throws IOException
+    */
    public IndexConfiguration(String rootParentUuid, String rootUuid) throws IndexConfigurationException,
       MimeTypeException, IOException
    {
