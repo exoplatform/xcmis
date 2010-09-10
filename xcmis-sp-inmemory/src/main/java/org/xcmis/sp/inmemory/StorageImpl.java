@@ -19,20 +19,19 @@
 
 package org.xcmis.sp.inmemory;
 
+import org.apache.tika.mime.MimeTypeException;
 import org.xcmis.search.InvalidQueryException;
 import org.xcmis.search.SearchService;
 import org.xcmis.search.SearchServiceException;
 import org.xcmis.search.Visitors;
 import org.xcmis.search.config.IndexConfiguration;
 import org.xcmis.search.config.SearchServiceConfiguration;
-import org.xcmis.search.content.command.InvocationContext;
 import org.xcmis.search.model.column.Column;
 import org.xcmis.search.model.source.SelectorName;
 import org.xcmis.search.parser.CmisQueryParser;
 import org.xcmis.search.parser.QueryParser;
 import org.xcmis.search.query.QueryExecutionException;
 import org.xcmis.search.result.ScoredRow;
-import org.xcmis.search.value.SlashSplitter;
 import org.xcmis.search.value.ToStringNameConverter;
 import org.xcmis.sp.inmemory.query.CmisContentReader;
 import org.xcmis.sp.inmemory.query.CmisSchema;
@@ -91,7 +90,6 @@ import org.xcmis.spi.model.impl.StringProperty;
 import org.xcmis.spi.query.Query;
 import org.xcmis.spi.query.Result;
 import org.xcmis.spi.query.Score;
-import org.xcmis.spi.utils.CmisDocumentReaderService;
 import org.xcmis.spi.utils.CmisUtils;
 import org.xcmis.spi.utils.Logger;
 import org.xcmis.spi.utils.MimeType;
@@ -124,7 +122,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
  * number of items and total amount of content. Storage is not designed for high
  * concurrency load. In some cases data in storage can be in inconsistency
  * state.
- *
+ * 
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id: StorageImpl.java 804 2010-04-16 16:48:59Z
  *          alexey.zavizionov@gmail.com $
@@ -156,7 +154,7 @@ public class StorageImpl implements Storage
 
    final Map<String, Set<String>> typeChildren;
 
-   private RepositoryInfo repositoryInfo;
+   private final RepositoryInfo repositoryInfo;
 
    /** Searche service. */
    final SearchService searchService;
@@ -641,9 +639,8 @@ public class StorageImpl implements Storage
          throw new NameConstraintViolationException("Name for new policy must be provided.");
       }
 
-      for (Iterator<Entry> iterator = entries.values().iterator(); iterator.hasNext();)
+      for (Entry next : entries.values())
       {
-         Entry next = iterator.next();
          String typeId = next.getTypeId();
          try
          {
@@ -730,9 +727,8 @@ public class StorageImpl implements Storage
          throw new NameConstraintViolationException("Name for new relationship must be provided.");
       }
 
-      for (Iterator<Entry> iterator = entries.values().iterator(); iterator.hasNext();)
+      for (Entry next : entries.values())
       {
-         Entry next = iterator.next();
          String typeId = next.getTypeId();
          try
          {
@@ -861,7 +857,9 @@ public class StorageImpl implements Storage
          catch (Exception e)
          {
             if (LOG.isDebugEnabled())
+            {
                LOG.warn("Unable delete object " + o.getObjectId());
+            }
 
             if (!continueOnFailure)
             {
@@ -1199,17 +1197,15 @@ public class StorageImpl implements Storage
       }
 
       Map<String, PropertyDefinition<?>> m = new HashMap<String, PropertyDefinition<?>>();
-      for (Iterator<PropertyDefinition<?>> iterator = superType.getPropertyDefinitions().iterator(); iterator.hasNext();)
+      for (PropertyDefinition<?> next : superType.getPropertyDefinitions())
       {
-         PropertyDefinition<?> next = iterator.next();
          m.put(next.getId(), next);
       }
 
       if (type.getPropertyDefinitions() != null)
       {
-         for (Iterator<PropertyDefinition<?>> iterator = type.getPropertyDefinitions().iterator(); iterator.hasNext();)
+         for (PropertyDefinition<?> next : type.getPropertyDefinitions())
          {
-            PropertyDefinition<?> next = iterator.next();
             m.put(next.getId(), next);
          }
       }
@@ -1312,9 +1308,9 @@ public class StorageImpl implements Storage
          throw new ConstraintException("Unable remove type " + typeId + ". Type has descendant types.");
       }
 
-      for (Iterator<Entry> iterator = entries.values().iterator(); iterator.hasNext();)
+      for (Entry entry : entries.values())
       {
-         if (typeId.equals(iterator.next().getTypeId()))
+         if (typeId.equals(entry.getTypeId()))
          {
             throw new ConstraintException("Unable remove type definition if at least one object of this type exists.");
          }
@@ -1352,9 +1348,11 @@ public class StorageImpl implements Storage
       {
          ByteArrayValue contentValue = (ByteArrayValue)c.getValue(PropertyDefinitions.CONTENT);
          if (contentValue != null)
+         {
             size += contentValue.getBytes().length;
+         }
       }
-      if ((size + content.length) > maxStorageMemSize)
+      if (size + content.length > maxStorageMemSize)
       {
          throw new StorageException("Unable add new object in storage. Max allowed memory size '" + maxStorageMemSize
             + "' bytes is reached." + " Increase or set storage configuration property 'org.xcmis.inmemory.maxmem'.");
@@ -1363,48 +1361,34 @@ public class StorageImpl implements Storage
 
    private SearchService getInitializedSearchService()
    {
-      CmisSchema schema = new CmisSchema(this);
-      CmisSchemaTableResolver tableResolver = new CmisSchemaTableResolver(new ToStringNameConverter(), schema, this);
-
-      IndexConfiguration indexConfiguration = new IndexConfiguration();
-      indexConfiguration.setQueryableIndexStorage("org.xcmis.search.lucene.InMemoryLuceneQueryableIndexStorage");
-      //indexConfiguration.setIndexDir("/tmp/dir/" + UUID.randomUUID().toString() + "/");
-      indexConfiguration.setRootUuid(this.getRepositoryInfo().getRootFolderId());
-      //if list of root parents is empty it will be indexed as empty string
-      indexConfiguration.setRootParentUuid("");
-      indexConfiguration.setDocumentReaderService(new CmisDocumentReaderService());
-
-      //default invocation context
-      InvocationContext invocationContext = new InvocationContext();
-      invocationContext.setNameConverter(new ToStringNameConverter());
-
-      invocationContext.setSchema(schema);
-      invocationContext.setPathSplitter(new SlashSplitter());
-
-      invocationContext.setTableResolver(tableResolver);
-
-      SearchServiceConfiguration searchConfiguration = new SearchServiceConfiguration();
-      searchConfiguration.setIndexConfiguration(indexConfiguration);
-      searchConfiguration.setContentReader(new CmisContentReader(this));
-      searchConfiguration.setNameConverter(new ToStringNameConverter());
-      searchConfiguration.setDefaultInvocationContext(invocationContext);
-      searchConfiguration.setTableResolver(tableResolver);
-      searchConfiguration.setPathSplitter(new SlashSplitter());
-
       try
       {
+         IndexConfiguration indexConfiguration = new IndexConfiguration("", getRepositoryInfo().getRootFolderId());
+
+         CmisSchema schema = new CmisSchema(this);
+         CmisSchemaTableResolver tableResolver = new CmisSchemaTableResolver(new ToStringNameConverter(), schema, this);
+
+         SearchServiceConfiguration searchConfiguration =
+            new SearchServiceConfiguration(schema, tableResolver, new CmisContentReader(this), indexConfiguration);
+
          SearchService searchService = new SearchService(searchConfiguration);
          searchService.start();
          return searchService;
-         //attach listener to the created storage
-         //IndexListener indexListener = new IndexListener(this, searchService);
-         //storage.setIndexListener(indexListener);
 
       }
       catch (SearchServiceException e)
       {
          LOG.error("Unable to initialize storage. ", e);
       }
+      catch (MimeTypeException e)
+      {
+         LOG.error("Unable to initialize storage. ", e);
+      }
+      catch (IOException e)
+      {
+         LOG.error("Unable to initialize storage. ", e);
+      }
+
       return null;
 
    }
@@ -1447,7 +1431,7 @@ public class StorageImpl implements Storage
 
       /**
        * Return comparable location of the object
-       *
+       * 
        * @param identifer
        * @return
        */
@@ -1639,7 +1623,7 @@ public class StorageImpl implements Storage
 
    private class TreeVisitor implements ObjectDataVisitor
    {
-      private Collection<BaseObjectData> items = new LinkedHashSet<BaseObjectData>();
+      private final Collection<BaseObjectData> items = new LinkedHashSet<BaseObjectData>();
 
       public void visit(ObjectData object)
       {
