@@ -18,74 +18,78 @@
  */
 package org.xcmis.search.config;
 
-import org.exoplatform.services.document.DocumentReaderService;
+import org.apache.tika.config.TikaConfig;
+import org.apache.tika.mime.MimeTypeException;
 import org.xcmis.search.content.interceptors.QueryableIndexStorage;
 
+import java.io.IOException;
+
 /**
- *  Search service index configuration
+ * Search service index configuration
  */
 public class IndexConfiguration
 {
    /**
     * Default implementation of {@link QueryableIndexStorage}.
     */
-   public static final String DEFAULT_QUERYABLEINDEXSTORAGE = "org.xcmis.search.lucene.LuceneQueryableIndexStorage";
+   public static final String DEFAULT_QUERYABLEINDEXSTORAGE =
+      "org.xcmis.search.lucene.InMemoryLuceneQueryableIndexStorage";
 
    /**
-    * Path where index should be stored. 
+    * Path where index should be stored.
     */
-   private String indexDir;
+   private final String indexDir;
 
    /**
-    * Parent uuid of root element. 
+    * Parent uuid of root element.
     */
-   private String rootParentUuid;
+   private final String rootParentUuid;
 
    /**
     * Uuid of root element.
     */
-   private String rootUuid;
+   private final String rootUuid;
+
+   /**
+    * Tika configuration.
+    */
+   private final TikaConfig tikaConfiguration;
 
    /**
     * Implementation of {@link QueryableIndexStorage}.
     */
-   private String queryableIndexStorage = DEFAULT_QUERYABLEINDEXSTORAGE;
+   private String queryableIndexStorage;
 
    /**
-    * @return the queryableIndexStorage
+    * In memory index storage with default Tika configuration
+    * 
+    * @param rootParentUuid
+    * @param rootUuid
+    * @throws IndexConfigurationException
+    * @throws MimeTypeException
+    * @throws IOException
     */
-   public String getQueryableIndexStorage()
+   public IndexConfiguration(String rootParentUuid, String rootUuid) throws IndexConfigurationException,
+      MimeTypeException, IOException
    {
-      return queryableIndexStorage;
+      this(null, rootParentUuid, rootUuid, DEFAULT_QUERYABLEINDEXSTORAGE, new TikaConfig());
    }
 
-   /**
-    * @param queryableIndexStorage the queryableIndexStorage to set
-    */
-   public void setQueryableIndexStorage(String queryableIndexStorage)
+   public IndexConfiguration(String indexDir, String rootParentUuid, String rootUuid)
+      throws IndexConfigurationException, MimeTypeException, IOException
    {
+      this(indexDir, rootParentUuid, rootUuid, "org.xcmis.search.lucene.LuceneQueryableIndexStorage", new TikaConfig());
+   }
+
+   public IndexConfiguration(String indexDir, String rootParentUuid, String rootUuid, String queryableIndexStorage,
+      TikaConfig tikaConfiguration) throws IndexConfigurationException, MimeTypeException, IOException
+   {
+      super();
+      this.indexDir = indexDir;
+      this.rootParentUuid = rootParentUuid;
+      this.rootUuid = rootUuid;
+      this.tikaConfiguration = tikaConfiguration;
       this.queryableIndexStorage = queryableIndexStorage;
-   }
-
-   /**
-    * Text extraction service.
-    */
-   private DocumentReaderService documentReaderService;
-
-   /**
-    * @return the documentReaderService
-    */
-   public DocumentReaderService getDocumentReaderService()
-   {
-      return documentReaderService;
-   }
-
-   /**
-    * @param documentReaderService the documentReaderService to set
-    */
-   public void setDocumentReaderService(DocumentReaderService documentReaderService)
-   {
-      this.documentReaderService = documentReaderService;
    }
 
    /**
@@ -94,6 +98,14 @@ public class IndexConfiguration
    public String getIndexDir()
    {
       return indexDir;
+   }
+
+   /**
+    * @return the queryableIndexStorage
+    */
+   public String getQueryableIndexStorage()
+   {
+      return queryableIndexStorage;
    }
 
    /**
@@ -113,27 +125,19 @@ public class IndexConfiguration
    }
 
    /**
-    * @param indexDir the indexDir to set
+    * @return the tikaConfiguration
     */
-   public void setIndexDir(String indexDir)
+   public TikaConfig getTikaConfiguration()
    {
-      this.indexDir = indexDir;
+      return tikaConfiguration;
    }
 
    /**
-    * @param rootParentUuid the rootParentUuid to set
+    * @param queryableIndexStorage
+    *           the queryableIndexStorage to set
     */
-   public void setRootParentUuid(String rootParentUuid)
+   public void setQueryableIndexStorage(String queryableIndexStorage)
    {
-      this.rootParentUuid = rootParentUuid;
+      this.queryableIndexStorage = queryableIndexStorage;
    }
-
-   /**
-    * @param rootUuid the rootUuid to set
-    */
-   public void setRootUuid(String rootUuid)
-   {
-      this.rootUuid = rootUuid;
-   }
-
 }

@@ -25,10 +25,10 @@ import org.apache.lucene.document.Field;
 import org.apache.lucene.document.NumberTools;
 import org.apache.lucene.document.Field.Index;
 import org.apache.lucene.document.Field.Store;
-import org.exoplatform.services.document.DocumentReadException;
-import org.exoplatform.services.document.DocumentReader;
-import org.exoplatform.services.document.DocumentReaderService;
-import org.exoplatform.services.document.HandlerNotFoundException;
+import org.apache.tika.exception.TikaException;
+import org.apache.tika.metadata.Metadata;
+import org.apache.tika.parser.AutoDetectParser;
+import org.apache.tika.sax.BodyContentHandler;
 import org.xcmis.search.config.IndexConfiguration;
 import org.xcmis.search.content.ContentEntry;
 import org.xcmis.search.content.ContentIndexer;
@@ -36,6 +36,7 @@ import org.xcmis.search.content.Property;
 import org.xcmis.search.content.Property.BinaryValue;
 import org.xcmis.search.content.Property.ContentValue;
 import org.xcmis.spi.utils.Logger;
+import org.xml.sax.SAXException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -50,10 +51,7 @@ public class LuceneIndexer implements ContentIndexer<Document>
 
    private final IndexConfiguration indexConfiguration;
 
-   /**
-    * Content extractor.
-    */
-   private DocumentReaderService documentReaderService;
+   private final AutoDetectParser parser;
 
    /**
     * Class logger.
@@ -66,7 +64,7 @@ public class LuceneIndexer implements ContentIndexer<Document>
    public LuceneIndexer(IndexConfiguration indexConfiguration)
    {
       super();
-      this.documentReaderService = indexConfiguration.getDocumentReaderService();
+      this.parser = new AutoDetectParser(indexConfiguration.getTikaConfiguration());
       this.indexConfiguration = indexConfiguration;
    }
 
@@ -124,81 +122,93 @@ public class LuceneIndexer implements ContentIndexer<Document>
 
    /**
     * Extract content of binary value.
+    * 
     * @param doc
     * @param propName
     * @param data
     */
    private void addBinaryProperty(final Document doc, String propName, BinaryValue data)
    {
-      try
+
+      if (data.getMimeType() != null)
       {
-         if (data.getMimeType() != null)
+
+         if (parser != null)
          {
-            final DocumentReader dreader = documentReaderService.getDocumentReader(data.getMimeType());
+            final InputStream is = data.getValue();
 
-            if (dreader != null)
+            try
             {
-               final InputStream is = data.getValue();
-               String content = "";
-
-               try
+               Metadata metadata = new Metadata();
+               metadata.set(Metadata.CONTENT_TYPE, data.getMimeType());
+               if (data.getEncoding() != null)
                {
-                  if (data.getEncoding() != null)
-                  {
-                     content = dreader.getContentAsText(is, data.getEncoding());
-                  }
-                  else
-                  {
-                     content = dreader.getContentAsText(is);
-                  }
-                  final Field f =
-                     new Field(FieldNames.createFullTextFieldName(propName), content, Field.Store.NO,
-                        Field.Index.ANALYZED, Field.TermVector.NO);
-                  doc.add(f);
+                  metadata.set(Metadata.CONTENT_ENCODING, data.getEncoding());
                }
-               finally
+
+               BodyContentHandler handler = new BodyContentHandler();
+               parser.parse(is, handler, metadata);
+
+               final Field f =
+                  new Field(FieldNames.createFullTextFieldName(propName), handler.toString(), Field.Store.NO,
+                     Field.Index.ANALYZED, Field.TermVector.NO);
+               doc.add(f);
+            }
+            catch (IOException e)
+            {
+               // no data - no index
+               if (LOG.isDebugEnabled())
                {
-                  if (is != null)
+                  LOG.warn("Binary value indexer IO error " + e, e);
+               }
+            }
+            catch (SAXException e)
+            {
+               // no data - no index
+               if (LOG.isDebugEnabled())
+               {
+                  LOG.warn("Binary value indexer IO error " + e, e);
+               }
+            }
+            catch (TikaException e)
+            { // no data - no index
+               if (LOG.isDebugEnabled())
+               {
+                  LOG.warn("Binary value indexer IO error " + e, e);
+               }
+            }
+            finally
+            {
+               if (is != null)
+               {
+                  try
                   {
                      is.close();
+                  }
+                  catch (IOException e)
+                  {
+                     if (LOG.isDebugEnabled())
+                     {
+                        LOG.warn("Binary value indexer IO error " + e, e);
+                     }
                   }
                }
             }
          }
       }
-      catch (final HandlerNotFoundException e)
-      {
-         // no handler - no index
-         if (LOG.isDebugEnabled())
-         {
-            LOG.warn("This content is not readable " + e);
-         }
-      }
-      catch (IOException e)
-      {
-         // no data - no index
-         if (LOG.isDebugEnabled())
-         {
-            LOG.warn("Binary value indexer IO error " + e, e);
-         }
-      }
-      catch (DocumentReadException e)
-      {
-         // no data - no index
-         if (LOG.isDebugEnabled())
-         {
-            LOG.warn("Binary value indexer IO error " + e, e);
-         }
-      }
+
    }
 
    /**
     * Adds the string representation of the boolean value to the document as the
     * named field.
     * 
-    * @param doc The document to which to add the field
-    * @param fieldName The name of the field to add
-    * @param internalValue The value for the field to add to the document.
+    * @param doc
+    *           The document to which to add the field
+    * @param fieldName
+    *           The name of the field to add
+    * @param internalValue
+    *           The value for the field to add to the document.
     */
    private void addBooleanValue(final Document doc, final String fieldName, final Boolean internalValue)
    {
@@ -207,12 +217,15 @@ public class LuceneIndexer implements ContentIndexer<Document>
 
    /**
     * Adds the calendar value to the document as the named field. The calendar
-    * value is converted to an indexable string value using the {@link DateTools}
-    * class.
+    * value is converted to an indexable string value using the
+    * {@link DateTools} class.
     * 
-    * @param doc The document to which to add the field
-    * @param fieldName The name of the field to add
-    * @param value The value for the field to add to the document.
+    * @param doc
+    *           The document to which to add the field
+    * @param fieldName
+    *           The name of the field to add
+    * @param value
+    *           The value for the field to add to the document.
     */
    private void addCalendarValue(final Document doc, final String fieldName, final Calendar value)
    {
@@ -226,9 +239,12 @@ public class LuceneIndexer implements ContentIndexer<Document>
     * is converted to an indexable string value using the {@link DoubleField}
     * class.
     * 
-    * @param doc The document to which to add the field
-    * @param fieldName The name of the field to add
-    * @param internalValue The value for the field to add to the document.
+    * @param doc
+    *           The document to which to add the field
+    * @param fieldName
+    *           The name of the field to add
+    * @param internalValue
+    *           The value for the field to add to the document.
     */
    private void addDoubleValue(final Document doc, final String fieldName, final Double doubleValue)
    {
@@ -237,9 +253,11 @@ public class LuceneIndexer implements ContentIndexer<Document>
 
    /**
     * Adds the length field.
+    * 
     * @param doc
-    * @param propName - property name.
-    * @param value 
+    * @param propName
+    *           - property name.
+    * @param value
     */
    private void addLengthField(Document doc, String propName, ContentValue value)
    {
@@ -252,11 +270,15 @@ public class LuceneIndexer implements ContentIndexer<Document>
 
    /**
     * Adds the long value to the document as the named field. The long value is
-    * converted to an indexable string value using the {@link NumberTools} class.
+    * converted to an indexable string value using the {@link NumberTools}
+    * class.
     * 
-    * @param doc The document to which to add the field
-    * @param fieldName The name of the field to add
-    * @param longValue The value for the field to add to the document.
+    * @param doc
+    *           The document to which to add the field
+    * @param fieldName
+    *           The name of the field to add
+    * @param longValue
+    *           The value for the field to add to the document.
     */
    private void addLongValue(final Document doc, final String fieldName, final Long longValue)
    {
@@ -268,9 +290,12 @@ public class LuceneIndexer implements ContentIndexer<Document>
     * Adds a {@link FieldNames#MVP} field to <code>doc</code> with the resolved
     * <code>name</code> using the internal search index namespace mapping.
     * 
-    * @param doc the lucene document.
-    * @param propName the name of the multi-value property.
-    * @throws RepositoryException if any repository errors
+    * @param doc
+    *           the lucene document.
+    * @param propName
+    *           the name of the multi-value property.
+    * @throws RepositoryException
+    *            if any repository errors
     */
    private void addMVPName(final Document doc, final String propName)
    {
@@ -280,9 +305,12 @@ public class LuceneIndexer implements ContentIndexer<Document>
    /**
     * Adds the non binary property.
     * 
-    * @param doc the doc
-    * @param propertyData the property data
-    * @throws RepositoryException the repository exception
+    * @param doc
+    *           the doc
+    * @param propertyData
+    *           the property data
+    * @throws RepositoryException
+    *            the repository exception
     */
    @SuppressWarnings("unchecked")
    private void addProperty(final Document doc, final Property propertyData)
@@ -338,25 +366,33 @@ public class LuceneIndexer implements ContentIndexer<Document>
    /**
     * Adds the property name to the lucene _:PROPERTIES_SET field.
     * 
-    * @param doc the document.
-    * @param name the name of the property.
-    * @throws RepositoryException if any repository errors
+    * @param doc
+    *           the document.
+    * @param name
+    *           the name of the property.
+    * @throws RepositoryException
+    *            if any repository errors
     */
    private void addPropertyName(final Document doc, final String propertyName)
    {
       doc.add(new Field(FieldNames.PROPERTIES_SET, propertyName, Field.Store.YES, Field.Index.NOT_ANALYZED_NO_NORMS));
    }
 
-   /** Adds the string value to the document both as the named field and
-   * optionally for full text indexing if <code>tokenized</code> is
-   * <code>true</code>.
-   * 
-   * @param doc The document to which to add the field
-   * @param fieldName The name of the field to add
-   * @param internalValue The value for the field to add to the document.
-   * @param tokenized If <code>true</code> the string is also tokenized and
-   *          fulltext indexed.
-   */
+   /**
+    * Adds the string value to the document both as the named field and
+    * optionally for full text indexing if <code>tokenized</code> is
+    * <code>true</code>.
+    * 
+    * @param doc
+    *           The document to which to add the field
+    * @param fieldName
+    *           The name of the field to add
+    * @param internalValue
+    *           The value for the field to add to the document.
+    * @param tokenized
+    *           If <code>true</code> the string is also tokenized and fulltext
+    *           indexed.
+    */
    private void addStringValue(final Document doc, final String fieldName, final String stringValue,
       final boolean tokenized)
    {
@@ -376,13 +412,17 @@ public class LuceneIndexer implements ContentIndexer<Document>
    /**
     * Creates a document field name as prefixed <code>fieldName</code> with the
     * value of <code>
-    * internalValue</code> . The created field is indexed without norms.
+    * internalValue</code> . The created field is indexed without
+    * norms.
     * 
-    * @param fieldName The name of the field to add
-    * @param internalValue The value for the field to add to the document.
-    * @param store <code>true</code> if the value should be stored,
-    *          <code>false</code> otherwise
-    *  @return field  Field 
+    * @param fieldName
+    *           The name of the field to add
+    * @param internalValue
+    *           The value for the field to add to the document.
+    * @param store
+    *           <code>true</code> if the value should be stored,
+    *           <code>false</code> otherwise
+    * @return field Field
     */
    private Field createFieldWithoutNorms(final String fieldName, final String internalValue, final boolean store)
    {
@@ -394,12 +434,14 @@ public class LuceneIndexer implements ContentIndexer<Document>
    }
 
    /**
-   * Returns <code>true</code> if the property with the given name should be indexed.
-   *
-   * @param propertyName name of a property.
-   * @return <code>true</code> if the property should be fulltext indexed;   <code>false</code>
-   * otherwise.
-   */
+    * Returns <code>true</code> if the property with the given name should be
+    * indexed.
+    * 
+    * @param propertyName
+    *           name of a property.
+    * @return <code>true</code> if the property should be fulltext indexed;
+    *         <code>false</code> otherwise.
+    */
    private boolean isIndexed(final String propertyName)
    {
       return true;

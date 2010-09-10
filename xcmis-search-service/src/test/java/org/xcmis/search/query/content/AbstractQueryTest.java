@@ -24,7 +24,6 @@ import static org.mockito.Mockito.mock;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.NotImplementedException;
-import org.exoplatform.services.document.DocumentReaderService;
 import org.junit.After;
 import org.junit.Before;
 import org.xcmis.search.SearchService;
@@ -37,9 +36,7 @@ import org.xcmis.search.content.Property;
 import org.xcmis.search.content.Schema;
 import org.xcmis.search.content.InMemorySchema.Builder;
 import org.xcmis.search.content.Property.SimpleValue;
-import org.xcmis.search.content.command.InvocationContext;
 import org.xcmis.search.content.interceptors.ContentReaderInterceptor;
-import org.xcmis.search.lucene.InMemoryLuceneQueryableIndexStorage;
 import org.xcmis.search.lucene.content.SchemaTableResolver;
 import org.xcmis.search.model.Query;
 import org.xcmis.search.model.constraint.Operator;
@@ -48,7 +45,6 @@ import org.xcmis.search.result.ScoredRow;
 import org.xcmis.search.value.CastSystem;
 import org.xcmis.search.value.NameConverter;
 import org.xcmis.search.value.PropertyType;
-import org.xcmis.search.value.SlashSplitter;
 import org.xcmis.search.value.ToStringNameConverter;
 import org.xcmis.spi.utils.Logger;
 
@@ -57,7 +53,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -99,7 +94,7 @@ public abstract class AbstractQueryTest
    /**
     * The string /${jcrRoot}${testRoot} with all components of the test path
     * properly escaped for XPath.
-    *
+    * 
     * @see <a href="https://issues.apache.org/jira/browse/JCR-714">JCR-714</a>
     */
    protected String xpathRoot;
@@ -143,8 +138,8 @@ public abstract class AbstractQueryTest
    private String testRoot;
 
    /**
-    * Set-up the configuration values used for the test. Per default retrieves
-    * a session, configures testRoot, and nodetype and checks if the query
+    * Set-up the configuration values used for the test. Per default retrieves a
+    * session, configures testRoot, and nodetype and checks if the query
     * language for the current language is available.<br>
     */
    @Before
@@ -177,29 +172,12 @@ public abstract class AbstractQueryTest
       SchemaTableResolver tableResolver = new SchemaTableResolver(nameConverter, schema);
 
       //index configuration
-      IndexConfiguration indexConfuration = new IndexConfiguration();
-      indexConfuration.setIndexDir(tempDir.getAbsolutePath());
-      indexConfuration.setRootParentUuid(testRootNode.getParentIdentifiers()[0]);
-      indexConfuration.setRootUuid(testRootNode.getIdentifier());
-      indexConfuration.setDocumentReaderService(mock(DocumentReaderService.class));
-      indexConfuration.setQueryableIndexStorage(InMemoryLuceneQueryableIndexStorage.class.getName());
+      IndexConfiguration indexConfuration =
+         new IndexConfiguration(testRootNode.getParentIdentifiers()[0], testRootNode.getIdentifier());
 
       //search service configuration
-      SearchServiceConfiguration configuration = new SearchServiceConfiguration();
-      configuration.setIndexConfiguration(indexConfuration);
-      configuration.setContentReader(mock(ContentReaderInterceptor.class));
-      configuration.setNameConverter(nameConverter);
-      configuration.setTableResolver(tableResolver);
-      configuration.setPathSplitter(new SlashSplitter());
-
-      InvocationContext invocationContext = new InvocationContext();
-      invocationContext.setSchema(schema);
-
-      invocationContext.setTableResolver(tableResolver);
-      invocationContext.setNameConverter(nameConverter);
-
-      configuration.setDefaultInvocationContext(invocationContext);
-
+      SearchServiceConfiguration configuration =
+         new SearchServiceConfiguration(schema, tableResolver, mock(ContentReaderInterceptor.class), indexConfuration);
       searchService = new SearchService(configuration);
       searchService.start();
 
@@ -227,22 +205,23 @@ public abstract class AbstractQueryTest
 
    /**
     * Create a {@link Query} for a given {@link Statement}.
-    *
-    * @param statement the query should be created for
+    * 
+    * @param statement
+    *           the query should be created for
     * @return
-    *
+    * 
     * @throws RepositoryException
     * @see #createQuery(String, String)
     */
    protected Query createQuery(String statement)
    {
-      //return createQuery(statement.getStatement(), statement.getLanguage());
       throw new NotImplementedException();
    }
 
    /**
-    * Creates a {@link Query} for the given statement in the requested
-    * language, treating optional languages gracefully
+    * Creates a {@link Query} for the given statement in the requested language,
+    * treating optional languages gracefully
+    * 
     * @throws RepositoryException
     */
    protected Query createQuery(String statement, String language)
@@ -252,10 +231,11 @@ public abstract class AbstractQueryTest
 
    /**
     * Creates and executes a {@link Query} for the given {@link Statement}
-    *
-    * @param statement to execute
+    * 
+    * @param statement
+    *           to execute
     * @return
-    *
+    * 
     * @throws RepositoryException
     * @see #execute(String, String)
     */
@@ -267,11 +247,13 @@ public abstract class AbstractQueryTest
    /**
     * Creates and executes a {@link Query} for a given Statement in a given
     * query language
-    *
-    * @param statement the query should be build for
-    * @param language  query language the stement is written in
+    * 
+    * @param statement
+    *           the query should be build for
+    * @param language
+    *           query language the stement is written in
     * @return
-    *
+    * 
     * @throws RepositoryException
     */
    protected void execute(String statement, String language)
@@ -280,13 +262,14 @@ public abstract class AbstractQueryTest
    }
 
    /**
-    * Checks if the <code>result</code> contains a number of
-    * <code>hits</code>.
-    *
-    * @param result the <code>QueryResult</code>.
-    * @param hits   the number of expected hits.
-    * @throws RepositoryException if an error occurs while iterating over the
-    *                             result nodes.
+    * Checks if the <code>result</code> contains a number of <code>hits</code>.
+    * 
+    * @param result
+    *           the <code>QueryResult</code>.
+    * @param hits
+    *           the number of expected hits.
+    * @throws RepositoryException
+    *            if an error occurs while iterating over the result nodes.
     */
    protected void checkResult(List<ScoredRow> result, int hits)
    {
@@ -312,12 +295,15 @@ public abstract class AbstractQueryTest
    /**
     * Checks if the <code>result</code> contains a number of <code>hits</code>
     * and <code>properties</code>.
-    *
-    * @param result     the <code>QueryResult</code>.
-    * @param hits       the number of expected hits.
-    * @param properties the number of expected properties.
-    * @throws RepositoryException if an error occurs while iterating over the
-    *                             result nodes.
+    * 
+    * @param result
+    *           the <code>QueryResult</code>.
+    * @param hits
+    *           the number of expected hits.
+    * @param properties
+    *           the number of expected properties.
+    * @throws RepositoryException
+    *            if an error occurs while iterating over the result nodes.
     */
    protected void checkResult(List<ScoredRow> result, int hits, int properties)
    {
@@ -355,14 +341,17 @@ public abstract class AbstractQueryTest
    /**
     * Checks if the {@link QueryResult} is ordered according order property in
     * direction of related argument.
-    *
-    * @param queryResult to be tested
-    * @param propName    Name of the porperty to order by
-    * @param descending  if <code>true</code> order has to be descending
+    * 
+    * @param queryResult
+    *           to be tested
+    * @param propName
+    *           Name of the porperty to order by
+    * @param descending
+    *           if <code>true</code> order has to be descending
     * @throws RepositoryException
-    * @throws NotExecutableException in case of less than two results or all
-    *                                results have same size of value in its
-    *                                order-property
+    * @throws NotExecutableException
+    *            in case of less than two results or all results have same size
+    *            of value in its order-property
     */
    protected void evaluateResultOrder(List<ScoredRow> result, String propName, boolean descending)
    {
@@ -402,12 +391,16 @@ public abstract class AbstractQueryTest
    }
 
    /**
-    * Executes the <code>sql</code> query and checks the results against
-    * the specified <code>nodes</code>.
-    * @param session the session to use for the query.
-    * @param sql the sql query.
-    * @param nodes the expected result nodes.
-    * @throws NotExecutableException 
+    * Executes the <code>sql</code> query and checks the results against the
+    * specified <code>nodes</code>.
+    * 
+    * @param session
+    *           the session to use for the query.
+    * @param sql
+    *           the sql query.
+    * @param nodes
+    *           the expected result nodes.
+    * @throws NotExecutableException
     */
    protected void executeSqlQuery(String sql, String[] nodes)
    {
@@ -421,16 +414,19 @@ public abstract class AbstractQueryTest
 
    /**
     * Checks if the result set contains exactly the <code>nodes</code>.
-    * @param result the query result.
-    * @param nodes the expected nodes in the result set.
+    * 
+    * @param result
+    *           the query result.
+    * @param nodes
+    *           the expected nodes in the result set.
     */
    protected void checkResult(List<ScoredRow> result, String selectorName, Node[] nodes)
    {
       // collect paths
       Set<String> expectedPaths = new HashSet<String>();
-      for (int i = 0; i < nodes.length; i++)
+      for (Node node : nodes)
       {
-         expectedPaths.add(nodes[i].getIdentifier());
+         expectedPaths.add(node.getIdentifier());
       }
       Set<String> resultPaths = new HashSet<String>();
       for (ScoredRow object : result)
@@ -439,15 +435,15 @@ public abstract class AbstractQueryTest
          resultPaths.add(object.getNodeIdentifer(selectorName));
       }
       // check if all expected are in result
-      for (Iterator it = expectedPaths.iterator(); it.hasNext();)
+      for (Object element : expectedPaths)
       {
-         String path = (String)it.next();
+         String path = (String)element;
          assertTrue(path + " is not part of the result set", resultPaths.contains(path));
       }
       // check result does not contain more than expected
-      for (Iterator it = resultPaths.iterator(); it.hasNext();)
+      for (Object element : resultPaths)
       {
-         String path = (String)it.next();
+         String path = (String)element;
          assertTrue(path + " is not expected to be part of the result set", expectedPaths.contains(path));
       }
       //throw new NotImplementedException();
@@ -470,6 +466,7 @@ public abstract class AbstractQueryTest
 
    /**
     * Escape an identifier suitable for the SQL parser
+    * 
     * @TODO currently only handles dash character
     */
    protected String escapeIdentifierForSQL(String identifier)

@@ -22,31 +22,52 @@ import org.xcmis.search.content.Schema;
 import org.xcmis.search.lucene.content.VirtualTableResolver;
 import org.xcmis.search.value.NameConverter;
 import org.xcmis.search.value.PathSplitter;
+import org.xcmis.search.value.SlashSplitter;
+import org.xcmis.search.value.ToStringNameConverter;
 
 /**
- * Context of command invocation.  
+ * Context of command invocation.
  */
 public class InvocationContext
 {
    /**
     * Content Schema.
     */
-   private Schema schema;
+   private final Schema schema;
 
    /**
     * Reselve selector names to lucene querys.
     */
-   private VirtualTableResolver tableResolver;
+   private final VirtualTableResolver tableResolver;
 
    /**
     * Convert one Sting name to other String name.
     */
-   private NameConverter nameConverter;
+   private final NameConverter nameConverter;
 
    /**
-    * Split path  string to names.
+    * Split path string to names.
     */
-   private PathSplitter pathSplitter;
+   private final PathSplitter pathSplitter;
+
+   public InvocationContext(Schema schema, VirtualTableResolver tableResolver)
+   {
+      this.schema = schema;
+      this.tableResolver = tableResolver;
+      this.nameConverter = new ToStringNameConverter();
+      this.pathSplitter = new SlashSplitter();
+
+   }
+
+   public InvocationContext(Schema schema, VirtualTableResolver tableResolver, NameConverter nameConverter,
+      PathSplitter pathSplitter)
+   {
+      super();
+      this.schema = schema;
+      this.tableResolver = tableResolver;
+      this.nameConverter = nameConverter;
+      this.pathSplitter = pathSplitter;
+   }
 
    /**
     * @return the nameConverter
@@ -79,37 +100,4 @@ public class InvocationContext
    {
       return tableResolver;
    }
-
-   /**
-    * @param nameConverter the nameConverter to set
-    */
-   public void setNameConverter(NameConverter nameConverter)
-   {
-      this.nameConverter = nameConverter;
-   }
-
-   /**
-    * @param pathSplitter the pathSplitter to set
-    */
-   public void setPathSplitter(PathSplitter pathSplitter)
-   {
-      this.pathSplitter = pathSplitter;
-   }
-
-   /**
-    * @param schema the schema to set
-    */
-   public void setSchema(Schema schema)
-   {
-      this.schema = schema;
-   }
-
-   /**
-    * @param tableResolver the tableResolver to set
-    */
-   public void setTableResolver(VirtualTableResolver tableResolver)
-   {
-      this.tableResolver = tableResolver;
-   }
-
 }

@@ -18,6 +18,7 @@
  */
 package org.xcmis.search.config;
 
+import org.xcmis.search.content.Schema;
 import org.xcmis.search.content.command.InvocationContext;
 import org.xcmis.search.content.interceptors.ContentReaderInterceptor;
 import org.xcmis.search.lucene.content.VirtualTableResolver;
@@ -27,50 +28,38 @@ import org.xcmis.search.value.PathSplitter;
 /**
  * Configuration of search service.
  */
-public class SearchServiceConfiguration
+public class SearchServiceConfiguration extends InvocationContext
 {
    /**
     * Mandatory parameter for service. To be able to read content from base
     * storage.
     */
-   private ContentReaderInterceptor contentReader;
-
-   /**
-    * Reselve selector names to lucene querys.
-    */
-   private VirtualTableResolver tableResolver;
-
-   /**
-    * Convert one Sting name to other String name.
-    */
-   private NameConverter nameConverter;
-
-   /**
-    * Split path  string to names.
-    */
-   private PathSplitter pathSplitter;
+   private final ContentReaderInterceptor contentReader;
 
    /**
     * Index configuration.
     */
-   private IndexConfiguration indexConfiguration;
+   private final IndexConfiguration indexConfiguration;
 
-   /**
-    * Default invocation context.
-    */
-   private InvocationContext defaultInvocationContext;
+   public SearchServiceConfiguration(Schema schema, VirtualTableResolver tableResolver,
+      ContentReaderInterceptor contentReader, IndexConfiguration indexConfiguration)
+   {
+      super(schema, tableResolver);
+      this.contentReader = contentReader;
+      this.indexConfiguration = indexConfiguration;
+   }
+
+   public SearchServiceConfiguration(Schema schema, VirtualTableResolver tableResolver, NameConverter nameConverter,
+      PathSplitter pathSplitter, ContentReaderInterceptor contentReader, IndexConfiguration indexConfiguration)
+   {
+      super(schema, tableResolver, nameConverter, pathSplitter);
+      this.contentReader = contentReader;
+      this.indexConfiguration = indexConfiguration;
+   }
 
    public ContentReaderInterceptor getContentReader()
    {
       return contentReader;
-   }
-
-   /**
-    * @return the defaultInvocationContext
-    */
-   public InvocationContext getDefaultInvocationContext()
-   {
-      return defaultInvocationContext;
    }
 
    /**
@@ -81,75 +70,4 @@ public class SearchServiceConfiguration
       return indexConfiguration;
    }
 
-   /**
-    * @return
-    */
-   public NameConverter getNameConverter()
-   {
-      return nameConverter;
-   }
-
-   /**
-    * @return
-    */
-   public PathSplitter getPathSplitter()
-   {
-      return pathSplitter;
-   }
-
-   /**
-    * @return
-    */
-   public VirtualTableResolver getTableResolver()
-   {
-      return tableResolver;
-   }
-
-   /**
-    * @param contentReader the contentReader to set
-    */
-   public void setContentReader(ContentReaderInterceptor contentReader)
-   {
-      this.contentReader = contentReader;
-   }
-
-   /**
-    * @param defaultInvocationContext the defaultInvocationContext to set
-    */
-   public void setDefaultInvocationContext(InvocationContext defaultInvocationContext)
-   {
-      this.defaultInvocationContext = defaultInvocationContext;
-   }
-
-   /**
-    * @param indexConfiguration the indexConfiguration to set
-    */
-   public void setIndexConfiguration(IndexConfiguration indexConfiguration)
-   {
-      this.indexConfiguration = indexConfiguration;
-   }
-
-   /**
-    * @param nameConverter the nameConverter to set
-    */
-   public void setNameConverter(NameConverter nameConverter)
-   {
-      this.nameConverter = nameConverter;
-   }
-
-   /**
-    * @param pathSplitter the pathSplitter to set
-    */
-   public void setPathSplitter(PathSplitter pathSplitter)
-   {
-      this.pathSplitter = pathSplitter;
-   }
-
-   /**
-    * @param tableResolver the tableResolver to set
-    */
-   public void setTableResolver(VirtualTableResolver tableResolver)
-   {
-      this.tableResolver = tableResolver;
-   }
 }

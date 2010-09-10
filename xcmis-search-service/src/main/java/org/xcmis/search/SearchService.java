@@ -64,11 +64,12 @@ public class SearchService implements Startable, ContentModificationListener, Se
    /**
     * Default invocation context.
     */
-   private InvocationContext defaultInvocationContext;
+   private final InvocationContext defaultInvocationContext;
 
    /**
-    * @param configuration SearchServiceConfiguration
-    * @throws SearchServiceException 
+    * @param configuration
+    *           SearchServiceConfiguration
+    * @throws SearchServiceException
     */
    public SearchService(SearchServiceConfiguration configuration) throws SearchServiceException
    {
@@ -76,7 +77,7 @@ public class SearchService implements Startable, ContentModificationListener, Se
       Validate.notNull(configuration.getContentReader(), "The configuration.getContentReader()  may not be null");
       this.configuration = configuration;
       this.interceptorChain = new InterceptorChain(configuration.getContentReader());
-      this.defaultInvocationContext = configuration.getDefaultInvocationContext();
+      this.defaultInvocationContext = configuration;
 
       addQueryableIndexStorageInterceptor(interceptorChain);
 
@@ -87,9 +88,12 @@ public class SearchService implements Startable, ContentModificationListener, Se
 
    /**
     * Execute query.
-    * @param query Query
+    * 
+    * @param query
+    *           Query
     * @return
-    * @throws InvalidQueryException, QueryExecutionException
+    * @throws InvalidQueryException
+    *            , QueryExecutionException
     */
    @SuppressWarnings("unchecked")
    public List<ScoredRow> execute(Query query) throws InvalidQueryException, QueryExecutionException
@@ -104,10 +108,13 @@ public class SearchService implements Startable, ContentModificationListener, Se
    /**
     * Execute query.
     * 
-    * @param query Query
-    * @param bindVariablesValues Map<String, Object>
+    * @param query
+    *           Query
+    * @param bindVariablesValues
+    *           Map<String, Object>
     * @return List<ScoredRow>
-    * @throws InvalidQueryException, QueryExecutionException
+    * @throws InvalidQueryException
+    *            , QueryExecutionException
     */
    public List<ScoredRow> execute(Query query, Map<String, Object> bindVariablesValues) throws InvalidQueryException,
       QueryExecutionException
@@ -120,7 +127,8 @@ public class SearchService implements Startable, ContentModificationListener, Se
    }
 
    /**
-    * @see org.xcmis.search.query.Searcher#execute(org.xcmis.search.model.Query, java.util.Map, org.xcmis.search.content.command.InvocationContext)
+    * @see org.xcmis.search.query.Searcher#execute(org.xcmis.search.model.Query,
+    *      java.util.Map, org.xcmis.search.content.command.InvocationContext)
     */
    @SuppressWarnings("unchecked")
    public List<ScoredRow> execute(Query query, Map<String, Object> bindVariablesValues,
@@ -156,7 +164,8 @@ public class SearchService implements Startable, ContentModificationListener, Se
    }
 
    /**
-    * @see org.xcmis.search.content.ContentModificationListener#update(org.xcmis.search.content.ContentEntry, java.lang.String)
+    * @see org.xcmis.search.content.ContentModificationListener#update(org.xcmis.search.content.ContentEntry,
+    *      java.lang.String)
     */
    public void update(ContentEntry addedEntry, String removedEntry) throws IndexModificationException
    {
@@ -174,7 +183,8 @@ public class SearchService implements Startable, ContentModificationListener, Se
    }
 
    /**
-    * @see org.xcmis.search.content.ContentModificationListener#update(java.util.List, java.util.Set)
+    * @see org.xcmis.search.content.ContentModificationListener#update(java.util.List,
+    *      java.util.Set)
     */
    public void update(List<ContentEntry> addedEntries, Set<String> removedEntries) throws IndexModificationException
    {
@@ -182,7 +192,8 @@ public class SearchService implements Startable, ContentModificationListener, Se
    }
 
    /**
-    * @see org.xcmis.search.content.ContentModificationListener#update(java.util.List, java.util.Set, org.xcmis.search.content.command.InvocationContext)
+    * @see org.xcmis.search.content.ContentModificationListener#update(java.util.List,
+    *      java.util.Set, org.xcmis.search.content.command.InvocationContext)
     */
    public void update(List<ContentEntry> addedEntries, Set<String> removedEntries, InvocationContext invocationContext)
       throws IndexModificationException
@@ -208,8 +219,10 @@ public class SearchService implements Startable, ContentModificationListener, Se
     * Add interceptors that handle {@link ModifyIndexCommand} and
     * {@link ExecuteSelectorCommand}
     * 
-    * @param interceptorChain InterceptorChain
-    * @throws SearchServiceException if error occurs
+    * @param interceptorChain
+    *           InterceptorChain
+    * @throws SearchServiceException
+    *            if error occurs
     */
    protected void addQueryableIndexStorageInterceptor(InterceptorChain interceptorChain) throws SearchServiceException
    {

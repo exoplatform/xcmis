@@ -134,8 +134,8 @@ public abstract class AbstractLuceneQueryableIndexStorage extends QueryableIndex
          "The RootParentUuid  argument may not be null in IndexConfiguration");
       Validate.notNull(serviceConfiguration.getIndexConfuguration().getRootUuid(),
          "The RootUuid may not be null in IndexConfiguration");
-      Validate.notNull(serviceConfiguration.getIndexConfuguration().getDocumentReaderService(),
-         "The DocumentReaderService may not be null in IndexConfiguration");
+      Validate.notNull(serviceConfiguration.getIndexConfuguration().getTikaConfiguration(),
+         "The TikaConfiguration may not be null in IndexConfiguration");
 
       this.tableResolver = serviceConfiguration.getTableResolver();
       this.nameConverter = serviceConfiguration.getNameConverter();
