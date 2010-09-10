@@ -15,6 +15,10 @@
          <artifactId>xcmis-spi</artifactId>
          <scope>compile</scope>
       </dependency>
+         <dependency>
+            <groupId>org.exoplatform.kernel</groupId>
+            <artifactId>exo.kernel.container</artifactId>
+         </dependency>
       <!-- CXF dependencies -->
       <dependency>
          <groupId>org.apache.cxf</groupId>
