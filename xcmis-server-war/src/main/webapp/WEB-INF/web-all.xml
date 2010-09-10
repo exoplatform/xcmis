@@ -7,8 +7,8 @@
    <display-name>xCMIS Application</display-name>
 
    <filter>
-      <filter-name>SetCurrentIdentityFilter</filter-name>
-      <filter-class>org.exoplatform.services.security.web.SetCurrentIdentityFilter</filter-class>
+      <filter-name>UserContextInitializerFilter</filter-name>
+      <filter-class>org.xcmis.server.UserContextInitializerFilter</filter-class>
    </filter>
 
    <filter>
@@ -21,7 +21,7 @@
    </filter>
 
    <filter-mapping>
-      <filter-name>SetCurrentIdentityFilter</filter-name>
+      <filter-name>UserContextInitializerFilter</filter-name>
       <url-pattern>/*</url-pattern>
    </filter-mapping>
 
