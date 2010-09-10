@@ -58,7 +58,7 @@ public class IndexConfiguration
    /**
     * Implementation of {@link QueryableIndexStorage}.
     */
-   private String queryableIndexStorage;
+   private final String queryableIndexStorage;
 
    /**
     * In memory index storage with default Tika configuration
@@ -132,12 +132,4 @@ public class IndexConfiguration
       return tikaConfiguration;
    }
 
-   /**
-    * @param queryableIndexStorage
-    *           the queryableIndexStorage to set
-    */
-   public void setQueryableIndexStorage(String queryableIndexStorage)
-   {
-      this.queryableIndexStorage = queryableIndexStorage;
-   }
 }
