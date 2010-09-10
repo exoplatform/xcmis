@@ -1363,7 +1363,7 @@ public class StorageImpl implements Storage
    {
       try
       {
-         IndexConfiguration indexConfiguration = new IndexConfiguration("", getRepositoryInfo().getRootFolderId());
+         IndexConfiguration indexConfiguration = new IndexConfiguration(getRepositoryInfo().getRootFolderId());
 
          CmisSchema schema = new CmisSchema(this);
          CmisSchemaTableResolver tableResolver = new CmisSchemaTableResolver(new ToStringNameConverter(), schema, this);
