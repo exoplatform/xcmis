@@ -19,7 +19,6 @@
 
 package org.xcmis.spi;
 
-import org.exoplatform.services.security.Identity;
 import org.xcmis.spi.model.AccessControlEntry;
 import org.xcmis.spi.model.AllowableActions;
 import org.xcmis.spi.model.BaseType;
@@ -45,22 +44,6 @@ import java.util.Set;
  */
 public class PermissionService
 {
-
-   /**
-    * Calculate allowable actions for specified object.
-    *
-    * @param object object
-    * @param userIdentity user's identity
-    * @param repositoryInfo RepositoryInfo
-    * @return allowable actions for object
-    * @see Identity
-    */
-   @Deprecated
-   public AllowableActions calculateAllowableActions(ObjectData object, Identity userIdentity,
-      RepositoryInfo repositoryInfo)
-   {
-      return calculateAllowableActions(object, userIdentity != null ? userIdentity.getUserId() : null, repositoryInfo);
-   }
 
    /**
     * Calculate allowable actions for specified object.
@@ -371,52 +354,6 @@ public class PermissionService
       }
 
       return actions;
-   }
-
-   /**
-    * @param object object
-    * @param permissions set of actions to be checked
-    * @param userIdentity user's identity
-    * @param repositoryInfo TODO
-    * @return <code>true</code> if user has all <code>permissions</code> and
-    *         <code>false</code> otherwise
-    */
-   @Deprecated
-   public boolean hasPermission(ObjectData object, Collection<String> permissions, Identity userIdentity,
-      RepositoryInfo repositoryInfo)
-   {
-      //      if (permissions == null || permissions.size() == 0)
-      //      {
-      //         throw new CmisRuntimeException("Permissions set may not be null or empty.");
-      //      }
-      //      if (userIdentity == null)
-      //      {
-      //         userIdentity = new Identity(repositoryInfo.getPrincipalAnonymous(), new HashSet<MembershipEntry>());
-      //      }
-      //      List<AccessControlEntry> acl = object.getACL(false);
-      //      if (acl.size() == 0)
-      //      {
-      //         return true;
-      //      }
-      //      Map<String, Set<String>> map = new HashMap<String, Set<String>>();
-      //      CmisUtils.addAclToPermissionMap(map, acl);
-      //
-      //      // Check for 'any principal' first the for current principal.
-      //      for (String principal : new String[]{repositoryInfo.getPrincipalAnyone(), userIdentity.getUserId()})
-      //      {
-      //         Set<String> p = map.get(principal);
-      //         if (p != null)
-      //         {
-      //            if (p.contains(BasicPermissions.CMIS_ALL.value()))
-      //            {
-      //               // All operations allowed.
-      //               return true;
-      //            }
-      //            return p.containsAll(permissions);
-      //         }
-      //      }
-      //      return false;
-      return hasPermission(object, permissions, userIdentity != null ? userIdentity.getUserId() : null, repositoryInfo);
    }
 
    /**
