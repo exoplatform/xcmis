@@ -24,18 +24,13 @@
          <scope>test</scope>
       </dependency>
       <dependency>
-         <groupId>org.exoplatform.core</groupId>
-         <artifactId>exo.core.component.document</artifactId>
-         <exclusions>
-            <exclusion>
-               <groupId>pdfbox</groupId>
-               <artifactId>pdfbox</artifactId>
-            </exclusion>
-         </exclusions>
+         <groupId>org.slf4j</groupId>
+         <artifactId>slf4j-api</artifactId>
       </dependency>
       <dependency>
-         <groupId>org.apache.pdfbox</groupId>
-         <artifactId>pdfbox</artifactId>
+         <groupId>junit</groupId>
+         <artifactId>junit</artifactId>
+         <scope>test</scope>
       </dependency>
    </dependencies>
 </project>
