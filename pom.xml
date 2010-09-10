@@ -869,7 +869,6 @@
       <!-- The list of excluded modules from common build. Do not uncomment it. Build them by yourself. -->
       <module>xcmis-server-tomcat</module>
       <module>xcmis-server-tomcat-demo</module>
-      <module>xcmis-docs</module>
       <!--module>xcmis-spi-tck</module-->
    </modules>
    <prerequisites>
