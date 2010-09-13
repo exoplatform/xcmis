@@ -22,7 +22,7 @@ import org.xcmis.search.content.command.InvocationContext;
 import org.xcmis.search.content.interceptors.Visitor;
 
 /**
- *  Get content entry command.
+ * Get content entry command.
  */
 public class GetContentEntryCommand implements AbstractReadDataCommand
 {
@@ -41,7 +41,9 @@ public class GetContentEntryCommand implements AbstractReadDataCommand
    }
 
    /**
-    * @see org.exoplatform.services.jcr.impl.storage.command.JcrCommand#acceptVisitor(org.exoplatform.services.jcr.impl.storage.command.JcrInvocationContext, org.jboss.cache.commands.Visitor)
+    * 
+    * @see org.xcmis.search.content.command.VisitableCommand#acceptVisitor(org.xcmis.search.content.command.InvocationContext,
+    *      org.xcmis.search.content.interceptors.Visitor)
     */
    public Object acceptVisitor(InvocationContext ctx, Visitor visitor) throws Throwable
    {

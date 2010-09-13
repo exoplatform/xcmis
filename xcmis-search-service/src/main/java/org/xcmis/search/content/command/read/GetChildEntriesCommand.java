@@ -22,7 +22,7 @@ import org.xcmis.search.content.command.InvocationContext;
 import org.xcmis.search.content.interceptors.Visitor;
 
 /**
- *  Get child entries command.
+ * Get child entries command.
  */
 public class GetChildEntriesCommand implements AbstractReadDataCommand
 {
@@ -32,7 +32,8 @@ public class GetChildEntriesCommand implements AbstractReadDataCommand
    private final String parentUuid;
 
    /**
-    * @param parentUuid String
+    * @param parentUuid
+    *           String
     */
    public GetChildEntriesCommand(String parentUuid)
    {
@@ -49,7 +50,9 @@ public class GetChildEntriesCommand implements AbstractReadDataCommand
    }
 
    /**
-    * @see org.exoplatform.services.jcr.impl.storage.command.JcrCommand#acceptVisitor(org.exoplatform.services.jcr.impl.storage.command.JcrInvocationContext, org.jboss.cache.commands.Visitor)
+    * 
+    * @see org.xcmis.search.content.command.VisitableCommand#acceptVisitor(org.xcmis.search.content.command.InvocationContext,
+    *      org.xcmis.search.content.interceptors.Visitor)
     */
    public Object acceptVisitor(InvocationContext ctx, Visitor visitor) throws Throwable
    {
