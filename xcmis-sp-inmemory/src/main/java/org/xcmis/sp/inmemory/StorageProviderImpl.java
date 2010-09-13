@@ -19,8 +19,6 @@
 
 package org.xcmis.sp.inmemory;
 
-import org.exoplatform.container.xml.InitParams;
-import org.exoplatform.container.xml.ObjectParameter;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.PermissionService;
@@ -43,35 +41,19 @@ public class StorageProviderImpl implements StorageProvider
 
    private RenditionManager renditionManager;
 
-   public StorageProviderImpl(InitParams initParams, PermissionService permissionService)
+   
+   public StorageProviderImpl(String repositoryId, String repositoryName, String description, String maxStorageMemSize,
+      String maxItemsNumber, PermissionService permissionService)
    {
-      if (initParams != null)
-      {
-         ObjectParameter param = initParams.getObjectParam("configs");
-
-         if (param == null)
-         {
-            LOG.error("Init-params does not contain configuration for any CMIS repository.");
-         }
-
-         StorageProviderConfig confs = (StorageProviderConfig)param.getObject();
-         this.storageConfig = confs.getStorage();
-         this.renditionManager = RenditionManager.getInstance();
-         this.storageImpl = new StorageImpl(storageConfig, renditionManager, permissionService);
-      }
-      else
-      {
-         LOG.error("Not found configuration for any storages.");
-      }
+      this(new StorageConfiguration(repositoryId, repositoryName, description, maxStorageMemSize, maxItemsNumber),
+         permissionService != null ? permissionService : new PermissionService());
    }
 
-   public StorageProviderImpl(String repositoryId, String repositoryName, String description, String maxStorageMemSize,
-      String maxItemsNumber)
+   private StorageProviderImpl(StorageConfiguration storageConfig, PermissionService permissionService)
    {
-      this.storageConfig =
-         new StorageConfiguration(repositoryId, repositoryName, description, maxStorageMemSize, maxItemsNumber);
+      this.storageConfig = storageConfig;
       this.renditionManager = RenditionManager.getInstance();
-      this.storageImpl = new StorageImpl(storageConfig, renditionManager, new PermissionService());
+      this.storageImpl = new StorageImpl(storageConfig, renditionManager, permissionService);
    }
 
    public Connection getConnection()

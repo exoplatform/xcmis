@@ -34,7 +34,7 @@ public class InmemoryCmisRegistryFactory implements CmisRegistryFactory
 
    public InmemoryCmisRegistryFactory()
    {
-      reg.addStorage(new org.xcmis.sp.inmemory.StorageProviderImpl("cmis1", "cmis1", "", null, null));
+      reg.addStorage(new org.xcmis.sp.inmemory.StorageProviderImpl("cmis1", "cmis1", "", null, null, null));
    }
 
    public CmisRegistry getRegistry()
