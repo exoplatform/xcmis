@@ -26,7 +26,7 @@ import org.xcmis.spi.utils.MimeType;
 /**
  * @author <a href="mailto:Sergey.Kabashnyuk@exoplatform.org">Sergey
  *         Kabashnyuk</a>
- * @version $Id: exo-jboss-codetemplates.xml 34360 2009-07-22 23:58:59Z ksm $
+ * @version $Id: MultifilingUnfilingTest.java 34360 2009-07-22 23:58:59Z ksm $
  *
  */
 public class MultifilingUnfilingTest extends BaseQueryTest
