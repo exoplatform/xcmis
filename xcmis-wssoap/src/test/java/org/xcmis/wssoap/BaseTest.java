@@ -30,7 +30,6 @@ import org.apache.cxf.jaxws.JaxWsServerFactoryBean;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.service.Service;
 import org.apache.cxf.service.invoker.BeanInvoker;
-import org.exoplatform.container.StandaloneContainer;
 import org.xcmis.core.CmisObjectType;
 import org.xcmis.core.CmisPropertiesType;
 import org.xcmis.core.CmisProperty;
@@ -61,32 +60,15 @@ public abstract class BaseTest extends TestCase
 
    protected String repositoryId = "cmis1";
 
-   protected StandaloneContainer container;
-
    protected Connection conn;
 
    protected String rootFolderId;
 
    protected String testFolderId;
 
-   private static final String SP_CONF_DEFAULT = "/conf/standalone/test-sp-inmemory-configuration.xml";
-
    @Override
    public void setUp() throws Exception
    {
-      String propertySpConf = System.getProperty("sp.conf");
-
-      String sp_conf =
-         propertySpConf == null || propertySpConf.length() == 0 || propertySpConf.equalsIgnoreCase("${sp.conf}")
-            ? SP_CONF_DEFAULT : propertySpConf;
-
-      String containerConf = getClass().getResource(sp_conf).toString();
-      StandaloneContainer.setConfigurationURL(containerConf);
-      container = StandaloneContainer.getInstance();
-
-      UserContext ctx = new UserContext("root");
-      UserContext.setCurrent(ctx);
-
       conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
       rootFolderId = conn.getStorage().getRepositoryInfo().getRootFolderId();

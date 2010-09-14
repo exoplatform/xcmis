@@ -22,8 +22,6 @@ package org.xcmis.wssoap.impl.server;
 import org.apache.cxf.Bus;
 import org.apache.cxf.BusFactory;
 import org.apache.cxf.transport.servlet.CXFNonSpringServlet;
-import org.exoplatform.container.ExoContainer;
-import org.exoplatform.container.ExoContainerContext;
 import org.xcmis.spi.utils.Logger;
 
 import javax.servlet.ServletConfig;
@@ -57,15 +55,14 @@ public class CmisSoapServlet extends CXFNonSpringServlet
       super.loadBus(servletConfig);
       if (LOG.isDebugEnabled())
          LOG.debug("loadBus method entering");
-      ExoContainer container = ExoContainerContext.getCurrentContainer();
-      if (LOG.isDebugEnabled())
-         LOG.debug("SOAPServlet.loadBus() container = " + container);
 
-      WebServiceLoader loader = (WebServiceLoader)container.getComponentInstance(WebServiceLoader.class);
-      if (LOG.isDebugEnabled())
-         LOG.debug("SOAPServlet.loadBus() loader = " + loader);
-      loader.init();
-
+      WebServiceLoader loader = (WebServiceLoader)servletConfig.getServletContext().getAttribute("org.xcmis.wssoap.WebServiceLoader");
+      if (loader == null)
+      {
+         loader = new WebServiceLoader();
+         loader.init();
+         servletConfig.getServletContext().setAttribute("org.xcmis.wssoap.WebServiceLoader", loader);
+      }
       Bus bus = getBus();
       BusFactory.setDefaultBus(bus);
    }

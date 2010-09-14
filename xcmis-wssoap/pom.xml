@@ -16,8 +16,8 @@
          <scope>compile</scope>
       </dependency>
          <dependency>
-            <groupId>org.exoplatform.kernel</groupId>
-            <artifactId>exo.kernel.container</artifactId>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
          </dependency>
       <!-- CXF dependencies -->
       <dependency>
@@ -98,10 +98,6 @@
                   <configuration>
                      <systemProperties>
                         <property>
-                           <name>sp.conf</name>
-                           <value>/conf/standalone/test-sp-inmemory-configuration.xml</value>
-                        </property>
-                        <property>
                            <name>org.xcmis.CmisRegistryFactory</name>
                            <value>org.xcmis.sp.inmemory.tck.InmemoryCmisRegistryFactory</value>
                         </property>
@@ -145,8 +141,8 @@
                   <configuration>
                      <systemProperties>
                         <property>
-                           <name>sp.conf</name>
-                           <value>/conf/standalone/test-sp-jcr-configuration.xml</value>
+                           <name>org.xcmis.CmisRegistryFactory</name>
+                           <value>org.exoplatform.ecms.xcmis.sp.tck.JcrCmisRegistryFactory</value>
                         </property>
                      </systemProperties>
                      <argLine>-Xms150m -Xmx150m</argLine>
@@ -158,8 +154,8 @@
          </build>
       </profile>
 -->
-   </profiles>
 
+   </profiles>
    <build>
       <plugins>
          <plugin>
