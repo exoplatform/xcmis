@@ -21,8 +21,7 @@ package org.xcmis.sp.inmemory;
 
 import junit.framework.TestCase;
 
-import org.exoplatform.services.log.LogConfigurator;
-import org.exoplatform.services.log.impl.Log4JConfigurator;
+import org.xcmis.sp.inmemory.query.BaseQueryTest;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.DocumentData;
@@ -35,6 +34,7 @@ import org.xcmis.spi.model.PropertyDefinition;
 import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.model.VersioningState;
 import org.xcmis.spi.model.impl.StringProperty;
+import org.xcmis.spi.utils.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -58,11 +58,6 @@ public abstract class BaseTest extends TestCase
    public void setUp() throws Exception
    {
       super.setUp();
-      LogConfigurator lc = new Log4JConfigurator();
-      Properties props = new Properties();
-      props.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("conf/log4j.properties"));
-      lc.configure(props);
-
       HashMap<String, Object> properties = new HashMap<String, Object>();
       properties.put("exo.cmis.changetoken.feature", false);
       StorageConfiguration configuration = new StorageConfiguration(storageId, properties);
