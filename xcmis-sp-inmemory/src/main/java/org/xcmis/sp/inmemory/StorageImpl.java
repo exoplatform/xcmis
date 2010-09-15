@@ -183,7 +183,7 @@ public class StorageImpl implements Storage
 
    private final long maxStorageMemSize;
 
-   private final int maxItemsNumber;
+   private final long maxItemsNumber;
 
    private PermissionService permissionService;
 
@@ -198,15 +198,8 @@ public class StorageImpl implements Storage
    {
       this.configuration = configuration;
 
-      this.maxStorageMemSize =
-         configuration.getProperties().get(StorageConfiguration.MAX_STORAGE_MEM_SIZE) == null
-            ? StorageConfiguration.DEFAULT_MAX_STORAGE_MEM_SIZE : StorageConfiguration.parseNumber(
-               (String)configuration.getProperties().get(StorageConfiguration.MAX_STORAGE_MEM_SIZE)).longValue();
-
-      this.maxItemsNumber =
-         configuration.getProperties().get(StorageConfiguration.MAX_ITEMS_NUMBER) == null
-            ? StorageConfiguration.DEFAULT_MAX_STORAGE_NUMBER_ITEMS : StorageConfiguration.parseNumber(
-               (String)configuration.getProperties().get(StorageConfiguration.MAX_ITEMS_NUMBER)).intValue();
+      this.maxStorageMemSize = (Long)configuration.getProperties().get(StorageConfiguration.MAX_STORAGE_MEM_SIZE);
+      this.maxItemsNumber = (Long)configuration.getProperties().get(StorageConfiguration.MAX_ITEMS_NUMBER);
 
       this.entries = new ConcurrentHashMap<String, Entry>();
       this.children = new ConcurrentHashMap<String, Set<String>>();
@@ -1329,7 +1322,7 @@ public class StorageImpl implements Storage
 
    void validateMaxItemsNumber(ObjectData object) throws StorageException
    {
-      if (entries.size() > maxItemsNumber)
+      if (maxItemsNumber != -1L && entries.size() > maxItemsNumber)
       {
          throw new StorageException("Unable add new object in storage. Max number '" + maxItemsNumber
             + "' of items is reached."
@@ -1352,7 +1345,7 @@ public class StorageImpl implements Storage
             size += contentValue.getBytes().length;
          }
       }
-      if (size + content.length > maxStorageMemSize)
+      if (maxStorageMemSize != -1L && size + content.length > maxStorageMemSize)
       {
          throw new StorageException("Unable add new object in storage. Max allowed memory size '" + maxStorageMemSize
             + "' bytes is reached." + " Increase or set storage configuration property 'org.xcmis.inmemory.maxmem'.");

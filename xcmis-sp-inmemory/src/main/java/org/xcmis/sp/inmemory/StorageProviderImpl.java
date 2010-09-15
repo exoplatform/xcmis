@@ -42,20 +42,31 @@ public class StorageProviderImpl implements StorageProvider
    private RenditionManager renditionManager;
 
    
-   public StorageProviderImpl(String repositoryId, String repositoryName, String description, String maxStorageMemSize,
-      String maxItemsNumber, PermissionService permissionService)
+   /**
+    * Instantiates a new storage provider impl.
+    * 
+    * @param repositoryId String repository id
+    * @param repositoryName String repository name
+    * @param description String description
+    * @param maxStorageMemSize the max storage memory size in bytes or -1L for unbounded
+    * @param maxItemsNumber the maximum items number, or -1L for unbounded
+    * @param permissionService the permission service
+    */
+   public StorageProviderImpl(String repositoryId, String repositoryName, String description, long maxStorageMemSize,
+      long maxItemsNumber, PermissionService permissionService)
    {
-      this(new StorageConfiguration(repositoryId, repositoryName, description, maxStorageMemSize, maxItemsNumber),
-         permissionService != null ? permissionService : new PermissionService());
-   }
-
-   private StorageProviderImpl(StorageConfiguration storageConfig, PermissionService permissionService)
-   {
-      this.storageConfig = storageConfig;
+      this.storageConfig =
+         new StorageConfiguration(repositoryId, repositoryName, description, maxStorageMemSize, maxItemsNumber);
       this.renditionManager = RenditionManager.getInstance();
-      this.storageImpl = new StorageImpl(storageConfig, renditionManager, permissionService);
+      this.storageImpl =
+         new StorageImpl(storageConfig, renditionManager, permissionService != null ? permissionService
+            : new PermissionService());
    }
+   
 
+   /** 
+    * @see org.xcmis.spi.StorageProvider#getConnection()
+    */
    public Connection getConnection()
    {
       if (storageImpl == null)
@@ -66,17 +77,12 @@ public class StorageProviderImpl implements StorageProvider
       return new InmemConnection(storageImpl);
    }
 
+   /**
+    * @see org.xcmis.spi.StorageProvider#getStorageID()
+    */
    public String getStorageID()
    {
       return storageConfig.getId();
-   }
-
-   /**
-    * @see org.picocontainer.Startable#stop()
-    */
-   public void stop()
-   {
-
    }
 
    public static class StorageProviderConfig

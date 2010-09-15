@@ -44,10 +44,6 @@ public class StorageConfiguration
 
    public static String MAX_ITEMS_NUMBER = "org.xcmis.inmemory.maxitems";
 
-   public static int DEFAULT_MAX_STORAGE_MEM_SIZE = 104857600; // 100MB
-
-   public static int DEFAULT_MAX_STORAGE_NUMBER_ITEMS = 100;
-
    public StorageConfiguration()
    {
    }
@@ -59,7 +55,14 @@ public class StorageConfiguration
    public StorageConfiguration(String id, Map<String, Object> properties)
    {
       this.id = id;
-      this.properties = properties;
+      if (properties == null)
+        this.properties = new HashMap<String, Object>();
+      else
+         this.properties = properties;
+      if (!this.properties.containsKey(MAX_STORAGE_MEM_SIZE))
+         this.properties.put(MAX_STORAGE_MEM_SIZE, -1L);
+      if (!this.properties.containsKey(MAX_ITEMS_NUMBER))
+         this.properties.put(MAX_ITEMS_NUMBER, -1L);
    }
 
    /**
@@ -69,16 +72,14 @@ public class StorageConfiguration
     * @param maxMem max memory size
     * @param maxObjects max objects count
     */
-   public StorageConfiguration(String id, String name, String description, String maxMem, String maxObjects)
+   public StorageConfiguration(String id, String name, String description, long maxMem, long maxObjects)
    {
       this.id = id;
       this.name = name;
       this.description = description;
       this.properties = new HashMap<String, Object>();
-      if (maxMem != null)
-         this.properties.put(MAX_STORAGE_MEM_SIZE, maxMem);
-      if (maxObjects != null)
-         this.properties.put(MAX_ITEMS_NUMBER, maxObjects);
+      this.properties.put(MAX_STORAGE_MEM_SIZE, maxMem);
+      this.properties.put(MAX_ITEMS_NUMBER, maxObjects);
    }
 
    /**
@@ -153,47 +154,5 @@ public class StorageConfiguration
    public void setDescription(String description)
    {
       this.description = description;
-   }
-
-   public static Double parseNumber(String text)
-   {
-      text = text.toUpperCase();
-
-      if (text.endsWith("K"))
-      {
-         return Double.valueOf(text.substring(0, text.length() - 1)) * 1024d;
-      }
-      else if (text.endsWith("KB"))
-      {
-         return Double.valueOf(text.substring(0, text.length() - 2)) * 1024d;
-      }
-      else if (text.endsWith("M"))
-      {
-         return Double.valueOf(text.substring(0, text.length() - 1)) * 1048576d; // 1024 * 1024
-      }
-      else if (text.endsWith("MB"))
-      {
-         return Double.valueOf(text.substring(0, text.length() - 2)) * 1048576d; // 1024 * 1024
-      }
-      else if (text.endsWith("G"))
-      {
-         return Double.valueOf(text.substring(0, text.length() - 1)) * 1073741824d; // 1024 * 1024 * 1024
-      }
-      else if (text.endsWith("GB"))
-      {
-         return Double.valueOf(text.substring(0, text.length() - 2)) * 1073741824d; // 1024 * 1024 * 1024
-      }
-      else if (text.endsWith("T"))
-      {
-         return Double.valueOf(text.substring(0, text.length() - 1)) * 1099511627776d; // 1024 * 1024 * 1024 * 1024
-      }
-      else if (text.endsWith("TB"))
-      {
-         return Double.valueOf(text.substring(0, text.length() - 2)) * 1099511627776d; // 1024 * 1024 * 1024 * 1024
-      }
-      else
-      {
-         return Double.valueOf(text);
-      }
    }
 }
