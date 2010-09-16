@@ -24,6 +24,11 @@
          <artifactId>slf4j-log4j12</artifactId>
          <scope>test</scope>
       </dependency>
+      <dependency>
+         <groupId>junit</groupId>
+         <artifactId>junit</artifactId>
+         <scope>test</scope>
+      </dependency>
    </dependencies>
    <profiles>
       <profile>
@@ -37,12 +42,6 @@
                <artifactId>xcmis-sp-inmemory</artifactId>
                <scope>test</scope>
             </dependency>
-<!--            <dependency>-->
-<!--               <groupId>org.exoplatform.ecms</groupId>-->
-<!--               <artifactId>exo-ecms-ext-xcmis-sp</artifactId>-->
-<!--               <version>2.1.0-CR03-SNAPSHOT</version>-->
-<!--               <scope>test</scope>-->
-<!--            </dependency>-->
          </dependencies>
          <build>
             <plugins>
@@ -51,9 +50,7 @@
                   <artifactId>maven-surefire-plugin</artifactId>
                   <configuration>
                      <systemPropertyVariables>
-                     <org.xcmis.CmisRegistryFactory>org.xcmis.sp.inmemory.tck.InmemoryCmisRegistryFactory</org.xcmis.CmisRegistryFactory>
-<!--                     <org.xcmis.CmisRegistryFactory>org.exoplatform.ecms.xcmis.sp.tck.JcrCmisRegistryFactory</org.xcmis.CmisRegistryFactory>-->
-<!--                     <org.xcmis.CmisRegistryFactory>org.xcmis.sp.sample.fs.tck.RegistryFactoryImpl</org.xcmis.CmisRegistryFactory>-->
+                        <org.xcmis.CmisRegistryFactory>org.xcmis.sp.inmemory.tck.InmemoryCmisRegistryFactory</org.xcmis.CmisRegistryFactory>
                      </systemPropertyVariables>
                      <includes>
                         <include>**/AllTests.java</include>

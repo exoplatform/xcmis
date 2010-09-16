@@ -379,6 +379,11 @@
             <version>1.1.0</version>
          </dependency>
          <dependency>
+            <groupId>commons-fileupload</groupId>
+            <artifactId>commons-fileupload</artifactId>
+            <version>1.0</version>
+         </dependency>
+         <dependency>
             <groupId>org.apache.shindig</groupId>
             <artifactId>shindig-common</artifactId>
             <version>${shindig.version}</version>
@@ -877,8 +882,8 @@
       <module>xcmis-wssoap</module>
       <module>xcmis-server-war</module>
       <!-- The list of excluded modules from common build. Do not uncomment it. Build them by yourself. -->
-      <module>xcmis-server-tomcat</module>
-      <module>xcmis-server-tomcat-demo</module>
+      <!--module>xcmis-server-tomcat</module-->
+      <!--module>xcmis-server-tomcat-demo</module-->
       <!--module>xcmis-spi-tck</module-->
    </modules>
    <prerequisites>

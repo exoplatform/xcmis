@@ -63,6 +63,7 @@ public class ByteArrayValue extends Value
       {
          bout.write(buf, 0, r);
       }
+      stream.close();
       byte[] bytes = bout.toByteArray();
       return new ByteArrayValue(bytes);
    }
