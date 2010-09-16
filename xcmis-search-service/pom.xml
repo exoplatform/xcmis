@@ -33,16 +33,6 @@
       <dependency>
          <groupId>org.xcmis</groupId>
          <artifactId>xcmis-spi</artifactId>
-         <exclusions>
-            <exclusion>
-               <groupId>org.exoplatform.core</groupId>
-               <artifactId>exo.core.component.document</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.exoplatform.core</groupId>
-               <artifactId>exo.core.component.security.core</artifactId>
-            </exclusion>
-         </exclusions>
       </dependency>
       <!-- Logger -->
       <dependency>
