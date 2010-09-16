@@ -58,7 +58,7 @@ public class StorageConfiguration
       if (properties == null)
         this.properties = new HashMap<String, Object>();
       else
-         this.properties = properties;
+         this.properties = new HashMap<String, Object>(properties);
       if (!this.properties.containsKey(MAX_STORAGE_MEM_SIZE))
          this.properties.put(MAX_STORAGE_MEM_SIZE, -1L);
       if (!this.properties.containsKey(MAX_ITEMS_NUMBER))
@@ -84,7 +84,7 @@ public class StorageConfiguration
 
    /**
     * Get repository id.
-    * 
+    *
     * @return the repository id
     */
    public String getId()
@@ -94,7 +94,7 @@ public class StorageConfiguration
 
    /**
     * Get repository description.
-    * 
+    *
     * @return the repository description
     */
    public String getDescription()
@@ -104,7 +104,7 @@ public class StorageConfiguration
 
    /**
     * Get repository name.
-    * 
+    *
     * @return the repository name
     */
    public String getName()

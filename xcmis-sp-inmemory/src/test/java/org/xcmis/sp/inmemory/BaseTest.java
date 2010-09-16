@@ -21,24 +21,24 @@ package org.xcmis.sp.inmemory;
 
 import junit.framework.TestCase;
 
-import org.xcmis.sp.inmemory.query.BaseQueryTest;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.DocumentData;
 import org.xcmis.spi.FolderData;
 import org.xcmis.spi.ObjectData;
+import org.xcmis.spi.PermissionService;
 import org.xcmis.spi.PolicyData;
 import org.xcmis.spi.RelationshipData;
+import org.xcmis.spi.RenditionManager;
+import org.xcmis.spi.UserContext;
 import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.PropertyDefinition;
 import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.model.VersioningState;
 import org.xcmis.spi.model.impl.StringProperty;
-import org.xcmis.spi.utils.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
@@ -55,6 +55,8 @@ public abstract class BaseTest extends TestCase
 
    protected TypeDefinition documentTypeDefinition;
 
+   protected String principal = "root";
+
    public void setUp() throws Exception
    {
       super.setUp();
@@ -62,7 +64,8 @@ public abstract class BaseTest extends TestCase
       properties.put("exo.cmis.changetoken.feature", false);
       StorageConfiguration configuration = new StorageConfiguration(storageId, properties);
 
-      storage = new StorageImpl(configuration);
+      storage = new StorageImpl(configuration, RenditionManager.getInstance(), new PermissionService());
+      UserContext.setCurrent(new UserContext(principal));
       rootFolder = (FolderData)storage.getObjectById(storage.getRepositoryInfo().getRootFolderId());
 
       documentTypeDefinition = storage.getTypeDefinition("cmis:document", true);

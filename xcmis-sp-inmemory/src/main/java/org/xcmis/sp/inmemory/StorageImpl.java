@@ -122,7 +122,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
  * number of items and total amount of content. Storage is not designed for high
  * concurrency load. In some cases data in storage can be in inconsistency
  * state.
- * 
+ *
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id: StorageImpl.java 804 2010-04-16 16:48:59Z
  *          alexey.zavizionov@gmail.com $
@@ -194,7 +194,7 @@ public class StorageImpl implements Storage
       this.permissionService = permissionService;
    }
 
-   public StorageImpl(StorageConfiguration configuration)
+   protected StorageImpl(StorageConfiguration configuration)
    {
       this.configuration = configuration;
 
@@ -335,8 +335,7 @@ public class StorageImpl implements Storage
       root.put(CmisConstants.LAST_MODIFICATION_DATE, new DateValue(Calendar.getInstance()));
       root.put(CmisConstants.LAST_MODIFIED_BY, new StringValue("system"));
 
-      // TODO : concurrent
-      Map<String, Set<String>> pm = new HashMap<String, Set<String>>();
+      Map<String, Set<String>> pm = new ConcurrentHashMap<String, Set<String>>();
       Set<String> perms = new HashSet<String>();
       perms.add("cmis:all");
       pm.put("any", perms);
@@ -909,7 +908,7 @@ public class StorageImpl implements Storage
     */
    public ItemsIterator<ChangeEvent> getChangeLog(String changeLogToken) throws ConstraintException
    {
-      // TODO
+      // TODO implement feature
       return CmisUtils.emptyItemsIterator();
    }
 
@@ -1424,7 +1423,7 @@ public class StorageImpl implements Storage
 
       /**
        * Return comparable location of the object
-       * 
+       *
        * @param identifer
        * @return
        */

@@ -24,7 +24,6 @@ import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.PermissionService;
 import org.xcmis.spi.RenditionManager;
 import org.xcmis.spi.StorageProvider;
-import org.xcmis.spi.utils.Logger;
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
@@ -33,7 +32,7 @@ import org.xcmis.spi.utils.Logger;
 public class StorageProviderImpl implements StorageProvider
 {
 
-   private static final Logger LOG = Logger.getLogger(StorageProviderImpl.class);
+   //private static final Logger LOG = Logger.getLogger(StorageProviderImpl.class);
 
    private StorageImpl storageImpl = null;
 
@@ -41,14 +40,14 @@ public class StorageProviderImpl implements StorageProvider
 
    private RenditionManager renditionManager;
 
-   
    /**
     * Instantiates a new storage provider impl.
-    * 
+    *
     * @param repositoryId String repository id
     * @param repositoryName String repository name
     * @param description String description
-    * @param maxStorageMemSize the max storage memory size in bytes or -1L for unbounded
+    * @param maxStorageMemSize the max storage memory size in bytes or -1L for
+    *        unbounded
     * @param maxItemsNumber the maximum items number, or -1L for unbounded
     * @param permissionService the permission service
     */
@@ -62,9 +61,8 @@ public class StorageProviderImpl implements StorageProvider
          new StorageImpl(storageConfig, renditionManager, permissionService != null ? permissionService
             : new PermissionService());
    }
-   
 
-   /** 
+   /**
     * @see org.xcmis.spi.StorageProvider#getConnection()
     */
    public Connection getConnection()
