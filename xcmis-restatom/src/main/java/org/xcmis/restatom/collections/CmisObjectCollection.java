@@ -34,9 +34,6 @@ import org.apache.abdera.protocol.server.context.EmptyResponseContext;
 import org.apache.abdera.protocol.server.context.MediaResponseContext;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
 import org.apache.commons.codec.binary.Base64;
-import org.exoplatform.common.http.client.HTTPConnection;
-import org.exoplatform.common.http.client.HTTPResponse;
-import org.exoplatform.common.http.client.ModuleException;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.AtomUtils;
 import org.xcmis.restatom.abdera.ContentTypeElement;
@@ -65,10 +62,14 @@ import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.Rendition;
 import org.xcmis.spi.model.RepositoryCapabilities;
 import org.xcmis.spi.model.impl.StringProperty;
+import org.xcmis.spi.utils.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.security.Principal;
 import java.util.Calendar;
@@ -90,6 +91,67 @@ import javax.ws.rs.core.HttpHeaders;
  */
 public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisObject>
 {
+
+   private class HttpConnectionStream extends InputStream
+   {
+      private final HttpURLConnection httpConnection;
+
+      private InputStream inStream;
+
+      private boolean closed;
+
+      public HttpConnectionStream(HttpURLConnection httpConnection)
+      {
+         this.httpConnection = httpConnection;
+      }
+
+      public int read() throws IOException
+      {
+         if (inStream == null)
+         {
+            inStream = httpConnection.getInputStream();
+         }
+         int i = inStream.read();
+         if (i == -1)
+         {
+            if (!closed)
+            {
+               try
+               {
+                  inStream.close();
+                  httpConnection.disconnect();
+                  closed = true;
+               }
+               catch (IOException e)
+               {
+                  LOG.error(e.getMessage(), e);
+               }
+            }
+         }
+         return i;
+      }
+
+      @Override
+      protected void finalize() throws Throwable
+      {
+         if (!closed)
+         {
+            try
+            {
+               inStream.close();
+               httpConnection.disconnect();
+            }
+            catch (IOException e)
+            {
+               LOG.error(e.getMessage(), e);
+            }
+         }
+         super.finalize();
+      }
+   }
+
+   private static final Logger LOG = Logger.getLogger(CmisObjectCollection.class);
+
    /** The Constant SPACES_AIR_SPECIFIC_REFERER. */
    protected static final String SPACES_AIR_SPECIFIC_REFERER = "app:/CMISSpacesAir.swf";
 
@@ -1121,11 +1183,12 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
 
    /**
     * Get self link which provides the URI to retrieve this resource again.
-    * 
-    * The atom:link with relation self MUST be generated to return the URI of the feed. If paging or any
-    * other mechanism is used to filter, sort, or change the representation of the feed, the URI MUST
-    * point back a resource with the same representation.
-    * 
+    *
+    * The atom:link with relation self MUST be generated to return the URI of
+    * the feed. If paging or any other mechanism is used to filter, sort, or
+    * change the representation of the feed, the URI MUST point back a resource
+    * with the same representation.
+    *
     * @param id the object id
     * @param request the request context
     * @return link which provides the URI to retrieve this resource again.
@@ -1201,35 +1264,32 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
                }
                else
                {
-                  HTTPConnection connection = new HTTPConnection(//
-                     src.getScheme(), //
-                     src.getHost(), //
-                     src.getPort());
-                  // Disable user interaction.
-                  connection.setAllowUserInteraction(false);
-                  String path = src.getQuery() != null //
-                     ? src.getPath() + "?" + src.getQuery() //
-                     : src.getPath();
+                  URL url = null;
                   try
                   {
-                     HTTPResponse response = connection.Get(path);
-                     int status = response.getStatusCode();
-                     if (200 == status)
-                     {
-                        contentStream =
-                           new BaseContentStream(response.getInputStream(), null, org.xcmis.spi.utils.MimeType
-                              .fromString(response.getHeader("Content-Type")));
-                     }
-                     else
-                     {
-                        String msg =
-                           "Unable get content from URI : " + src.toString() + ". Response status is " + status;
-                        throw new ResponseContextException(createErrorResponse(msg, status));
-                     }
+                     url = src.toURL();
                   }
-                  catch (ModuleException ce)
+                  catch (URISyntaxException e)
                   {
-                     throw new ResponseContextException(createErrorResponse(ce, 500));
+                     String msg = "Invalid src attribute: " + src;
+                     throw new ResponseContextException(createErrorResponse(msg, 400));
+                  }
+                  // HTTP only
+                  HttpURLConnection httpConnection = (HttpURLConnection)url.openConnection();
+                  httpConnection.setRequestMethod("GET");
+                  httpConnection.setDoOutput(false);
+                  httpConnection.setDoInput(true);
+                  int status = httpConnection.getResponseCode();
+                  if (200 == status)
+                  {
+                     contentStream =
+                        new BaseContentStream(new HttpConnectionStream(httpConnection), null,
+                           org.xcmis.spi.utils.MimeType.fromString(httpConnection.getHeaderField("Content-Type")));
+                  }
+                  else
+                  {
+                     String msg = "Unable get content from URI : " + src.toString() + ". Response status is " + status;
+                     throw new ResponseContextException(createErrorResponse(msg, status));
                   }
                }
             }
