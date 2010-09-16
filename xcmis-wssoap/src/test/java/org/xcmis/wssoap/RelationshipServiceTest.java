@@ -48,7 +48,7 @@ public class RelationshipServiceTest extends BaseTest
    {
       super.setUp();
       server =
-         complexDeployService(SERVICE_ADDRESS, new RelationshipServicePortImpl(/*storageProvider*/), null, null, true);
+         complexDeployService(SERVICE_ADDRESS, new RelationshipServicePortImpl(), interceptors, null, true);
       port = getRelationshipService(SERVICE_ADDRESS);
       assertNotNull(server);
       assertNotNull(port);

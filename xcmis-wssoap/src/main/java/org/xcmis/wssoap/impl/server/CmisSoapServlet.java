@@ -22,29 +22,26 @@ package org.xcmis.wssoap.impl.server;
 import org.apache.cxf.Bus;
 import org.apache.cxf.BusFactory;
 import org.apache.cxf.transport.servlet.CXFNonSpringServlet;
-import org.xcmis.spi.utils.Logger;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 
 /**
  * Created by The eXo Platform SAS .
- * 
+ *
  * @author <a href="mailto:alexey.zavizionov@exoplatform.com.ua">Alexey
  *         Zavizionov</a>
- * @version $Id: CmisSoapServlet.java 2 2010-02-04 17:21:49Z andrew00x $ Sep 17, 2008
+ * @version $Id: CmisSoapServlet.java 2 2010-02-04 17:21:49Z andrew00x $ Sep 17,
+ *          2008
  */
 public class CmisSoapServlet extends CXFNonSpringServlet
 {
    /** VersionUID. */
    private static final long serialVersionUID = 8525887555654944318L;
 
-   /** Logger.  */
-   private static final Logger LOG = Logger.getLogger(CmisSoapServlet.class);
-
    /**
     * Load bus.
-    * 
+    *
     * @param servletConfig ServletConfig
     * @see org.apache.cxf.transport.servlet.CXFNonSpringServlet#loadBus(javax.servlet.ServletConfig)
     * @throws ServletException servlet exception
@@ -53,10 +50,8 @@ public class CmisSoapServlet extends CXFNonSpringServlet
    public void loadBus(ServletConfig servletConfig) throws ServletException
    {
       super.loadBus(servletConfig);
-      if (LOG.isDebugEnabled())
-         LOG.debug("loadBus method entering");
-
-      WebServiceLoader loader = (WebServiceLoader)servletConfig.getServletContext().getAttribute("org.xcmis.wssoap.WebServiceLoader");
+      WebServiceLoader loader =
+         (WebServiceLoader)servletConfig.getServletContext().getAttribute("org.xcmis.wssoap.WebServiceLoader");
       if (loader == null)
       {
          loader = new WebServiceLoader();

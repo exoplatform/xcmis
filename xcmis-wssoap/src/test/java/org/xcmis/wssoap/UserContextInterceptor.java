@@ -14,14 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, see<http://www.gnu.org/licenses/>.
  */
-package org.xcmis.wssoap.impl.server;
+package org.xcmis.wssoap;
 
 import org.apache.cxf.binding.soap.SoapMessage;
 import org.apache.cxf.binding.soap.interceptor.AbstractSoapInterceptor;
 import org.apache.cxf.interceptor.Fault;
 import org.apache.cxf.phase.Phase;
 import org.xcmis.spi.UserContext;
-import org.xcmis.spi.utils.Logger;
 
 /**
  * Created by The eXo Platform SAS .
@@ -30,34 +29,28 @@ import org.xcmis.spi.utils.Logger;
  *         Shaposhnik</a>
  * @version $Id$ Dec 17, 2008
  */
-public class IdentityInterceptor extends AbstractSoapInterceptor
+public class UserContextInterceptor extends AbstractSoapInterceptor
 {
 
-   /** Logger. */
-   private static final Logger LOG = Logger.getLogger(IdentityInterceptor.class);
+   private final String principal;
 
    /**
     * Instantiates a new instance of Identity interceptor.
     */
-   public IdentityInterceptor()
+   public UserContextInterceptor(String principal)
    {
       super(Phase.READ);
-      if (LOG.isDebugEnabled())
-      {
-         LOG.debug(">> > IdentityInterceptor.IdentityInterceptor() entered");
-      }
+      if (principal == null)
+         throw new NullPointerException();
+      this.principal = principal;
    }
 
-   /* (non-Javadoc)
-    * @see org.apache.cxf.interceptor.Interceptor#handleMessage(org.apache.cxf.message.Message)
+   /**
+    * {@inheritDoc}
     */
-   public void handleMessage(SoapMessage arg0) throws Fault
+   public void handleMessage(SoapMessage message) throws Fault
    {
-      if (LOG.isDebugEnabled())
-      {
-         LOG.debug(">> > IdentityInterceptor.handleMessage() entered");
-      }
-      UserContext ctx = new UserContext("root");
+      UserContext ctx = new UserContext(principal);
       UserContext.setCurrent(ctx);
    }
 

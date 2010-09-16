@@ -59,7 +59,7 @@ public class RepositoryServiceTest extends BaseTest
    {
       super.setUp();
       server =
-         complexDeployService(SERVICE_ADDRESS, new RepositoryServicePortImpl(/*storageProvider*/), null, null, true);
+         complexDeployService(SERVICE_ADDRESS, new RepositoryServicePortImpl(), interceptors, null, true);
       port = getRepositoryService(SERVICE_ADDRESS);
       assertNotNull(server);
       assertNotNull(port);

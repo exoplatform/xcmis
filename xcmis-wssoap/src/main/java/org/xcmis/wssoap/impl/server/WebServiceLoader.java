@@ -52,7 +52,6 @@ public class WebServiceLoader
     */
    private static final Logger LOG = Logger.getLogger(WebServiceLoader.class);
 
-
    /**
     * Constructs instance of WebServiceLoader.
     *
@@ -109,33 +108,33 @@ public class WebServiceLoader
     */
    private String getAddress(String baseURL, Object implementor)
    {
-      String serviceName = implementor.getClass().getAnnotation(WebService.class).serviceName();
-      String portName = implementor.getClass().getAnnotation(WebService.class).portName();
+      Class<?> iclass = implementor.getClass();
+      String serviceName = iclass.getAnnotation(WebService.class).serviceName();
+      String portName = iclass.getAnnotation(WebService.class).portName();
 
       if (LOG.isDebugEnabled())
       {
          LOG.debug(" serviceName = " + serviceName);
-      }
-      if (LOG.isDebugEnabled())
-      {
          LOG.debug(" portName = " + portName);
       }
 
-      String address = new String();
+      StringBuilder address = new StringBuilder();
 
       if (baseURL != null && baseURL.length() != 0)
       {
-         address += baseURL;
+         address.append(baseURL);
       }
 
       if (serviceName != null && serviceName.length() != 0)
       {
-         address += "/" + serviceName;
+         address.append('/');
+         address.append(serviceName);
       }
 
       if (portName != null && portName.length() != 0)
       {
-         address += "/" + portName;
+         address.append('/');
+         address.append(portName);
       }
 
       if (LOG.isDebugEnabled())
@@ -143,7 +142,7 @@ public class WebServiceLoader
          LOG.debug("getAddress() - address = " + address);
          LOG.debug("getAddress() - implementor = " + implementor);
       }
-      return address;
+      return address.toString();
    }
 
    /**

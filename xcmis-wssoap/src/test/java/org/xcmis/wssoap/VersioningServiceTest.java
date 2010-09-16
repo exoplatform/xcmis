@@ -53,7 +53,7 @@ public class VersioningServiceTest extends BaseTest
    {
       super.setUp();
       server =
-         complexDeployService(SERVICE_ADDRESS, new VersioningServicePortImpl(/*storageProvider*/), null, null, true);
+         complexDeployService(SERVICE_ADDRESS, new VersioningServicePortImpl(), interceptors, null, true);
       port = getVersioningService(SERVICE_ADDRESS);
       assertNotNull(server);
       assertNotNull(port);

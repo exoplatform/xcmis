@@ -51,7 +51,7 @@ public class NavigationServiceTest extends BaseTest
    {
       super.setUp();
       server =
-         complexDeployService(SERVICE_ADDRESS, new NavigationServicePortImpl(/*storageProvider*/), null, null, true);
+         complexDeployService(SERVICE_ADDRESS, new NavigationServicePortImpl(), interceptors, null, true);
       port = getNavigationService(SERVICE_ADDRESS);
       assertNotNull(server);
       assertNotNull(port);

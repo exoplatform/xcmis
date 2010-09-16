@@ -43,13 +43,13 @@ import org.xcmis.spi.Connection;
 import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.ItemsList;
 import org.xcmis.spi.ObjectNotFoundException;
-import org.xcmis.spi.UserContext;
 import org.xcmis.spi.model.BaseType;
 import org.xcmis.spi.model.CmisObject;
 import org.xcmis.spi.model.VersioningState;
 import org.xcmis.spi.utils.Logger;
 import org.xcmis.wssoap.impl.TypeConverter;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -60,11 +60,15 @@ public abstract class BaseTest extends TestCase
 
    protected String repositoryId = "cmis1";
 
+   protected String principal = "root";
+
    protected Connection conn;
 
    protected String rootFolderId;
 
    protected String testFolderId;
+
+   protected ArrayList<AbstractPhaseInterceptor<?>> interceptors;
 
    @Override
    public void setUp() throws Exception
@@ -82,6 +86,8 @@ public abstract class BaseTest extends TestCase
          testFolderId = createFolder(rootFolderId, "testFolder");
       }
 
+      interceptors = new ArrayList<AbstractPhaseInterceptor<?>>();
+      interceptors.add(new UserContextInterceptor(principal));
    }
 
    /**

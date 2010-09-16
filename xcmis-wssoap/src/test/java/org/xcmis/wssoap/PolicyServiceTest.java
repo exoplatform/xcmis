@@ -45,7 +45,7 @@ public class PolicyServiceTest extends BaseTest
    public void setUp() throws Exception
    {
       super.setUp();
-      server = complexDeployService(SERVICE_ADDRESS, new PolicyServicePortImpl(/*storageProvider*/), null, null, true);
+      server = complexDeployService(SERVICE_ADDRESS, new PolicyServicePortImpl(), interceptors, null, true);
       port = getPolicyService(SERVICE_ADDRESS);
       assertNotNull(server);
       assertNotNull(port);
