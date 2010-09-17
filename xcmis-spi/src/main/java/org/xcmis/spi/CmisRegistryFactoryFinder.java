@@ -31,7 +31,8 @@ import java.nio.charset.Charset;
  * Find implementation of CmisRegistryFactory Class.
  *
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: CmisRegistryFactoryFinder.java 1677 2010-09-09 10:47:27Z ur3cma
+ *          $
  */
 class CmisRegistryFactoryFinder
 {
@@ -56,22 +57,13 @@ class CmisRegistryFactoryFinder
     */
    public static CmisRegistryFactory findCmisRegistry()
    {
-      ClassLoader classLoader = null;
-      try
-      {
-         classLoader = CmisRegistryFactoryFinder.class.getClassLoader();
-      }
-      catch (Exception e)
-      {
-      }
-
       String name = null;
       try
       {
          name = System.getProperty(CmisRegistry.XCMIS_REGISTRY_FACTORY);
          if (name != null)
          {
-            return createInstance(classLoader, name);
+            return createInstance(null, name);
          }
       }
       catch (SecurityException se)
@@ -80,11 +72,30 @@ class CmisRegistryFactoryFinder
 
       String file = "META-INF/services/xcmis/" + CmisRegistry.XCMIS_REGISTRY_FACTORY;
       InputStream in = null;
-      if (classLoader != null)
+      ClassLoader classLoader = null;
+
+      try
       {
+         classLoader = Thread.currentThread().getContextClassLoader();
          in = classLoader.getResourceAsStream(file);
       }
-      else
+      catch (Exception e)
+      {
+      }
+
+      if (in == null)
+      {
+         try
+         {
+            classLoader = CmisRegistryFactoryFinder.class.getClassLoader();
+            in = classLoader.getResourceAsStream(file);
+         }
+         catch (Exception e)
+         {
+         }
+      }
+
+      if (in == null)
       {
          in = ClassLoader.getSystemResourceAsStream(file);
       }

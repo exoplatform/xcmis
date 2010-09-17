@@ -33,11 +33,13 @@ import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * xCMIS SPI entry point. 
- * 
- * Contains list of all known CMIS StorageProviders with convenience addStorage method for theirs initializing
- * as well as the method getConnection for accessing data from concrete Storage (visible on top level as CMIS Repository)  
- * 
+ * xCMIS SPI entry point.
+ *
+ * Contains list of all known CMIS StorageProviders with convenience addStorage
+ * method for theirs initializing as well as the method getConnection for
+ * accessing data from concrete Storage (visible on top level as CMIS
+ * Repository)
+ *
  * @version $Id:$
  */
 
@@ -65,14 +67,17 @@ public class CmisRegistry
    private static AtomicReference<CmisRegistryFactory> crfs = new AtomicReference<CmisRegistryFactory>();
 
    /**
-    * Singleton method for obtaining "current" CmisRegistry object stored in AtomicReference-ed CmisRegistryFactory.
-    * Such a factory should be set by compilmentary (in some sence) setFactory(CmisRegistryFactory inst) method in advance.
-    * 
-    * Otherwise, it will try to find it using CmisRegistryFactoryFinder.findCmisRegistry() 
-    * 
+    * Singleton method for obtaining "current" CmisRegistry object stored in
+    * AtomicReference-ed CmisRegistryFactory. Such a factory should be set by
+    * compilmentary (in some sence) setFactory(CmisRegistryFactory inst) method
+    * in advance.
+    *
+    * Otherwise, it will try to find it using
+    * CmisRegistryFactoryFinder.findCmisRegistry()
+    *
     * @return "current" CmisRegistry
     */
-  public static CmisRegistry getInstance()
+   public static CmisRegistry getInstance()
    {
       CmisRegistryFactory crf = crfs.get();
       if (crf != null)
@@ -98,7 +103,7 @@ public class CmisRegistry
 
    /**
     * Sets the "current" instance of CmisRegistryFactory
-    * 
+    *
     * @param inst
     */
    public static void setFactory(CmisRegistryFactory factory)
@@ -111,7 +116,7 @@ public class CmisRegistry
    protected Map<String, StorageProvider> storageProviders;
 
    /**
-    * Default constructor 
+    * Default constructor
     */
    public CmisRegistry()
    {
@@ -120,7 +125,7 @@ public class CmisRegistry
 
    /**
     * Registers StorageProvider
-    * 
+    *
     * @param storageProvider to be registerd
     */
    public void addStorage(StorageProvider storageProvider)
@@ -169,8 +174,7 @@ public class CmisRegistry
          try
          {
             connection = storageProviders.get(id).getConnection();
-            info.setRootFolderId(connection.getStorage().getRepositoryInfo()
-               .getRootFolderId());
+            info.setRootFolderId(connection.getStorage().getRepositoryInfo().getRootFolderId());
             set.add(info);
          }
          finally

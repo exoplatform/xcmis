@@ -15,65 +15,14 @@
          <artifactId>xcmis-spi</artifactId>
       </dependency>
       <dependency>
-         <groupId>org.xcmis</groupId>
-         <artifactId>xcmis-renditions</artifactId>
+         <groupId>org.slf4j</groupId>
+         <artifactId>slf4j-log4j12</artifactId>
          <scope>runtime</scope>
       </dependency>
       <dependency>
          <groupId>javax.servlet</groupId>
          <artifactId>servlet-api</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>org.exoplatform.kernel</groupId>
-         <artifactId>exo.kernel.component.common</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>org.exoplatform.kernel</groupId>
-         <artifactId>exo.kernel.container</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>org.exoplatform.core</groupId>
-         <artifactId>exo.core.component.organization.api</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>org.exoplatform.ws</groupId>
-         <artifactId>exo.ws.rest.core</artifactId>
-         <scope>runtime</scope>
-      </dependency>
-      <dependency>
-         <groupId>org.exoplatform.ws</groupId>
-         <artifactId>exo.ws.rest.ext</artifactId>
-         <scope>runtime</scope>
-      </dependency>
-      <dependency>
-         <groupId>org.exoplatform.ws</groupId>
-         <artifactId>exo.ws.commons</artifactId>
-         <scope>runtime</scope>
-      </dependency>
-      <dependency>
-         <groupId>org.exoplatform.ws</groupId>
-         <artifactId>exo.ws.frameworks.servlet</artifactId>
-         <scope>runtime</scope>
-      </dependency>
-      <dependency>
-         <groupId>javax.mail</groupId>
-         <artifactId>mail</artifactId>
-         <scope>runtime</scope>
-      </dependency>
-      <dependency>
-         <groupId>javax.xml.bind</groupId>
-         <artifactId>jaxb-api</artifactId>
-         <exclusions>
-            <exclusion>
-               <groupId>javax.xml.stream</groupId>
-               <artifactId>stax-api</artifactId>
-            </exclusion>
-         </exclusions>
-      </dependency>
-      <dependency>
-         <groupId>org.slf4j</groupId>
-         <artifactId>slf4j-log4j12</artifactId>
-         <scope>runtime</scope>
+         <scope>provided</scope>
       </dependency>
    </dependencies>
    <profiles>
@@ -88,11 +37,44 @@
                <artifactId>xcmis-sp-inmemory</artifactId>
                <scope>runtime</scope>
             </dependency>
+            <!-- rest atom -->
             <dependency>
                <groupId>org.xcmis</groupId>
                <artifactId>xcmis-restatom</artifactId>
                <scope>runtime</scope>
             </dependency>
+            <dependency>
+               <groupId>org.everrest</groupId>
+               <artifactId>everrest-commons</artifactId>
+               <scope>runtime</scope>
+            </dependency>
+            <dependency>
+               <groupId>org.everrest</groupId>
+               <artifactId>everrest-core</artifactId>
+               <scope>runtime</scope>
+            </dependency>
+            <dependency>
+               <groupId>org.apache.abdera</groupId>
+               <artifactId>abdera-server</artifactId>
+               <scope>runtime</scope>
+            </dependency>
+            <dependency>
+               <groupId>org.apache.abdera</groupId>
+               <artifactId>abdera-client</artifactId>
+               <scope>runtime</scope>
+            </dependency>
+            <dependency>
+               <groupId>javax.xml.bind</groupId>
+               <artifactId>jaxb-api</artifactId>
+               <exclusions>
+                  <exclusion>
+                     <groupId>javax.xml.stream</groupId>
+                     <artifactId>stax-api</artifactId>
+                  </exclusion>
+               </exclusions>
+               <scope>runtime</scope>
+            </dependency>
+            <!-- ws -->
             <dependency>
                <groupId>org.xcmis</groupId>
                <artifactId>xcmis-wssoap</artifactId>
@@ -100,57 +82,44 @@
             </dependency>
          </dependencies>
          <build>
+            <resources>
+               <resource>
+                  <directory>src/main/resources</directory>
+                  <includes>
+                     <include>**/org.xcmis.CmisRegistryFactory</include>
+                  </includes>
+               </resource>
+            </resources>
             <finalName>xcmis</finalName>
             <plugins>
                <plugin>
                   <groupId>org.apache.maven.plugins</groupId>
                   <artifactId>maven-war-plugin</artifactId>
                   <configuration>
+                     <archiveClasses>true</archiveClasses>
                      <webXml>${project.basedir}/src/main/webapp/WEB-INF/web-all.xml</webXml>
                      <warSourceExcludes>
-                        **/web-*.xml,
-                        **/ant-*.jar,
-                        **/ant-launcher-*.jar,
-                        **/bcel-*.jar,
-                        **/bcmail-jdk14-*.jar,
-                        **/carol-*.jar,
+                        **/servlet-api-*.jar,
+                        **/geronimo-stax-api_*.jar,
+                        **/geronimo-activation_*.jar,
+                        **/geronimo-annotation_*.jar,
+                        **/geronimo-javamail_*.jar,
+                        **/geronimo-servlet_*.jar,
                         **/cxf-rt-databinding-aegis-*.jar,
                         **/cxf-rt-javascript-*.jar,
                         **/cxf-rt-transports-local-*.jar,
                         **/cxf-tools-java2ws-*.jar,
                         **/cxf-tools-validator-*.jar,
                         **/cxf-tools-wsdlto-frontend-jaxws-*.jar,
-                        **/ejb-*.jar,
-                        **/exo.tool.framework.junit-*.jar,
-                        **/geronimo-activation_1.0.2_spec-*.jar,
-                        **/geronimo-activation_1.1_spec-*.jar,
-                        **/geronimo-annotation_1.0_spec-*.jar,
-                        **/geronimo-javamail_1.4_spec-*.jar,
-                        **/geronimo-servlet_2.5_spec-*.jar,
-                        **/geronimo-stax-api_1.0_spec-*.jar,
-                        **/groovy-all-*.jar,
-                        **/jempbox-*.jar,
-                        **/jline-*.jar,
-                        **/jmock-*.jar,
-                        **/jsf-api-*.jar,
-                        **/junit-*.jar,
-                        **/lucene-spellchecker-*.jar,
-                        **/portlet-api-*.jar,
-                        **/servlet-api-*.jar,
-                        **/slf4j-simple-*.jar,
+                        **/xercesImpl-*.jar,
+                        **/wstx-asl-*.jar,
                         **/spring-*.jar,
                         **/velocity-*.jar,
                         **/velocity-dep-*.jar,
                         **/xbean-*.jar,
-                        **/xbean-spring-*.jar,
-                        **/xdoclet-*.jar,
-                        **/xdoclet-hibernate-module-*.jar,
-                        **/xdoclet-xdoclet-module-*.jar,
-                        **/xerces-*.jar,
-                        **/xjavadoc-*.jar,
+                        **/jetty-*.jar,
+                        **/jetty-util-*.jar,
                         **/xml-apis-*.jar,
-                        **/xmlParserAPIs-*.jar,
-                        **/xercesImpl-*.jar,
                      </warSourceExcludes>
                      <archive>
                         <manifest>
