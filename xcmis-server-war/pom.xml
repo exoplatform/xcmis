@@ -96,7 +96,14 @@
                   <groupId>org.apache.maven.plugins</groupId>
                   <artifactId>maven-war-plugin</artifactId>
                   <configuration>
+                     <!--
+                     *** DO NOT REMOVE OR SET TO FALSE ***
+                     Need pack in jar and put in WEB-INF/lib instead WEB-INF/classes!!!
+                     Otherwise will be not able found CmisRegistryFactory name in file
+                     META-INF/services/xcmis/org.xcmis.CmisRegistryFactory
+                     -->
                      <archiveClasses>true</archiveClasses>
+                     
                      <webXml>${project.basedir}/src/main/webapp/WEB-INF/web-all.xml</webXml>
                      <warSourceExcludes>
                         **/servlet-api-*.jar,
