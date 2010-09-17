@@ -24,16 +24,19 @@ import junit.framework.TestCase;
 
 import org.apache.abdera.Abdera;
 import org.apache.abdera.factory.Factory;
-import org.exoplatform.container.StandaloneContainer;
-import org.exoplatform.services.rest.ContainerResponseWriter;
-import org.exoplatform.services.rest.impl.ContainerRequest;
-import org.exoplatform.services.rest.impl.ContainerResponse;
-import org.exoplatform.services.rest.impl.EnvironmentContext;
-import org.exoplatform.services.rest.impl.InputHeadersMap;
-import org.exoplatform.services.rest.impl.MultivaluedMapImpl;
-import org.exoplatform.services.rest.impl.RequestHandlerImpl;
-import org.exoplatform.services.rest.tools.DummyContainerResponseWriter;
-import org.exoplatform.services.test.mock.MockHttpServletRequest;
+import org.everrest.core.ContainerResponseWriter;
+import org.everrest.core.RequestHandler;
+import org.everrest.core.ResourceBinder;
+import org.everrest.core.impl.ApplicationPublisher;
+import org.everrest.core.impl.ContainerResponse;
+import org.everrest.core.impl.EnvironmentContext;
+import org.everrest.core.impl.ProviderBinder;
+import org.everrest.core.impl.RequestHandlerImpl;
+import org.everrest.core.impl.ResourceBinderImpl;
+import org.everrest.core.impl.SimpleDependencySupplier;
+import org.everrest.core.tools.DummyContainerResponseWriter;
+import org.everrest.core.tools.ResourceLauncher;
+import org.everrest.test.mock.MockHttpServletRequest;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xcmis.restatom.abdera.CMISExtensionFactory;
@@ -56,15 +59,12 @@ import org.xcmis.spi.model.impl.StringProperty;
 import org.xcmis.spi.utils.Logger;
 
 import java.io.ByteArrayInputStream;
-import java.net.URI;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.core.MultivaluedMap;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
@@ -84,42 +84,19 @@ public abstract class BaseTest extends TestCase
 
    protected String rootFolderId;
 
-   protected StandaloneContainer container;
-
-   protected RequestHandlerImpl requestHandler;
-
    protected Factory factory;
 
    protected String testFolderId;
 
    protected XPath xp;
 
-   private static final String SP_CONF_DEFAULT = "/conf/standalone/test-sp-inmemory-configuration.xml";
-
-   //   protected StorageProvider storageProvider;
-
    protected Connection conn;
 
-   public ContainerResponse service(String method, String requestURI, String baseURI,
-      MultivaluedMap<String, String> headers, byte[] data) throws Exception
-   {
-      return service(method, requestURI, baseURI, headers, data, new DummyContainerResponseWriter());
-   }
+   protected ResourceLauncher launcher;
 
    @Override
    public void setUp() throws Exception
    {
-      String propertySpConf = System.getProperty("sp.conf");
-
-      String sp_conf =
-         propertySpConf == null || propertySpConf.length() == 0 || propertySpConf.equalsIgnoreCase("${sp.conf}")
-            ? SP_CONF_DEFAULT : propertySpConf;
-
-      String containerConf = getClass().getResource(sp_conf).toString();
-      StandaloneContainer.setConfigurationURL(containerConf);
-      container = StandaloneContainer.getInstance();
-      requestHandler = (RequestHandlerImpl)container.getComponentInstanceOfType(RequestHandlerImpl.class);
-
       Abdera abdera = new Abdera();
       factory = abdera.getFactory();
       factory.registerExtension(new CMISExtensionFactory());
@@ -147,40 +124,30 @@ public abstract class BaseTest extends TestCase
 
       xp = XPathFactory.newInstance().newXPath();
       xp.setNamespaceContext(new NamespaceResolver());
+
+      ResourceBinder resources = new ResourceBinderImpl();
+      ApplicationPublisher publisher = new ApplicationPublisher(resources, ProviderBinder.getInstance());
+      publisher.publish(new CmisRestApplication());
+
+      SimpleDependencySupplier dependencies = new SimpleDependencySupplier();
+      ProviderImpl provider = new ProviderImpl();
+      provider.init(AbderaFactory.getInstance(), new HashMap<String, String>());
+      dependencies.put(ProviderImpl.class, provider);
+      RequestHandler requestHandler = new RequestHandlerImpl(resources, dependencies);
+      launcher = new ResourceLauncher(requestHandler);
    }
 
    @Override
    public void tearDown() throws Exception
    {
-      container = null;
-      requestHandler = null;
       factory = null;
       clearRepository();
+      conn.close();
       super.tearDown();
    }
 
    private void clearRepository()
    {
-      //      try
-      //      {
-      //         // TODO to remove this "if" statement when it was fixed for JCR storage
-      //         if (conn.getCheckedOutDocs(rootFolderId, false, null, true, null, null, null, -1, 0) != null)
-      //         {
-      //            for (Iterator<CmisObject> iter =
-      //               conn.getCheckedOutDocs(rootFolderId, false, null, true, null, null, null, -1, 0).getItems().iterator(); iter
-      //               .hasNext();)
-      //            {
-      //               CmisObject cmisObj = iter.next();
-      //               conn.deleteObject(cmisObj.getObjectInfo().getId(), null);
-      //            }
-      //         }
-      //      }
-      //      catch (Exception e)
-      //      {
-      //         e.printStackTrace();
-      //      }
-      /////////////////////////////////////////////////////////////////////////////////
-
       try
       {
          conn.deleteTree(testFolderId, true, null, true);
@@ -189,58 +156,27 @@ public abstract class BaseTest extends TestCase
       {
          e.printStackTrace();
       }
-
-      //      try
-      //      {
-      //         for (Iterator<CmisObject> iter = getChildren(rootFolderId).getItems().iterator(); iter.hasNext();)
-      //         {
-      //            CmisObject obj = iter.next();
-      //            deleteObject(obj);
-      //         }
-      //      }
-      //      catch (Exception e)
-      //      {
-      //         e.printStackTrace();
-      //      }
-
-      ///////////////////////////////////////////////////////////////////////////////
-      //      try
-      //      {
-      //         conn.deleteObject(testFolderId, true);
-      //      }
-      //      catch (Exception e)
-      //      {
-      //         e.printStackTrace();
-      //      }
    }
 
-   private void deleteObject(CmisObject obj)
+   protected ContainerResponse service(String method, String requestURI, String baseURI,
+      Map<String, List<String>> headers, byte[] data, ContainerResponseWriter writer) throws Exception
    {
-      String objId = obj.getObjectInfo().getId();
-      try
+      EnvironmentContext envctx = new EnvironmentContext();
+      ByteArrayInputStream in = null;
+      if (data != null)
       {
-         if (obj.getObjectInfo().getBaseType().value().equals(BaseType.FOLDER.value()))
-         {
-            for (Iterator<CmisObject> iter = getChildren(objId).getItems().iterator(); iter.hasNext();)
-            {
-               CmisObject obj2 = iter.next();
-               deleteObject(obj2);
-            }
-         }
+         in = new ByteArrayInputStream(data);
       }
-      catch (Exception e)
-      {
-         e.printStackTrace();
-      }
-      try
-      {
-         conn.deleteObject(objId, null);
-      }
-      catch (Exception e)
-      {
-         e.printStackTrace();
-      }
+      MockHttpServletRequest httpRequest =
+         new MockHttpServletRequest(requestURI, in, in != null ? in.available() : 0, method, headers);
+      envctx.put(HttpServletRequest.class, httpRequest);
+      return launcher.service(method, requestURI, baseURI, headers, data, writer, envctx);
+   }
 
+   protected ContainerResponse service(String method, String requestURI, String baseURI,
+      Map<String, List<String>> headers, byte[] data) throws Exception
+   {
+      return service(method, requestURI, baseURI, headers, data, new DummyContainerResponseWriter());
    }
 
    protected void validateAllowableActions(org.w3c.dom.Node actions) throws XPathExpressionException
@@ -486,42 +422,6 @@ public abstract class BaseTest extends TestCase
    protected void printBody(byte[] bytes)
    {
       System.out.println("+++\n" + new String(bytes) + "\n+++\n");
-   }
-
-   protected ContainerResponse service(String method, String requestURI, String baseURI,
-      MultivaluedMap<String, String> headers, byte[] data, ContainerResponseWriter writer) throws Exception
-   {
-
-      if (headers == null)
-      {
-         headers = new MultivaluedMapImpl();
-      }
-
-      ByteArrayInputStream in = null;
-      if (data != null)
-      {
-         in = new ByteArrayInputStream(data);
-      }
-
-      EnvironmentContext envctx = new EnvironmentContext();
-      MockHttpServletRequest httpRequest =
-         new MockHttpServletRequest(requestURI, in, in != null ? in.available() : 0, method, new InputHeadersMap(
-            headers));
-      envctx.put(HttpServletRequest.class, httpRequest);
-      EnvironmentContext.setCurrent(envctx);
-      ContainerRequest request =
-         new ContainerRequest(method, new URI(requestURI), new URI(baseURI), in, new InputHeadersMap(headers));
-      ContainerResponse response = new ContainerResponse(writer);
-
-      try
-      {
-         requestHandler.handleRequest(request, response);
-      }
-      catch (Exception e)
-      {
-         e.printStackTrace();
-      }
-      return response;
    }
 
    protected void validateEntryCommons(org.w3c.dom.Node xmlEntry) throws XPathExpressionException

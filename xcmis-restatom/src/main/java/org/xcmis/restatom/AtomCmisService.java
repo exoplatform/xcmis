@@ -55,7 +55,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -93,15 +92,12 @@ public class AtomCmisService
    /** The provider. */
    protected ProviderImpl provider;
 
-   /** The storage provider. */
-
    /**
     * Instantiates a new atom cmis service.
     */
-   public AtomCmisService()
+   public AtomCmisService(ProviderImpl provider)
    {
-      provider = new ProviderImpl();
-      provider.init(AbderaFactory.getInstance(), new HashMap<String, String>());
+      this.provider = provider;
    }
 
    @PUT

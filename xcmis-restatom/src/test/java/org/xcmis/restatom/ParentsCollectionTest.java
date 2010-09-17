@@ -19,8 +19,8 @@
 
 package org.xcmis.restatom;
 
-import org.exoplatform.services.rest.impl.ContainerResponse;
-import org.exoplatform.services.rest.tools.ByteArrayContainerResponseWriter;
+import org.everrest.core.impl.ContainerResponse;
+import org.everrest.core.tools.ByteArrayContainerResponseWriter;
 
 import java.io.ByteArrayInputStream;
 
@@ -28,10 +28,11 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 /**
  * Created by The eXo Platform SAS .
- * 
+ *
  * @author <a href="mailto:alexey.zavizionov@exoplatform.com.ua">Alexey
  *         Zavizionov</a>
- * @version $Id: ParentsCollectionTest.java 2 2010-02-04 17:21:49Z andrew00x $ Aug 12, 2009
+ * @version $Id: ParentsCollectionTest.java 2 2010-02-04 17:21:49Z andrew00x $
+ *          Aug 12, 2009
  */
 public class ParentsCollectionTest extends BaseTest
 {
@@ -42,42 +43,40 @@ public class ParentsCollectionTest extends BaseTest
       super.setUp();
    }
 
-   /*   public void testGetFolderParent() throws Exception
-      {
-         Entry folder = createFolder(testFolderId, "folder1");
-         String folderId = folder.getObjectId();
+   public void testGetFolderParent() throws Exception
+   {
+      String folderId = createFolder(testFolderId, "folder1");
 
-         String requestURI = "http://localhost:8080/rest" //
-            + "/cmisatom/" //
-            + cmisRepositoryId //
-            + "/parents/" //
-            + folderId;
+      String requestURI = "http://localhost:8080/rest" //
+         + "/cmisatom/" //
+         + cmisRepositoryId //
+         + "/parents/" //
+         + folderId;
 
-         ByteArrayContainerResponseWriter writer = new ByteArrayContainerResponseWriter();
-         ContainerResponse resp = service("GET", requestURI, "http://localhost:8080/rest", null, null, writer);
+      ByteArrayContainerResponseWriter writer = new ByteArrayContainerResponseWriter();
+      ContainerResponse resp = service("GET", requestURI, "http://localhost:8080/rest", null, null, writer);
 
-         // printBody(writer.getBody());
-         assertEquals(200, resp.getStatus());
+      // printBody(writer.getBody());
+      assertEquals(200, resp.getStatus());
 
-         DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
-         f.setNamespaceAware(true);
-         org.w3c.dom.Document xmlDoc = f.newDocumentBuilder().parse(new ByteArrayInputStream(writer.getBody()));
+      DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
+      f.setNamespaceAware(true);
+      org.w3c.dom.Document xmlDoc = f.newDocumentBuilder().parse(new ByteArrayInputStream(writer.getBody()));
 
-         org.w3c.dom.Node xmlFeed = getNode("atom:feed", xmlDoc);
-         validateFeedCommons(xmlFeed);
+      org.w3c.dom.Node xmlFeed = getNode("atom:feed", xmlDoc);
+      validateFeedCommons(xmlFeed);
 
-         assertTrue(hasLink(AtomCMIS.LINK_SERVICE, xmlFeed));
-         assertTrue(hasLink(AtomCMIS.LINK_SELF, xmlFeed));
-         assertTrue(hasLink(AtomCMIS.LINK_VIA, xmlFeed));
+      assertTrue(hasLink(AtomCMIS.LINK_SERVICE, xmlFeed));
+      assertTrue(hasLink(AtomCMIS.LINK_SELF, xmlFeed));
+      assertTrue(hasLink(AtomCMIS.LINK_VIA, xmlFeed));
 
-         assertEquals("1", getStringElement("cmisra:numItems", xmlFeed));
+      assertEquals("1", getStringElement("cmisra:numItems", xmlFeed));
 
-         org.w3c.dom.Node xmlEntry = getNode("atom:entry", xmlFeed);
-         validateObjectEntry(xmlEntry, "cmis:folder");
+      org.w3c.dom.Node xmlEntry = getNode("atom:entry", xmlFeed);
+      validateObjectEntry(xmlEntry, "cmis:folder");
 
-         assertEquals(testFolderName, getStringElement("cmisra:relativePathSegment", xmlEntry));
-      }
-   */
+      assertEquals("folder1", getStringElement("cmisra:relativePathSegment", xmlEntry));
+   }
 
    public void testGetObjectParents() throws Exception
    {

@@ -21,11 +21,16 @@ package org.xcmis.restatom;
 
 import org.apache.abdera.model.Document;
 import org.apache.abdera.model.Element;
+import org.everrest.core.impl.ContainerResponse;
+import org.everrest.core.tools.ByteArrayContainerResponseWriter;
+import org.w3c.dom.NodeList;
 import org.xcmis.restatom.abdera.QueryTypeElement;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.query.Query;
 
 import java.io.ByteArrayInputStream;
+
+import javax.xml.parsers.DocumentBuilderFactory;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
@@ -49,51 +54,47 @@ public class QueryCollectionTest extends BaseTest
       QueryTypeElement q = (QueryTypeElement)doc.getRoot();
       Query qt = q.getQuery();
       assertEquals("SELECT * FROM Document", qt.getStatement());
-//      assertEquals(BigInteger.valueOf(10), qt.getMaxItems());
-//      assertEquals(BigInteger.valueOf(0), qt.getSkipCount());
       assertTrue(qt.isSearchAllVersions());
-//      assertFalse(qt.isIncludeAllowableActions());
    }
 
-   /*   public void testQuery() throws Exception
+   public void testQuery() throws Exception
+   {
+      createDocument(testFolderId, "doc1", null, null);
+      createDocument(testFolderId, "doc2", null, null);
+      createDocument(testFolderId, "doc3", null, null);
+      String s = "<?xml version='1.0' encoding='utf-8'?>" //
+         + "<cmis:query xmlns='http://www.w3.org/2005/Atom' xmlns:cmis='" + CmisConstants.CMIS_NS_URI + "'>" //
+         + "<cmis:statement>SELECT * FROM cmis:document</cmis:statement>" //
+         + "<cmis:maxItems>10</cmis:maxItems>" //
+         + "<cmis:skipCount>0</cmis:skipCount>" //
+         + "<cmis:searchAllVersions>true</cmis:searchAllVersions>" //
+         + "<cmis:includeAllowableActions>true</cmis:includeAllowableActions>" //
+         + "</cmis:query>";
+      String requestURI = "http://localhost:8080/rest/cmisatom/" + cmisRepositoryId + "/query";
+      ByteArrayContainerResponseWriter writer = new ByteArrayContainerResponseWriter();
+      ContainerResponse resp = service("POST", requestURI, "http://localhost:8080/rest", null, s.getBytes(), writer);
+
+      //printBody(writer.getBody());
+      assertEquals(201, resp.getStatus());
+
+      DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
+      f.setNamespaceAware(true);
+      org.w3c.dom.Document xmlDoc = f.newDocumentBuilder().parse(new ByteArrayInputStream(writer.getBody()));
+
+      org.w3c.dom.Node xmlFeed = getNode("atom:feed", xmlDoc);
+      validateFeedCommons(xmlFeed);
+
+      assertTrue(hasLink(AtomCMIS.LINK_SERVICE, xmlFeed));
+
+      NodeList entries = getNodeSet("atom:entry", xmlFeed);
+      int length = entries.getLength();
+      assertEquals(3, length);
+      for (int i = 0; i < length; i++)
       {
-         createDocument(testFolderId, "doc1", null, null);
-         createDocument(testFolderId, "doc2", null, null);
-         createDocument(testFolderId, "doc3", null, null);
-         String s = "<?xml version='1.0' encoding='utf-8'?>" //
-            + "<cmis:query xmlns='http://www.w3.org/2005/Atom' xmlns:cmis='" + CMIS.CMIS_NS_URI + "'>" //
-            + "<cmis:statement>SELECT * FROM nt:file</cmis:statement>" //
-            + "<cmis:maxItems>10</cmis:maxItems>" //
-            + "<cmis:skipCount>0</cmis:skipCount>" //
-            + "<cmis:searchAllVersions>true</cmis:searchAllVersions>" //
-            + "<cmis:includeAllowableActions>true</cmis:includeAllowableActions>" //
-            + "</cmis:query>";
-         String requestURI = "http://localhost:8080/rest/cmisatom/" + cmisRepositoryId + "/query";
-         ByteArrayContainerResponseWriter writer = new ByteArrayContainerResponseWriter();
-         ContainerResponse resp = service("POST", requestURI, "http://localhost:8080/rest", null, s.getBytes(), writer);
-
-         //      printBody(writer.getBody());
-         assertEquals(200, resp.getStatus());
-
-         DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
-         f.setNamespaceAware(true);
-         org.w3c.dom.Document xmlDoc = f.newDocumentBuilder().parse(new ByteArrayInputStream(writer.getBody()));
-
-         org.w3c.dom.Node xmlFeed = getNode("atom:feed", xmlDoc);
-         validateFeedCommons(xmlFeed);
-
-         assertTrue(hasLink(AtomCMIS.LINK_SERVICE, xmlFeed));
-
-         NodeList entries = getNodeSet("atom:entry", xmlFeed);
-         int length = entries.getLength();
-         assertEquals(3, length);
-         for (int i = 0; i < length; i++)
-         {
-            org.w3c.dom.Node n = entries.item(i);
-            validateObjectEntry(n, "cmis:document");
-            validateObjectEntry(n, "cmis:document");
-            validateObjectEntry(n, "cmis:document");
-         }
+         org.w3c.dom.Node n = entries.item(i);
+         validateObjectEntry(n, "cmis:document");
+         validateObjectEntry(n, "cmis:document");
+         validateObjectEntry(n, "cmis:document");
       }
-   */
+   }
 }

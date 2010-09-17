@@ -64,6 +64,9 @@
       <org.exoplatform.kernel.version>2.2.4-GA</org.exoplatform.kernel.version>
       <org.exoplatform.core.version>2.3.4-GA</org.exoplatform.core.version>
       <org.exoplatform.ws.version>2.1.4-GA</org.exoplatform.ws.version>
+      
+      <org.everrest.version>1.0-SNAPSHOT</org.everrest.version>
+      
       <!-- Default tests settings -->
       <maven.test.skip>false</maven.test.skip>
       <forkMode>once</forkMode>
@@ -98,7 +101,6 @@
             <artifactId>xcmis-spi</artifactId>
             <version>${project.version}</version>
          </dependency>
-         <!-- Search -->
          <dependency>
             <groupId>org.xcmis</groupId>
             <artifactId>xcmis-search-model</artifactId>
@@ -136,64 +138,25 @@
          </dependency>
          <dependency>
             <groupId>org.exoplatform.kernel</groupId>
-            <artifactId>exo.kernel.component.common</artifactId>
-            <version>${org.exoplatform.kernel.version}</version>
-         </dependency>
-         <dependency>
-            <groupId>org.exoplatform.kernel</groupId>
             <artifactId>exo.kernel.commons</artifactId>
             <version>${org.exoplatform.kernel.version}</version>
          </dependency>
          <dependency>
-            <groupId>org.exoplatform.kernel</groupId>
-            <artifactId>exo.kernel.container</artifactId>
-            <version>${org.exoplatform.kernel.version}</version>
+            <groupId>org.everrest</groupId>
+            <artifactId>everrest-commons</artifactId>
+            <version>${org.everrest.version}</version>
          </dependency>
          <dependency>
-            <groupId>org.exoplatform.kernel</groupId>
-            <artifactId>exo.kernel.component.common</artifactId>
-            <version>${org.exoplatform.kernel.version}</version>
+            <groupId>org.everrest</groupId>
+            <artifactId>everrest-core</artifactId>
+            <version>${org.everrest.version}</version>
          </dependency>
          <dependency>
-            <groupId>org.exoplatform.core</groupId>
-            <artifactId>exo.core.component.document</artifactId>
-            <version>${org.exoplatform.core.version}</version>
+            <groupId>org.everrest</groupId>
+            <artifactId>everrest-test</artifactId>
+            <version>${org.everrest.version}</version>
          </dependency>
-         <dependency>
-            <groupId>org.exoplatform.core</groupId>
-            <artifactId>exo.core.component.organization.api</artifactId>
-            <version>${org.exoplatform.core.version}</version>
-         </dependency>
-         <dependency>
-            <groupId>org.exoplatform.ws</groupId>
-            <artifactId>exo.ws.commons</artifactId>
-            <version>${org.exoplatform.ws.version}</version>
-         </dependency>
-         <dependency>
-            <groupId>org.exoplatform.ws</groupId>
-            <artifactId>exo.ws.rest.core</artifactId>
-            <version>${org.exoplatform.ws.version}</version>
-         </dependency>
-         <dependency>
-            <groupId>org.exoplatform.ws</groupId>
-            <artifactId>exo.ws.rest.ext</artifactId>
-            <version>${org.exoplatform.ws.version}</version>
-         </dependency>
-         <dependency>
-            <groupId>org.exoplatform.ws</groupId>
-            <artifactId>exo.ws.frameworks.servlet</artifactId>
-            <version>${org.exoplatform.ws.version}</version>
-         </dependency>
-         <dependency>
-            <groupId>org.exoplatform.ws</groupId>
-            <artifactId>exo.ws.frameworks.json</artifactId>
-            <version>${org.exoplatform.ws.version}</version>
-         </dependency>
-         <dependency>
-            <groupId>org.exoplatform.ws</groupId>
-            <artifactId>exo.ws.testframework</artifactId>
-            <version>${org.exoplatform.ws.version}</version>
-         </dependency>
+
          <!-- Third party dependencies -->
          <dependency>
             <groupId>junit</groupId>
@@ -880,7 +843,7 @@
       <module>xcmis-sp-inmemory</module>
       <module>xcmis-restatom</module>
       <module>xcmis-wssoap</module>
-      <module>xcmis-server-war</module>
+      <!--module>xcmis-server-war</module-->
       <!-- The list of excluded modules from common build. Do not uncomment it. Build them by yourself. -->
       <!--module>xcmis-server-tomcat</module-->
       <!--module>xcmis-server-tomcat-demo</module-->

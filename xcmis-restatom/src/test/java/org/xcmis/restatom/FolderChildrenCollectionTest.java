@@ -20,9 +20,9 @@
 package org.xcmis.restatom;
 
 import org.apache.commons.codec.binary.Base64;
-import org.exoplatform.services.rest.impl.ContainerResponse;
-import org.exoplatform.services.rest.impl.MultivaluedMapImpl;
-import org.exoplatform.services.rest.tools.ByteArrayContainerResponseWriter;
+import org.everrest.core.impl.ContainerResponse;
+import org.everrest.core.impl.MultivaluedMapImpl;
+import org.everrest.core.tools.ByteArrayContainerResponseWriter;
 import org.w3c.dom.NodeList;
 import org.xcmis.spi.BaseContentStream;
 import org.xcmis.spi.CmisConstants;

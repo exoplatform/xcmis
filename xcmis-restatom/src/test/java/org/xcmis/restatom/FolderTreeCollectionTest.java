@@ -26,9 +26,9 @@ package org.xcmis.restatom;
  *         Zavizionov</a>
  * @version $Id: FolderTreeCollectionTest.java 2 2010-02-04 17:21:49Z andrew00x $ Jul 28, 2009
  */
-import org.exoplatform.services.rest.impl.ContainerResponse;
-import org.exoplatform.services.rest.impl.MultivaluedMapImpl;
-import org.exoplatform.services.rest.tools.ByteArrayContainerResponseWriter;
+import org.everrest.core.impl.ContainerResponse;
+import org.everrest.core.impl.MultivaluedMapImpl;
+import org.everrest.core.tools.ByteArrayContainerResponseWriter;
 import org.xcmis.spi.model.IncludeRelationships;
 
 import java.io.ByteArrayInputStream;

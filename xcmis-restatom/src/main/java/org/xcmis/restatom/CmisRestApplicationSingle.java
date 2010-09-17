@@ -20,6 +20,7 @@
 package org.xcmis.restatom;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -41,7 +42,9 @@ public class CmisRestApplicationSingle extends Application
     */
    public CmisRestApplicationSingle()
    {
-      singleton.add(new AtomCmisService());
+      ProviderImpl provider = new ProviderImpl();
+      provider.init(AbderaFactory.getInstance(), new HashMap<String, String>());
+      singleton.add(new AtomCmisService(provider));
       singleton.add(new AbderaResponseEntityProvider());
       singleton.add(new AbderaElementEntityProvider());
    }
