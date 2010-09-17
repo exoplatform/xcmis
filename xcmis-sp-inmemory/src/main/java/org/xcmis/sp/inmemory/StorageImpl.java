@@ -840,11 +840,14 @@ public class StorageImpl implements Storage
       String folderId = folder.getObjectId();
       TreeVisitor visitor = new TreeVisitor();
       folder.accept(visitor);
+      Set<String> removed = new HashSet<String>();
       for (BaseObjectData o : visitor.items)
       {
          try
          {
+            String id = o.getObjectId();
             o.delete();
+            removed.add(id);
          }
          catch (Exception e)
          {
@@ -858,6 +861,11 @@ public class StorageImpl implements Storage
                break;
             }
          }
+      }
+
+      if (indexListener != null)
+      {
+         indexListener.removed(removed);
       }
 
       try
