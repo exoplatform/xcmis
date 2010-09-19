@@ -53,16 +53,16 @@
                <artifactId>everrest-core</artifactId>
                <scope>runtime</scope>
             </dependency>
-            <dependency>
-               <groupId>org.apache.abdera</groupId>
-               <artifactId>abdera-server</artifactId>
-               <scope>runtime</scope>
-            </dependency>
-            <dependency>
-               <groupId>org.apache.abdera</groupId>
-               <artifactId>abdera-client</artifactId>
-               <scope>runtime</scope>
-            </dependency>
+<!--            <dependency>-->
+<!--               <groupId>org.apache.abdera</groupId>-->
+<!--               <artifactId>abdera-server</artifactId>-->
+<!--               <scope>runtime</scope>-->
+<!--            </dependency>-->
+<!--            <dependency>-->
+<!--               <groupId>org.apache.abdera</groupId>-->
+<!--               <artifactId>abdera-client</artifactId>-->
+<!--               <scope>runtime</scope>-->
+<!--            </dependency>-->
             <dependency>
                <groupId>javax.xml.bind</groupId>
                <artifactId>jaxb-api</artifactId>
@@ -168,60 +168,69 @@
                <artifactId>xcmis-restatom</artifactId>
                <scope>runtime</scope>
             </dependency>
+            <dependency>
+               <groupId>org.everrest</groupId>
+               <artifactId>everrest-commons</artifactId>
+               <scope>runtime</scope>
+            </dependency>
+            <dependency>
+               <groupId>org.everrest</groupId>
+               <artifactId>everrest-core</artifactId>
+               <scope>runtime</scope>
+            </dependency>
+            <dependency>
+               <groupId>org.apache.abdera</groupId>
+               <artifactId>abdera-server</artifactId>
+               <scope>runtime</scope>
+            </dependency>
+            <dependency>
+               <groupId>org.apache.abdera</groupId>
+               <artifactId>abdera-client</artifactId>
+               <scope>runtime</scope>
+            </dependency>
+            <dependency>
+               <groupId>javax.xml.bind</groupId>
+               <artifactId>jaxb-api</artifactId>
+               <exclusions>
+                  <exclusion>
+                     <groupId>javax.xml.stream</groupId>
+                     <artifactId>stax-api</artifactId>
+                  </exclusion>
+               </exclusions>
+               <scope>runtime</scope>
+            </dependency>
          </dependencies>
          <build>
             <finalName>xcmis</finalName>
+            <resources>
+               <resource>
+                  <directory>src/main/resources</directory>
+                  <includes>
+                     <include>**/org.xcmis.CmisRegistryFactory</include>
+                  </includes>
+               </resource>
+            </resources>
             <plugins>
                <plugin>
                   <groupId>org.apache.maven.plugins</groupId>
                   <artifactId>maven-war-plugin</artifactId>
                   <version>2.0.2</version>
                   <configuration>
+                     <!--
+                     *** DO NOT REMOVE OR SET TO FALSE ***
+                     Need pack in jar and put in WEB-INF/lib instead WEB-INF/classes!!!
+                     Otherwise will be not able found CmisRegistryFactory name in file
+                     META-INF/services/xcmis/org.xcmis.CmisRegistryFactory
+                     -->
+                     <archiveClasses>true</archiveClasses>
                      <webXml>${project.basedir}/src/main/webapp/WEB-INF/web-restatom.xml</webXml>
                      <warSourceExcludes>
-                        **/web-*.xml,
-                        **/ant-*.jar,
-                        **/ant-launcher-*.jar,
-                        **/bcel-*.jar,
-                        **/bcmail-jdk14-*.jar,
-                        **/carol-*.jar,
-                        **/cxf-rt-databinding-aegis-*.jar,
-                        **/cxf-rt-javascript-*.jar,
-                        **/cxf-rt-transports-local-*.jar,
-                        **/cxf-tools-java2ws-*.jar,
-                        **/cxf-tools-validator-*.jar,
-                        **/cxf-tools-wsdlto-frontend-jaxws-*.jar,
-                        **/ejb-*.jar,
-                        **/exo.tool.framework.junit-*.jar,
-                        **/geronimo-activation_1.0.2_spec-*.jar,
-                        **/geronimo-activation_1.1_spec-*.jar,
-                        **/geronimo-annotation_1.0_spec-*.jar,
-                        **/geronimo-javamail_1.4_spec-*.jar,
-                        **/geronimo-servlet_2.5_spec-*.jar,
-                        **/geronimo-stax-api_1.0_spec-*.jar,
-                        **/groovy-all-*.jar,
-                        **/jempbox-*.jar,
-                        **/jline-*.jar,
-                        **/jmock-*.jar,
-                        **/jsf-api-*.jar,
-                        **/junit-*.jar,
-                        **/lucene-spellchecker-*.jar,
-                        **/portlet-api-*.jar,
                         **/servlet-api-*.jar,
-                        **/slf4j-simple-*.jar,
-                        **/spring-*.jar,
-                        **/velocity-*.jar,
-                        **/velocity-dep-*.jar,
-                        **/xbean-*.jar,
-                        **/xbean-spring-*.jar,
-                        **/xdoclet-*.jar,
-                        **/xdoclet-hibernate-module-*.jar,
-                        **/xdoclet-xdoclet-module-*.jar,
-                        **/xerces-*.jar,
-                        **/xjavadoc-*.jar,
-                        **/xml-apis-*.jar,
-                        **/xmlParserAPIs-*.jar,
+                        **/geronimo-stax-api_*.jar,
+                        **/geronimo-activation_*.jar,
                         **/xercesImpl-*.jar,
+                        **/xml-apis-*.jar,
+                        **/wstx-asl-*.jar,
                      </warSourceExcludes>
                      <archive>
                         <manifest>
@@ -266,57 +275,50 @@
          </dependencies>
          <build>
             <finalName>xcmis</finalName>
+            <resources>
+               <resource>
+                  <directory>src/main/resources</directory>
+                  <includes>
+                     <include>**/org.xcmis.CmisRegistryFactory</include>
+                  </includes>
+               </resource>
+            </resources>
             <plugins>
                <plugin>
                   <groupId>org.apache.maven.plugins</groupId>
                   <artifactId>maven-war-plugin</artifactId>
                   <version>2.0.2</version>
                   <configuration>
+                     <!--
+                     *** DO NOT REMOVE OR SET TO FALSE ***
+                     Need pack in jar and put in WEB-INF/lib instead WEB-INF/classes!!!
+                     Otherwise will be not able found CmisRegistryFactory name in file
+                     META-INF/services/xcmis/org.xcmis.CmisRegistryFactory
+                     -->
+                     <archiveClasses>true</archiveClasses>
                      <webXml>${project.basedir}/src/main/webapp/WEB-INF/web-wssoap.xml</webXml>
                      <warSourceExcludes>
-                        **/web-*.xml,
-                        **/ant-*.jar,
-                        **/ant-launcher-*.jar,
-                        **/bcel-*.jar,
-                        **/bcmail-jdk14-*.jar,
-                        **/carol-*.jar,
+                        **/servlet-api-*.jar,
+                        **/geronimo-stax-api_*.jar,
+                        **/geronimo-activation_*.jar,
+                        **/geronimo-annotation_*.jar,
+                        **/geronimo-javamail_*.jar,
+                        **/geronimo-servlet_*.jar,
                         **/cxf-rt-databinding-aegis-*.jar,
                         **/cxf-rt-javascript-*.jar,
                         **/cxf-rt-transports-local-*.jar,
                         **/cxf-tools-java2ws-*.jar,
                         **/cxf-tools-validator-*.jar,
                         **/cxf-tools-wsdlto-frontend-jaxws-*.jar,
-                        **/ejb-*.jar,
-                        **/exo.tool.framework.junit-*.jar,
-                        **/geronimo-activation_1.0.2_spec-*.jar,
-                        **/geronimo-activation_1.1_spec-*.jar,
-                        **/geronimo-annotation_1.0_spec-*.jar,
-                        **/geronimo-javamail_1.4_spec-*.jar,
-                        **/geronimo-servlet_2.5_spec-*.jar,
-                        **/geronimo-stax-api_1.0_spec-*.jar,
-                        **/groovy-all-*.jar,
-                        **/jempbox-*.jar,
-                        **/jline-*.jar,
-                        **/jmock-*.jar,
-                        **/jsf-api-*.jar,
-                        **/junit-*.jar,
-                        **/lucene-spellchecker-*.jar,
-                        **/portlet-api-*.jar,
-                        **/servlet-api-*.jar,
-                        **/slf4j-simple-*.jar,
+                        **/xercesImpl-*.jar,
+                        **/wstx-asl-*.jar,
                         **/spring-*.jar,
                         **/velocity-*.jar,
                         **/velocity-dep-*.jar,
                         **/xbean-*.jar,
-                        **/xbean-spring-*.jar,
-                        **/xdoclet-*.jar,
-                        **/xdoclet-hibernate-module-*.jar,
-                        **/xdoclet-xdoclet-module-*.jar,
-                        **/xerces-*.jar,
-                        **/xjavadoc-*.jar,
+                        **/jetty-*.jar,
+                        **/jetty-util-*.jar,
                         **/xml-apis-*.jar,
-                        **/xmlParserAPIs-*.jar,
-                        **/xercesImpl-*.jar,
                      </warSourceExcludes>
                      <archive>
                         <manifest>

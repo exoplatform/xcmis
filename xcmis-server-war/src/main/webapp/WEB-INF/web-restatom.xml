@@ -4,20 +4,16 @@
 
 <web-app>
 
-   <display-name>xCMIS Application: REST</display-name>
+   <display-name>xCMIS Application</display-name>
+
+   <context-param>
+      <param-name>ws.rs.scan.components</param-name>
+      <param-value>true</param-value>
+   </context-param>
 
    <filter>
       <filter-name>UserContextInitializerFilter</filter-name>
       <filter-class>org.xcmis.server.UserContextInitializerFilter</filter-class>
-   </filter>
-
-   <filter>
-      <filter-name>RestContentFilter</filter-name>
-      <filter-class>org.exoplatform.services.rest.servlet.RestEncodingFilter</filter-class>
-      <init-param>
-         <param-name>REQUEST_ENCODING</param-name>
-         <param-value>UTF-8</param-value>
-      </init-param>
    </filter>
 
    <filter-mapping>
@@ -25,21 +21,16 @@
       <url-pattern>/*</url-pattern>
    </filter-mapping>
 
-   <filter-mapping>
-      <filter-name>RestContentFilter</filter-name>
-      <servlet-name>RestServer</servlet-name>
-   </filter-mapping>
-
    <listener>
-      <listener-class>org.exoplatform.ws.frameworks.servlet.StandaloneContainerInitializedListener</listener-class>
+      <listener-class>org.xcmis.restatom.AtomCmisBootstrapListener</listener-class>
+   </listener>
+   <listener>
+      <listener-class>org.everrest.core.servlet.RestInitializedListener</listener-class>
    </listener>
 
    <servlet>
       <servlet-name>RestServer</servlet-name>
-      <display-name>Rest Server</display-name>
-      <description>eXo REST Server</description>
-      <servlet-class>org.exoplatform.services.rest.servlet.RestServlet</servlet-class>
-      <load-on-startup>4</load-on-startup>
+      <servlet-class>org.everrest.core.servlet.StandaloneRestServlet</servlet-class>
    </servlet>
 
    <servlet-mapping>
@@ -49,32 +40,26 @@
 
    <security-constraint>
       <web-resource-collection>
-         <web-resource-name>xcmis</web-resource-name>
-         <url-pattern>/rest/*</url-pattern>
+         <web-resource-name>xCMIS Application</web-resource-name>
          <url-pattern>/cmisws/*</url-pattern>
+         <url-pattern>/rest/*</url-pattern>
       </web-resource-collection>
       <auth-constraint>
-         <role-name>users</role-name>
          <role-name>administrators</role-name>
+         <role-name>users</role-name>
       </auth-constraint>
-      <user-data-constraint>
-         <transport-guarantee>NONE</transport-guarantee>
-      </user-data-constraint>
    </security-constraint>
 
    <login-config>
       <auth-method>BASIC</auth-method>
-      <realm-name>exo-domain</realm-name>
+      <realm-name>xCMIS Application</realm-name>
    </login-config>
 
    <security-role>
-      <description>Security role1</description>
-      <role-name>administrators</role-name>
-   </security-role>
-
-   <security-role>
-      <description>Security role2</description>
       <role-name>users</role-name>
+   </security-role>
+   <security-role>
+      <role-name>administrators</role-name>
    </security-role>
 
 </web-app>
