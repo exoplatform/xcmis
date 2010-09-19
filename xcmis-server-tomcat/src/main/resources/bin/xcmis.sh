@@ -4,15 +4,11 @@
 cd `dirname "$0"`
 
 # Sets some variables
-LOG_OPTS="-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"
-SECURITY_OPTS="-Djava.security.auth.login.config=../conf/jaas.conf"
-EXO_CONFIG_OPTS="-Xshare:auto -Xms128m -Xmx512m"
+XCMIS_OPTS="-Xshare:auto -Xms256m -Xmx512m"
 
 #REMOTE_DEBUG="-Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n"
 
-XCMIS_OPTS="-Dorg.xcmis.CmisRegistryFactory=org.xcmis.sp.inmemory.tck.InmemoryCmisRegistryFactory"
-
-JAVA_OPTS="$JAVA_OPTS $LOG_OPTS $SECURITY_OPTS $EXO_CONFIG_OPTS $REMOTE_DEBUG $XCMIS_OPTS"
+JAVA_OPTS="$JAVA_OPTS $XCMIS_OPTS $REMOTE_DEBUG"
 export JAVA_OPTS
 
 # Launches the server
