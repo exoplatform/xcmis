@@ -21,6 +21,13 @@ package org.xcmis.sp.inmemory.tck;
 
 import org.xcmis.spi.CmisRegistry;
 import org.xcmis.spi.CmisRegistryFactory;
+import org.xcmis.spi.utils.Logger;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.Properties;
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
@@ -30,11 +37,88 @@ import org.xcmis.spi.CmisRegistryFactory;
 public class InmemoryCmisRegistryFactory implements CmisRegistryFactory
 {
 
+   private static final Logger LOG = Logger.getLogger(InmemoryCmisRegistryFactory.class);
+
    private CmisRegistry reg = new CmisRegistry();
 
    public InmemoryCmisRegistryFactory()
    {
-      reg.addStorage(new org.xcmis.sp.inmemory.StorageProviderImpl("cmis1", "cmis1", "", -1L, -1L, null));
+      ClassLoader cl = null;
+      try
+      {
+         cl = Thread.currentThread().getContextClassLoader();
+      }
+      catch (Exception e)
+      {
+         LOG.error("Unable get context class loader. " + e.getMessage());
+      }
+
+      if (cl != null)
+      {
+         InputStream in = cl.getResourceAsStream("xcmis-storage.properties");
+         Properties properties = new Properties();
+         if (in != null)
+         {
+            try
+            {
+               properties.load(new BufferedReader(new InputStreamReader(in)));
+            }
+            catch (IOException ioe)
+            {
+               LOG.error(ioe.getMessage(), ioe);
+            }
+         }
+         String sids = (String)properties.get("org.xcmis.storage.id");
+         if (sids != null)
+         {
+            for (String s : sids.split(","))
+            {
+               String id = s.trim();
+               if (id.length() > 0)
+               {
+                  String name = (String)properties.get("org.xcmis.storage." + id + ".name");
+                  String description = (String)properties.get("org.xcmis.storage." + id + ".description");
+                  String sMaxItemsNum = (String)properties.get("org.xcmis.storage." + id + ".maxItemsNum");
+                  long maxItemsNum = -1;
+                  if (sMaxItemsNum != null && sMaxItemsNum.length() > 0)
+                  {
+                     try
+                     {
+                        maxItemsNum = Long.parseLong(sMaxItemsNum);
+                     }
+                     catch (NumberFormatException ne)
+                     {
+                        LOG.error("Unable convert '" + sMaxItemsNum + "' to long. ");
+                     }
+                  }
+                  String sMaxMem = (String)properties.get("org.xcmis.storage." + id + ".maxMem");
+                  long maxMem = -1;
+                  if (sMaxMem != null && sMaxMem.length() > 0)
+                  {
+                     try
+                     {
+                        maxMem = Long.parseLong(sMaxMem);
+                     }
+                     catch (NumberFormatException ne)
+                     {
+                        LOG.error("Unable convert '" + sMaxMem + "' to long. ");
+                     }
+                  }
+                  reg.addStorage(new org.xcmis.sp.inmemory.StorageProviderImpl(id, //
+                     name != null && name.length() > 0 ? name : id, //
+                     description != null && description.length() > 0 ? description : id, //
+                     maxMem, //
+                     maxItemsNum));
+                  LOG.info("Register storage " + id);
+               }
+            }
+         }
+         else
+         {
+            // Default
+            reg.addStorage(new org.xcmis.sp.inmemory.StorageProviderImpl("cmis1", "cmis1", "", -1L, -1L));
+         }
+      }
    }
 
    public CmisRegistry getRegistry()

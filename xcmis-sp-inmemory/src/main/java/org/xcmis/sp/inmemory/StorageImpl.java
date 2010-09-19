@@ -74,6 +74,7 @@ import org.xcmis.spi.model.CapabilityRendition;
 import org.xcmis.spi.model.ChangeEvent;
 import org.xcmis.spi.model.ContentStreamAllowed;
 import org.xcmis.spi.model.Permission;
+import org.xcmis.spi.model.Permission.BasicPermissions;
 import org.xcmis.spi.model.PermissionMapping;
 import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.PropertyDefinition;
@@ -85,7 +86,6 @@ import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.model.UnfileObject;
 import org.xcmis.spi.model.Updatability;
 import org.xcmis.spi.model.VersioningState;
-import org.xcmis.spi.model.Permission.BasicPermissions;
 import org.xcmis.spi.model.impl.StringProperty;
 import org.xcmis.spi.query.Query;
 import org.xcmis.spi.query.Result;
@@ -122,7 +122,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
  * number of items and total amount of content. Storage is not designed for high
  * concurrency load. In some cases data in storage can be in inconsistency
  * state.
- *
+ * 
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id: StorageImpl.java 804 2010-04-16 16:48:59Z
  *          alexey.zavizionov@gmail.com $
@@ -181,10 +181,6 @@ public class StorageImpl implements Storage
 
    private static final String PRODUCT_NAME = "xCMIS (eXo InMemory SP)";
 
-   private final long maxStorageMemSize;
-
-   private final long maxItemsNumber;
-
    private PermissionService permissionService;
 
    public StorageImpl(StorageConfiguration configuration, RenditionManager manager, PermissionService permissionService)
@@ -197,9 +193,6 @@ public class StorageImpl implements Storage
    protected StorageImpl(StorageConfiguration configuration)
    {
       this.configuration = configuration;
-
-      this.maxStorageMemSize = (Long)configuration.getProperties().get(StorageConfiguration.MAX_STORAGE_MEM_SIZE);
-      this.maxItemsNumber = (Long)configuration.getProperties().get(StorageConfiguration.MAX_ITEMS_NUMBER);
 
       this.entries = new ConcurrentHashMap<String, Entry>();
       this.children = new ConcurrentHashMap<String, Set<String>>();
@@ -385,9 +378,9 @@ public class StorageImpl implements Storage
       {
          name = source.getName();
          PropertyDefinition<?> namePropertyDefinition = typeDefinition.getPropertyDefinition(CmisConstants.NAME);
-         properties.put(namePropertyDefinition.getId(), new StringProperty(namePropertyDefinition.getId(),
-            namePropertyDefinition.getQueryName(), namePropertyDefinition.getLocalName(), namePropertyDefinition
-               .getDisplayName(), name));
+         properties.put(namePropertyDefinition.getId(),
+            new StringProperty(namePropertyDefinition.getId(), namePropertyDefinition.getQueryName(),
+               namePropertyDefinition.getLocalName(), namePropertyDefinition.getDisplayName(), name));
       }
 
       try
@@ -473,8 +466,8 @@ public class StorageImpl implements Storage
          {
             docEntry.setValue(CmisConstants.CHARSET, new StringValue(charset));
          }
-         docEntry.setValue(CmisConstants.CONTENT_STREAM_LENGTH, new IntegerValue(BigInteger
-            .valueOf(cv.getBytes().length)));
+         docEntry.setValue(CmisConstants.CONTENT_STREAM_LENGTH,
+            new IntegerValue(BigInteger.valueOf(cv.getBytes().length)));
          docEntry.setValue(CmisConstants.CONTENT_STREAM_ID, new StringValue(docId));
          docEntry.setValue(CmisConstants.CONTENT_STREAM_FILE_NAME, new StringValue(name));
       }
@@ -1259,12 +1252,12 @@ public class StorageImpl implements Storage
          throw new TypeNotFoundException("Type '" + typeId + "' does not exist.");
       }
       TypeDefinition copy =
-         new TypeDefinition(type.getId(), type.getBaseId(), type.getQueryName(), type.getLocalName(), type
-            .getLocalNamespace(), type.getParentId(), type.getDisplayName(), type.getDescription(), type.isCreatable(),
-            type.isFileable(), type.isQueryable(), type.isFulltextIndexed(), type.isIncludedInSupertypeQuery(), type
-               .isControllablePolicy(), type.isControllableACL(), type.isVersionable(), type.getAllowedSourceTypes(),
-            type.getAllowedTargetTypes(), type.getContentStreamAllowed(), includePropertyDefinition
-               ? PropertyDefinitions.getAll(typeId) : null);
+         new TypeDefinition(type.getId(), type.getBaseId(), type.getQueryName(), type.getLocalName(),
+            type.getLocalNamespace(), type.getParentId(), type.getDisplayName(), type.getDescription(),
+            type.isCreatable(), type.isFileable(), type.isQueryable(), type.isFulltextIndexed(),
+            type.isIncludedInSupertypeQuery(), type.isControllablePolicy(), type.isControllableACL(),
+            type.isVersionable(), type.getAllowedSourceTypes(), type.getAllowedTargetTypes(),
+            type.getContentStreamAllowed(), includePropertyDefinition ? PropertyDefinitions.getAll(typeId) : null);
 
       return copy;
    }
@@ -1329,9 +1322,10 @@ public class StorageImpl implements Storage
 
    void validateMaxItemsNumber(ObjectData object) throws StorageException
    {
-      if (maxItemsNumber != -1L && entries.size() > maxItemsNumber)
+      long maxItemsNum = configuration.getMaxItemsNum();
+      if (maxItemsNum > -1 && entries.size() > maxItemsNum)
       {
-         throw new StorageException("Unable add new object in storage. Max number '" + maxItemsNumber
+         throw new StorageException("Unable add new object in storage. Max number '" + maxItemsNum
             + "' of items is reached."
             + " Increase or set storage configuration property 'org.xcmis.inmemory.maxitems'.");
       }
@@ -1352,9 +1346,10 @@ public class StorageImpl implements Storage
             size += contentValue.getBytes().length;
          }
       }
-      if (maxStorageMemSize != -1L && size + content.length > maxStorageMemSize)
+      long maxMem = configuration.getMaxMem();
+      if (maxMem > -1 && size + content.length > maxMem)
       {
-         throw new StorageException("Unable add new object in storage. Max allowed memory size '" + maxStorageMemSize
+         throw new StorageException("Unable add new object in storage. Max allowed memory size '" + maxMem
             + "' bytes is reached." + " Increase or set storage configuration property 'org.xcmis.inmemory.maxmem'.");
       }
    }
@@ -1431,7 +1426,7 @@ public class StorageImpl implements Storage
 
       /**
        * Return comparable location of the object
-       *
+       * 
        * @param identifer
        * @return
        */
@@ -1614,8 +1609,8 @@ public class StorageImpl implements Storage
                   }
                }
                next =
-                  new ResultImpl(objectId, properties == null ? null : properties
-                     .toArray(new String[properties.size()]), score);
+                  new ResultImpl(objectId, properties == null ? null
+                     : properties.toArray(new String[properties.size()]), score);
             }
          }
       }

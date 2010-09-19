@@ -62,7 +62,7 @@ public abstract class BaseTest extends TestCase
       super.setUp();
       HashMap<String, Object> properties = new HashMap<String, Object>();
       properties.put("exo.cmis.changetoken.feature", false);
-      StorageConfiguration configuration = new StorageConfiguration(storageId, properties);
+      StorageConfiguration configuration = new StorageConfiguration(storageId, storageId, null, -1, -1);
 
       storage = new StorageImpl(configuration, RenditionManager.getInstance(), new PermissionService());
       UserContext.setCurrent(new UserContext(principal));
@@ -75,8 +75,8 @@ public abstract class BaseTest extends TestCase
    {
       PropertyDefinition<?> def = PropertyDefinitions.getPropertyDefinition("cmis:folder", CmisConstants.NAME);
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-      properties.put(CmisConstants.NAME, new StringProperty(def.getId(), def.getQueryName(), def.getLocalName(), def
-         .getDisplayName(), name));
+      properties.put(CmisConstants.NAME,
+         new StringProperty(def.getId(), def.getQueryName(), def.getLocalName(), def.getDisplayName(), name));
 
       TypeDefinition typeDefinition = storage.getTypeDefinition("cmis:folder", true);
 
@@ -90,8 +90,8 @@ public abstract class BaseTest extends TestCase
 
       PropertyDefinition<?> def = PropertyDefinitions.getPropertyDefinition("cmis:document", CmisConstants.NAME);
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-      properties.put(CmisConstants.NAME, new StringProperty(def.getId(), def.getQueryName(), def.getLocalName(), def
-         .getDisplayName(), name));
+      properties.put(CmisConstants.NAME,
+         new StringProperty(def.getId(), def.getQueryName(), def.getLocalName(), def.getDisplayName(), name));
 
       DocumentData doc =
          storage.createDocument(parent, typeDefinition, properties, content, null, null, versioningState);
@@ -102,8 +102,8 @@ public abstract class BaseTest extends TestCase
    {
       PropertyDefinition<?> def = PropertyDefinitions.getPropertyDefinition("cmis:policy", CmisConstants.POLICY_TEXT);
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-      properties.put(CmisConstants.NAME, new StringProperty(def.getId(), def.getQueryName(), def.getLocalName(), def
-         .getDisplayName(), name));
+      properties.put(CmisConstants.NAME,
+         new StringProperty(def.getId(), def.getQueryName(), def.getLocalName(), def.getDisplayName(), name));
       properties.put(CmisConstants.POLICY_TEXT, new StringProperty(def.getId(), def.getQueryName(), def.getLocalName(),
          def.getDisplayName(), policyText));
       PolicyData policy = storage.createPolicy(null, typeDefinition, properties, null, null);
@@ -116,8 +116,9 @@ public abstract class BaseTest extends TestCase
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
       PropertyDefinition<?> defName =
          PropertyDefinitions.getPropertyDefinition("cmis:relationship", CmisConstants.NAME);
-      properties.put(CmisConstants.NAME, new StringProperty(defName.getId(), defName.getQueryName(), defName
-         .getLocalName(), defName.getDisplayName(), name));
+      properties.put(CmisConstants.NAME,
+         new StringProperty(defName.getId(), defName.getQueryName(), defName.getLocalName(), defName.getDisplayName(),
+            name));
 
       RelationshipData relationship =
          storage.createRelationship(source, target, typeDefinition, properties, null, null);

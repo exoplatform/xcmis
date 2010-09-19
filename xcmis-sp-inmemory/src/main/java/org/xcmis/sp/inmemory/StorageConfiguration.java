@@ -19,9 +19,6 @@
 
 package org.xcmis.sp.inmemory;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id$
@@ -37,32 +34,14 @@ public class StorageConfiguration
    /** Description. */
    private String description;
 
-   /** Additional properties. */
-   private Map<String, Object> properties;
+   /** Max memory size allowed to be used for store objects. */
+   private long maxMem;
 
-   public static String MAX_STORAGE_MEM_SIZE = "org.xcmis.inmemory.maxmem";
+   /** Max number of objects allowed to be added in storage. */
+   private long maxItemsNum;
 
-   public static String MAX_ITEMS_NUMBER = "org.xcmis.inmemory.maxitems";
-
-   public StorageConfiguration()
+   StorageConfiguration()
    {
-   }
-
-   /**
-    * @param id the id
-    * @param properties the properties
-    */
-   public StorageConfiguration(String id, Map<String, Object> properties)
-   {
-      this.id = id;
-      if (properties == null)
-        this.properties = new HashMap<String, Object>();
-      else
-         this.properties = new HashMap<String, Object>(properties);
-      if (!this.properties.containsKey(MAX_STORAGE_MEM_SIZE))
-         this.properties.put(MAX_STORAGE_MEM_SIZE, -1L);
-      if (!this.properties.containsKey(MAX_ITEMS_NUMBER))
-         this.properties.put(MAX_ITEMS_NUMBER, -1L);
    }
 
    /**
@@ -70,58 +49,23 @@ public class StorageConfiguration
     * @param name name
     * @param description description
     * @param maxMem max memory size
-    * @param maxObjects max objects count
+    * @param maxItemsNum max objects count
     */
-   public StorageConfiguration(String id, String name, String description, long maxMem, long maxObjects)
+   public StorageConfiguration(String id, String name, String description, long maxMem, long maxItemsNum)
    {
       this.id = id;
       this.name = name;
       this.description = description;
-      this.properties = new HashMap<String, Object>();
-      this.properties.put(MAX_STORAGE_MEM_SIZE, maxMem);
-      this.properties.put(MAX_ITEMS_NUMBER, maxObjects);
+      this.maxMem = maxMem;
+      this.maxItemsNum = maxItemsNum;
    }
 
    /**
-    * Get repository id.
-    *
     * @return the repository id
     */
    public String getId()
    {
       return id;
-   }
-
-   /**
-    * Get repository description.
-    *
-    * @return the repository description
-    */
-   public String getDescription()
-   {
-      return description;
-   }
-
-   /**
-    * Get repository name.
-    *
-    * @return the repository name
-    */
-   public String getName()
-   {
-      return name;
-   }
-
-   /**
-    * @return properties
-    */
-   public Map<String, Object> getProperties()
-   {
-      if (properties == null)
-      {
-         properties = new HashMap<String, Object>();
-      }
-      return properties;
    }
 
    /**
@@ -133,6 +77,14 @@ public class StorageConfiguration
    }
 
    /**
+    * @return the repository name
+    */
+   public String getName()
+   {
+      return name;
+   }
+
+   /**
     * @param name repository name
     */
    public void setName(String name)
@@ -141,11 +93,43 @@ public class StorageConfiguration
    }
 
    /**
-    * @param properties properties
+    * @return max number of items allowed to be added in storage
     */
-   public void setProperties(Map<String, Object> properties)
+   public long getMaxItemsNum()
    {
-      this.properties = properties;
+      return maxItemsNum;
+   }
+
+   /**
+    * @param maxItemsNum max number of items allowed to be added in storage
+    */
+   public void setMaxItemsNum(long maxItemsNum)
+   {
+      this.maxItemsNum = maxItemsNum;
+   }
+
+   /**
+    * @return max memory size to be used for store objects
+    */
+   public long getMaxMem()
+   {
+      return maxMem;
+   }
+
+   /**
+    * @param maxMem max memory size to be used for store objects
+    */
+   public void setMaxMem(long maxMem)
+   {
+      this.maxMem = maxMem;
+   }
+
+   /**
+    * @return the repository description
+    */
+   public String getDescription()
+   {
+      return description;
    }
 
    /**
@@ -155,4 +139,5 @@ public class StorageConfiguration
    {
       this.description = description;
    }
+
 }

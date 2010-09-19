@@ -49,17 +49,15 @@ public class StorageProviderImpl implements StorageProvider
     * @param maxStorageMemSize the max storage memory size in bytes or -1L for
     *        unbounded
     * @param maxItemsNumber the maximum items number, or -1L for unbounded
-    * @param permissionService the permission service
     */
    public StorageProviderImpl(String repositoryId, String repositoryName, String description, long maxStorageMemSize,
-      long maxItemsNumber, PermissionService permissionService)
+      long maxItemsNumber)
    {
       this.storageConfig =
          new StorageConfiguration(repositoryId, repositoryName, description, maxStorageMemSize, maxItemsNumber);
       this.renditionManager = RenditionManager.getInstance();
       this.storageImpl =
-         new StorageImpl(storageConfig, renditionManager, permissionService != null ? permissionService
-            : new PermissionService());
+         new StorageImpl(storageConfig, renditionManager, new PermissionService());
    }
 
    /**
