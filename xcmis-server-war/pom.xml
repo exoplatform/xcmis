@@ -37,6 +37,11 @@
                <artifactId>xcmis-sp-inmemory</artifactId>
                <scope>runtime</scope>
             </dependency>
+            <dependency>
+               <groupId>org.xcmis</groupId>
+               <artifactId>xcmis-renditions</artifactId>
+               <scope>runtime</scope>
+            </dependency>
             <!-- rest atom -->
             <dependency>
                <groupId>org.xcmis</groupId>
@@ -53,16 +58,6 @@
                <artifactId>everrest-core</artifactId>
                <scope>runtime</scope>
             </dependency>
-<!--            <dependency>-->
-<!--               <groupId>org.apache.abdera</groupId>-->
-<!--               <artifactId>abdera-server</artifactId>-->
-<!--               <scope>runtime</scope>-->
-<!--            </dependency>-->
-<!--            <dependency>-->
-<!--               <groupId>org.apache.abdera</groupId>-->
-<!--               <artifactId>abdera-client</artifactId>-->
-<!--               <scope>runtime</scope>-->
-<!--            </dependency>-->
             <dependency>
                <groupId>javax.xml.bind</groupId>
                <artifactId>jaxb-api</artifactId>
@@ -127,6 +122,7 @@
                         **/jetty-*.jar,
                         **/jetty-util-*.jar,
                         **/xml-apis-*.jar,
+                        **/stax-stax-api-*.jar,
                      </warSourceExcludes>
                      <archive>
                         <manifest>
@@ -161,6 +157,11 @@
             <dependency>
                <groupId>org.xcmis</groupId>
                <artifactId>xcmis-sp-inmemory</artifactId>
+               <scope>runtime</scope>
+            </dependency>
+            <dependency>
+               <groupId>org.xcmis</groupId>
+               <artifactId>xcmis-renditions</artifactId>
                <scope>runtime</scope>
             </dependency>
             <dependency>
@@ -265,6 +266,11 @@
             <dependency>
                <groupId>org.xcmis</groupId>
                <artifactId>xcmis-sp-inmemory</artifactId>
+               <scope>runtime</scope>
+            </dependency>
+            <dependency>
+               <groupId>org.xcmis</groupId>
+               <artifactId>xcmis-renditions</artifactId>
                <scope>runtime</scope>
             </dependency>
             <dependency>

@@ -81,29 +81,4 @@ public class StorageProviderImpl implements StorageProvider
       return storageConfig.getId();
    }
 
-   public static class StorageProviderConfig
-   {
-
-      /**
-       * The storage configuration.
-       */
-      private StorageConfiguration storage;
-
-      /**
-       * @return the storage configuration
-       */
-      public StorageConfiguration getStorage()
-      {
-         return storage;
-      }
-
-      /**
-       * @param configs storage configuration
-       */
-      public void setStorage(StorageConfiguration storage)
-      {
-         this.storage = storage;
-      }
-   }
-
 }

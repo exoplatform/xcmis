@@ -21,12 +21,14 @@ package org.xcmis.sp.inmemory.tck;
 
 import org.xcmis.spi.CmisRegistry;
 import org.xcmis.spi.CmisRegistryFactory;
+import org.xcmis.spi.RenditionManager;
 import org.xcmis.spi.utils.Logger;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Arrays;
 import java.util.Properties;
 
 /**
@@ -53,6 +55,7 @@ public class InmemoryCmisRegistryFactory implements CmisRegistryFactory
          LOG.error("Unable get context class loader. " + e.getMessage());
       }
 
+      boolean fconfig = false;
       if (cl != null)
       {
          InputStream in = cl.getResourceAsStream("xcmis-storage.properties");
@@ -62,12 +65,21 @@ public class InmemoryCmisRegistryFactory implements CmisRegistryFactory
             try
             {
                properties.load(new BufferedReader(new InputStreamReader(in)));
+               fconfig = true;
             }
             catch (IOException ioe)
             {
                LOG.error(ioe.getMessage(), ioe);
             }
          }
+
+         String renditionProvider = (String)properties.get("org.xcmis.storage.renditionProvider");
+         if (renditionProvider != null)
+         {
+            RenditionManager renditionManager = RenditionManager.getInstance();
+            renditionManager.addRenditionProviders(Arrays.asList(renditionProvider.split(",")));
+         }
+
          String sids = (String)properties.get("org.xcmis.storage.id");
          if (sids != null)
          {
@@ -113,11 +125,11 @@ public class InmemoryCmisRegistryFactory implements CmisRegistryFactory
                }
             }
          }
-         else
-         {
-            // Default
-            reg.addStorage(new org.xcmis.sp.inmemory.StorageProviderImpl("cmis1", "cmis1", "", -1L, -1L));
-         }
+      }
+      if (!fconfig)
+      {
+         // Default
+         reg.addStorage(new org.xcmis.sp.inmemory.StorageProviderImpl("cmis1", "cmis1", "", -1L, -1L));
       }
    }
 
