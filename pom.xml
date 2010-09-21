@@ -60,8 +60,6 @@
       <wiki.url>http://code.google.com/p/xcmis/w/list</wiki.url>
       <maven.build.timestamp.format>yyyy.MM.dd-HH:mm</maven.build.timestamp.format>
       <eclipse.projectNameTemplate>[artifactId]-[version]</eclipse.projectNameTemplate>
-      <!-- eXo versions -->
-      <org.exoplatform.kernel.version>2.2.4-GA</org.exoplatform.kernel.version>
       
       <org.everrest.version>1.0-SNAPSHOT</org.everrest.version>
       
@@ -133,11 +131,6 @@
             <groupId>org.xcmis</groupId>
             <artifactId>xcmis-wssoap</artifactId>
             <version>${project.version}</version>
-         </dependency>
-         <dependency>
-            <groupId>org.exoplatform.kernel</groupId>
-            <artifactId>exo.kernel.commons</artifactId>
-            <version>${org.exoplatform.kernel.version}</version>
          </dependency>
          <dependency>
             <groupId>org.everrest</groupId>

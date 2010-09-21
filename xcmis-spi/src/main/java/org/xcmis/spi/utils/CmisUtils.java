@@ -32,6 +32,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
@@ -106,32 +108,6 @@ public final class CmisUtils
       return acl;
    }
 
-   /**
-    * Get XMLGregorianCalendar that is based on Calendar.
-    *
-    * @param calendar source Calendar
-    * @return XMLGregorianCalendar
-    */
-   public static XMLGregorianCalendar fromCalendar(Calendar calendar)
-   {
-      XMLGregorianCalendar xmlCalendar;
-      try
-      {
-         xmlCalendar = DatatypeFactory.newInstance().newXMLGregorianCalendar();
-      }
-      catch (DatatypeConfigurationException e)
-      {
-         String msg = "Unable get XMLGregorianCalendar.";
-         throw new RuntimeException(msg, e);
-      }
-      xmlCalendar.setYear(calendar.get(Calendar.YEAR));
-      xmlCalendar.setMonth(calendar.get(Calendar.MONTH) + 1);
-      xmlCalendar.setDay(calendar.get(Calendar.DAY_OF_MONTH));
-      xmlCalendar.setTime(calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), calendar
-         .get(Calendar.SECOND), calendar.get(Calendar.MILLISECOND));
-      return xmlCalendar;
-   }
-
    public static List<AccessControlEntry> mergeACLs(List<AccessControlEntry> existedAcl,
       List<AccessControlEntry> addAcl, List<AccessControlEntry> removeAcl)
    {
@@ -188,6 +164,115 @@ public final class CmisUtils
             }
          }
       }
+   }
+
+   // ----- Dates ------
+
+   /** The z-format pattern. */
+   private static final Pattern Z_FORMAT =
+      Pattern.compile("(\\d{4})-(\\d{2})-(\\d{2})[Tt](\\d{2}):(\\d{2}):(\\d{2})(\\.(\\d{1,3}))?[zZ]");
+
+   /** The td-format pattern. */
+   private static final Pattern TD_FORMAT =
+      Pattern
+         .compile("(\\d{4})-(\\d{2})-(\\d{2})[Tt](\\d{2}):(\\d{2}):(\\d{2})(\\.(\\d{1,3}))?([+-])((\\d{2}):(\\d{2}))");
+
+   /**
+    * Get XMLGregorianCalendar that is based on Calendar.
+    *
+    * @param calendar source Calendar
+    * @return XMLGregorianCalendar
+    */
+   public static XMLGregorianCalendar fromCalendar(Calendar calendar)
+   {
+      XMLGregorianCalendar xmlCalendar;
+      try
+      {
+         xmlCalendar = DatatypeFactory.newInstance().newXMLGregorianCalendar();
+      }
+      catch (DatatypeConfigurationException e)
+      {
+         String msg = "Unable get XMLGregorianCalendar.";
+         throw new RuntimeException(msg, e);
+      }
+      xmlCalendar.setYear(calendar.get(Calendar.YEAR));
+      xmlCalendar.setMonth(calendar.get(Calendar.MONTH) + 1);
+      xmlCalendar.setDay(calendar.get(Calendar.DAY_OF_MONTH));
+      xmlCalendar.setTime(calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), calendar
+         .get(Calendar.SECOND), calendar.get(Calendar.MILLISECOND));
+      return xmlCalendar;
+   }
+
+   /**
+    * Convert calendar to ISO8601 string representation.
+    *
+    * @param c the Calendar
+    * @return the ISO8601 string
+    */
+   public static String convertToString(Calendar c)
+   {
+      return String.format("%04d-%02d-%02dT%02d:%02d:%02d.%03dZ", c.get(Calendar.YEAR), c.get(Calendar.MONTH) + 1, c
+         .get(Calendar.DAY_OF_MONTH), c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), c.get(Calendar.SECOND), c
+         .get(Calendar.MILLISECOND));
+   }
+
+   /**
+    * Parses the calendar.
+    *
+    * @param date the date
+    * @return the calendar
+    */
+   public static Calendar parseCalendar(String date)
+   {
+      Matcher m = Z_FORMAT.matcher(date);
+      if (m.matches())
+      {
+         Calendar c = Calendar.getInstance();
+         c.set(Calendar.YEAR, Integer.parseInt(m.group(1)));
+         c.set(Calendar.MONTH, Integer.parseInt(m.group(2)) - 1);
+         c.set(Calendar.DATE, Integer.parseInt(m.group(3)));
+         c.set(Calendar.HOUR_OF_DAY, Integer.parseInt(m.group(4)));
+         c.set(Calendar.MINUTE, Integer.parseInt(m.group(5)));
+         c.set(Calendar.SECOND, Integer.parseInt(m.group(6)));
+         c.set(Calendar.MILLISECOND, //
+            m.group(7) == null ? 0 : Integer.parseInt(m.group(8)));
+         return c;
+      }
+      else
+      {
+         m = TD_FORMAT.matcher(date);
+         if (m.matches())
+         {
+            int t = m.group(9).equals("+") ? 1 : -1;
+            Calendar c = Calendar.getInstance();
+            c.set(Calendar.YEAR, Integer.parseInt(m.group(1)));
+            c.set(Calendar.MONTH, Integer.parseInt(m.group(2)) - 1);
+            c.set(Calendar.DATE, Integer.parseInt(m.group(3)));
+            c.set(Calendar.HOUR_OF_DAY, //
+               Integer.parseInt(m.group(4)) + t * Integer.parseInt(m.group(11)));
+            c.set(Calendar.MINUTE, //
+               Integer.parseInt(m.group(5)) + t * Integer.parseInt(m.group(12)));
+            c.set(Calendar.SECOND, Integer.parseInt(m.group(6)));
+            c.set(Calendar.MILLISECOND, //
+               m.group(7) == null ? 0 : Integer.parseInt(m.group(8)));
+            return c;
+         }
+         else
+         {
+            throw new IllegalArgumentException("Unsupported date format " + date);
+         }
+      }
+   }
+
+   /**
+    * Parses the xml calendar.
+    *
+    * @param date the date
+    * @return the xML gregorian calendar
+    */
+   public static XMLGregorianCalendar parseXMLCalendar(String date)
+   {
+      return fromCalendar(parseCalendar(date));
    }
 
    /**

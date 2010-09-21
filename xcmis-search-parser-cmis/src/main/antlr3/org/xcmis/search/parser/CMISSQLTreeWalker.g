@@ -19,7 +19,8 @@ import org.antlr.runtime.Token;
 import org.antlr.runtime.tree.CommonTree;
 import org.antlr.runtime.tree.TreeNodeStream;
 import org.antlr.runtime.tree.TreeParser;
-import org.exoplatform.commons.utils.ISO8601;
+//import org.exoplatform.commons.utils.ISO8601;
+import org.xcmis.spi.utils.CmisUtils;
 import org.xcmis.search.model.Limit;
 import org.xcmis.search.model.Query;
 import org.xcmis.search.model.column.Column;
@@ -1062,7 +1063,8 @@ dateTimeLiteral returns [Literal res]
   :
   TIMESTAMP sl=STRING_LITERAL {
 		String date = processLiteral($sl.getText());
-		{res =  new Literal(ISO8601.parse(date));}
+//		{res =  new Literal(ISO8601.parse(date));}
+      {res =  new Literal(CmisUtils.parseCalendar(date));}
 	}
   ;
 catch [RecognitionException e] {

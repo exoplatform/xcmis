@@ -18,12 +18,11 @@
       </dependency>
       <dependency>
          <groupId>org.xcmis</groupId>
-         <artifactId>xcmis-search-model</artifactId>
+         <artifactId>xcmis-spi</artifactId>
       </dependency>
-      <!-- Time parsing -->
       <dependency>
-         <groupId>org.exoplatform.kernel</groupId>
-         <artifactId>exo.kernel.commons</artifactId>
+         <groupId>org.xcmis</groupId>
+         <artifactId>xcmis-search-model</artifactId>
       </dependency>
       <dependency>
          <groupId>junit</groupId>
