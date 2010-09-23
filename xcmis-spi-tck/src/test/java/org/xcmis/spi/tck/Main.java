@@ -30,7 +30,7 @@ import junit.framework.TestSuite;
  * xCMIS SPI TCK entry point.
  *
  * Creates an test suite with TCK classes, and run it with results checking. 
- * Used only when TCK launches from the command line.
+ * Used only for TCK launching from the command line.
  *
  * @version $Id$
  */
