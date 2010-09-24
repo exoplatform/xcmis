@@ -19,7 +19,6 @@
 
 package org.xcmis.sp.inmemory.query;
 
-import org.apache.commons.lang.Validate;
 import org.xcmis.search.SearchService;
 import org.xcmis.search.content.ContentEntry;
 import org.xcmis.search.content.IndexModificationException;
@@ -35,7 +34,6 @@ import org.xcmis.spi.FolderData;
 import org.xcmis.spi.ObjectData;
 import org.xcmis.spi.PolicyData;
 import org.xcmis.spi.RelationshipData;
-import org.xcmis.spi.Storage;
 import org.xcmis.spi.utils.Logger;
 
 import java.io.IOException;
@@ -60,17 +58,12 @@ public class IndexListener
     */
    private final SearchService searchService;
 
-   /**
-    * Content storage.
-    */
-   private final Storage storage;
-
    private final ContentEntryAdapter contentEntryAdapter;
 
-   public IndexListener(Storage storage, SearchService searchService)
+   public IndexListener(SearchService searchService)
    {
-      Validate.notNull(searchService, "The searchService argument may not be null");
-      this.storage = storage;
+      if (searchService == null)
+         throw new IllegalArgumentException("The searchService argument may not be null");
       this.searchService = searchService;
       this.contentEntryAdapter = new ContentEntryAdapter();
    }
@@ -142,9 +135,8 @@ public class IndexListener
    {
       /**
        * Convert {@link ObjectData} to {@link ContentEntry}.
-       * 
-       * @param objectData
-       *           ObjectData
+       *
+       * @param objectData ObjectData
        * @return contentEntry ContentEntry
        * @throws IOException
        */
@@ -171,8 +163,7 @@ public class IndexListener
       }
 
       /**
-       * @param objectData
-       *           RelationshipData
+       * @param objectData RelationshipData
        * @return ContentEntry ContentEntry;
        */
       private ContentEntry createFromRelationship(RelationshipData objectData)
@@ -185,8 +176,7 @@ public class IndexListener
       }
 
       /**
-       * @param objectData
-       *           PolicyData
+       * @param objectData PolicyData
        * @return contentEntry ContentEntry
        */
       private ContentEntry createFromPolicy(PolicyData objectData)
@@ -232,9 +222,8 @@ public class IndexListener
 
       /**
        * Convert {@link FolderData} to {@link ContentEntry}.
-       * 
-       * @param objectData
-       *           FolderData
+       *
+       * @param objectData FolderData
        * @return contentEntry ContentEntry
        */
       private ContentEntry createFromFolder(FolderData objectData)
@@ -246,9 +235,8 @@ public class IndexListener
 
       /**
        * Convert {@link DocumentData} to {@link ContentEntry}.
-       * 
-       * @param objectData
-       *           DocumentData
+       *
+       * @param objectData DocumentData
        * @return contentEntry ContentEntry.
        * @throws IOException
        */

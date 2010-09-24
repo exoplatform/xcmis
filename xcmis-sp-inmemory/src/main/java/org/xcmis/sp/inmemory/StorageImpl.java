@@ -46,6 +46,7 @@ import org.xcmis.spi.DocumentData;
 import org.xcmis.spi.FolderData;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ItemsIterator;
+import org.xcmis.spi.LazyIterator;
 import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.ObjectData;
 import org.xcmis.spi.ObjectDataVisitor;
@@ -72,9 +73,9 @@ import org.xcmis.spi.model.CapabilityJoin;
 import org.xcmis.spi.model.CapabilityQuery;
 import org.xcmis.spi.model.CapabilityRendition;
 import org.xcmis.spi.model.ChangeEvent;
+import org.xcmis.spi.model.ChangeType;
 import org.xcmis.spi.model.ContentStreamAllowed;
 import org.xcmis.spi.model.Permission;
-import org.xcmis.spi.model.Permission.BasicPermissions;
 import org.xcmis.spi.model.PermissionMapping;
 import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.PropertyDefinition;
@@ -86,6 +87,7 @@ import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.model.UnfileObject;
 import org.xcmis.spi.model.Updatability;
 import org.xcmis.spi.model.VersioningState;
+import org.xcmis.spi.model.Permission.BasicPermissions;
 import org.xcmis.spi.model.impl.StringProperty;
 import org.xcmis.spi.query.Query;
 import org.xcmis.spi.query.Result;
@@ -109,7 +111,6 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.UUID;
@@ -122,7 +123,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
  * number of items and total amount of content. Storage is not designed for high
  * concurrency load. In some cases data in storage can be in inconsistency
  * state.
- * 
+ *
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id: StorageImpl.java 804 2010-04-16 16:48:59Z
  *          alexey.zavizionov@gmail.com $
@@ -130,6 +131,18 @@ import java.util.concurrent.CopyOnWriteArraySet;
 public class StorageImpl implements Storage
 {
    private static final Logger LOG = Logger.getLogger(StorageImpl.class);
+
+   private static final String VENDOR_NAME = "eXo";
+
+   private static final String REPOSITORY_DESCRIPTION = "xCMIS (eXo InMemory SP)";
+
+   private static final String PRODUCT_VERSION = "1.1";
+
+   private static final String PRODUCT_NAME = "xCMIS (eXo InMemory SP)";
+
+   static final String ROOT_FOLDER_ID = "abcdef12-3456-7890-0987-654321fedcba";
+
+   static final Set<String> EMPTY_PARENTS = Collections.emptySet();
 
    public static String generateId()
    {
@@ -154,7 +167,7 @@ public class StorageImpl implements Storage
 
    final Map<String, Set<String>> typeChildren;
 
-   private final RepositoryInfo repositoryInfo;
+   final IndexListener indexListener;
 
    /** Searche service. */
    final SearchService searchService;
@@ -162,26 +175,15 @@ public class StorageImpl implements Storage
    /** Cmis query parser. */
    final QueryParser cmisQueryParser;
 
-   /** The rendition manager. */
-   protected RenditionManager renditionManager;
+   final List<ChangeEvent> changes;
+
+   RenditionManager renditionManager;
+
+   PermissionService permissionService;
+
+   private final RepositoryInfo repositoryInfo;
 
    private final StorageConfiguration configuration;
-
-   final IndexListener indexListener;
-
-   static final String ROOT_FOLDER_ID = "abcdef12-3456-7890-0987-654321fedcba";
-
-   static final Set<String> EMPTY_PARENTS = Collections.emptySet();
-
-   private static final String VENDOR_NAME = "eXo";
-
-   private static final String REPOSITORY_DESCRIPTION = "xCMIS (eXo InMemory SP)";
-
-   private static final String PRODUCT_VERSION = "1.1";
-
-   private static final String PRODUCT_NAME = "xCMIS (eXo InMemory SP)";
-
-   private PermissionService permissionService;
 
    public StorageImpl(StorageConfiguration configuration, RenditionManager manager, PermissionService permissionService)
    {
@@ -202,6 +204,7 @@ public class StorageImpl implements Storage
       this.unfiled = new CopyOnWriteArraySet<String>();
       this.relationships = new ConcurrentHashMap<String, Set<String>>();
       this.types = new ConcurrentHashMap<String, TypeDefinition>();
+      this.changes = new CopyOnWriteArrayList<ChangeEvent>();
 
       PermissionMapping permissionMapping = new PermissionMapping();
       permissionMapping.put(PermissionMapping.CAN_GET_DESCENDENTS_FOLDER, //
@@ -289,8 +292,9 @@ public class StorageImpl implements Storage
                CapabilityContentStreamUpdatable.ANYTIME, CapabilityJoin.NONE, CapabilityQuery.BOTHCOMBINED,
                CapabilityRendition.READ, false, true, true, true, false, true, true, false), new ACLCapability(
                permissionMapping, Collections.unmodifiableList(supportedPermissions),
-               AccessControlPropagation.REPOSITORYDETERMINED, SupportedPermissions.BASIC), "anonymous", "any", null,
-            null, true, REPOSITORY_DESCRIPTION, VENDOR_NAME, PRODUCT_NAME, PRODUCT_VERSION, null);
+               AccessControlPropagation.REPOSITORYDETERMINED, SupportedPermissions.BASIC), "anonymous", "any", Arrays
+               .asList(BaseType.DOCUMENT, BaseType.FOLDER, BaseType.POLICY, BaseType.RELATIONSHIP), null, false,
+            REPOSITORY_DESCRIPTION, VENDOR_NAME, PRODUCT_NAME, PRODUCT_VERSION, null);
 
       types.put("cmis:document", //
          new TypeDefinition("cmis:document", BaseType.DOCUMENT, "cmis:document", "cmis:document", "", null,
@@ -340,7 +344,7 @@ public class StorageImpl implements Storage
       children.put(ROOT_FOLDER_ID, new CopyOnWriteArraySet<String>());
 
       this.searchService = getInitializedSearchService();
-      this.indexListener = new IndexListener(this, searchService);
+      this.indexListener = new IndexListener(searchService);
       this.cmisQueryParser = new CmisQueryParser();
    }
 
@@ -378,9 +382,9 @@ public class StorageImpl implements Storage
       {
          name = source.getName();
          PropertyDefinition<?> namePropertyDefinition = typeDefinition.getPropertyDefinition(CmisConstants.NAME);
-         properties.put(namePropertyDefinition.getId(),
-            new StringProperty(namePropertyDefinition.getId(), namePropertyDefinition.getQueryName(),
-               namePropertyDefinition.getLocalName(), namePropertyDefinition.getDisplayName(), name));
+         properties.put(namePropertyDefinition.getId(), new StringProperty(namePropertyDefinition.getId(),
+            namePropertyDefinition.getQueryName(), namePropertyDefinition.getLocalName(), namePropertyDefinition
+               .getDisplayName(), name));
       }
 
       try
@@ -466,8 +470,8 @@ public class StorageImpl implements Storage
          {
             docEntry.setValue(CmisConstants.CHARSET, new StringValue(charset));
          }
-         docEntry.setValue(CmisConstants.CONTENT_STREAM_LENGTH,
-            new IntegerValue(BigInteger.valueOf(cv.getBytes().length)));
+         docEntry.setValue(CmisConstants.CONTENT_STREAM_LENGTH, new IntegerValue(BigInteger
+            .valueOf(cv.getBytes().length)));
          docEntry.setValue(CmisConstants.CONTENT_STREAM_ID, new StringValue(docId));
          docEntry.setValue(CmisConstants.CONTENT_STREAM_FILE_NAME, new StringValue(name));
       }
@@ -513,11 +517,9 @@ public class StorageImpl implements Storage
       entries.put(docId, docEntry);
 
       DocumentDataImpl document = new DocumentDataImpl(docEntry, typeDefinition, this);
+      indexListener.created(document);
 
-      if (indexListener != null)
-      {
-         indexListener.created(document);
-      }
+      changes.add(new ChangeEvent(generateId(), docId, ChangeType.CREATED, (Calendar)cal.clone()));
 
       return document;
    }
@@ -597,11 +599,9 @@ public class StorageImpl implements Storage
       children.put(folderId, new CopyOnWriteArraySet<String>());
 
       FolderDataImpl folder = new FolderDataImpl(folderEntry, typeDefinition, this);
+      indexListener.created(folder);
 
-      if (indexListener != null)
-      {
-         indexListener.created(folder);
-      }
+      changes.add(new ChangeEvent(generateId(), folderId, ChangeType.CREATED, (Calendar)cal.clone()));
 
       return folder;
    }
@@ -685,11 +685,9 @@ public class StorageImpl implements Storage
       entries.put(policyId, policyEntry);
 
       PolicyDataImpl policy = new PolicyDataImpl(policyEntry, typeDefinition, this);
+      indexListener.created(policy);
 
-      if (indexListener != null)
-      {
-         indexListener.created(policy);
-      }
+      changes.add(new ChangeEvent(generateId(), policyId, ChangeType.CREATED, (Calendar)cal.clone()));
 
       return policy;
    }
@@ -789,11 +787,9 @@ public class StorageImpl implements Storage
       targetRels.add(relationshipId);
 
       RelationshipDataImpl relationship = new RelationshipDataImpl(relationshipEntry, typeDefinition, this);
+      indexListener.created(relationship);
 
-      if (indexListener != null)
-      {
-         indexListener.created(relationship);
-      }
+      changes.add(new ChangeEvent(generateId(), relationshipId, ChangeType.CREATED, (Calendar)cal.clone()));
 
       return relationship;
    }
@@ -809,12 +805,10 @@ public class StorageImpl implements Storage
 
       ((BaseObjectData)object).delete();
 
-      if (indexListener != null)
-      {
-         Set<String> removed = new HashSet<String>();
-         removed.add(objectId);
-         indexListener.removed(removed);
-      }
+      Set<String> removed = new HashSet<String>();
+      removed.add(objectId);
+      indexListener.removed(removed);
+      changes.add(new ChangeEvent(generateId(), objectId, ChangeType.DELETED, Calendar.getInstance()));
    }
 
    /**
@@ -856,9 +850,11 @@ public class StorageImpl implements Storage
          }
       }
 
-      if (indexListener != null)
+      indexListener.removed(removed);
+
+      for (String id : removed)
       {
-         indexListener.removed(removed);
+         changes.add(new ChangeEvent(generateId(), id, ChangeType.DELETED, Calendar.getInstance()));
       }
 
       try
@@ -909,8 +905,22 @@ public class StorageImpl implements Storage
     */
    public ItemsIterator<ChangeEvent> getChangeLog(String changeLogToken) throws ConstraintException
    {
-      // TODO implement feature
-      return CmisUtils.emptyItemsIterator();
+      if (changeLogToken != null)
+      {
+         int offset = 0;
+         int size = changes.size();
+         for (Iterator<ChangeEvent> iter = changes.iterator(); iter.hasNext()
+            && !changeLogToken.equals(iter.next().getLogToken());)
+         {
+            offset++;
+         }
+         if (offset == size)
+         {
+            throw new ConstraintException("No event corresponded to change log token " + changeLogToken);
+         }
+         return new BaseItemsIterator<ChangeEvent>(changes.subList(offset, size));
+      }
+      return new BaseItemsIterator<ChangeEvent>(changes);
    }
 
    /**
@@ -1058,6 +1068,13 @@ public class StorageImpl implements Storage
     */
    public RepositoryInfo getRepositoryInfo()
    {
+      int size = changes.size();
+      if (size > 0)
+      {
+         ChangeEvent event = changes.get(size - 1);
+         repositoryInfo.setLatestChangeLogToken(event.getLogToken());
+      }
+      // TODO clone repositoryInfo
       return repositoryInfo;
    }
 
@@ -1085,12 +1102,14 @@ public class StorageImpl implements Storage
       parents.get(object.getObjectId()).add(targetId);
       try
       {
-         return getObjectById(objectid);
+         object = getObjectById(objectid);
       }
       catch (ObjectNotFoundException e)
       {
          throw new CmisRuntimeException("Unable get object after moving.");
       }
+      indexListener.updated(object);
+      return object;
    }
 
    /**
@@ -1134,11 +1153,7 @@ public class StorageImpl implements Storage
       }
       parentIds.clear();
       unfiled.add(objectId);
-      if (indexListener != null)
-      {
-         indexListener.updated(object);
-      }
-
+      indexListener.updated(object);
    }
 
    /**
@@ -1252,12 +1267,12 @@ public class StorageImpl implements Storage
          throw new TypeNotFoundException("Type '" + typeId + "' does not exist.");
       }
       TypeDefinition copy =
-         new TypeDefinition(type.getId(), type.getBaseId(), type.getQueryName(), type.getLocalName(),
-            type.getLocalNamespace(), type.getParentId(), type.getDisplayName(), type.getDescription(),
-            type.isCreatable(), type.isFileable(), type.isQueryable(), type.isFulltextIndexed(),
-            type.isIncludedInSupertypeQuery(), type.isControllablePolicy(), type.isControllableACL(),
-            type.isVersionable(), type.getAllowedSourceTypes(), type.getAllowedTargetTypes(),
-            type.getContentStreamAllowed(), includePropertyDefinition ? PropertyDefinitions.getAll(typeId) : null);
+         new TypeDefinition(type.getId(), type.getBaseId(), type.getQueryName(), type.getLocalName(), type
+            .getLocalNamespace(), type.getParentId(), type.getDisplayName(), type.getDescription(), type.isCreatable(),
+            type.isFileable(), type.isQueryable(), type.isFulltextIndexed(), type.isIncludedInSupertypeQuery(), type
+               .isControllablePolicy(), type.isControllableACL(), type.isVersionable(), type.getAllowedSourceTypes(),
+            type.getAllowedTargetTypes(), type.getContentStreamAllowed(), includePropertyDefinition
+               ? PropertyDefinitions.getAll(typeId) : null);
 
       return copy;
    }
@@ -1388,6 +1403,8 @@ public class StorageImpl implements Storage
 
    }
 
+   // -------------------------------------------------------
+
    private class DocumentOrderResultSorter implements Comparator<ScoredRow>
    {
 
@@ -1426,7 +1443,7 @@ public class StorageImpl implements Storage
 
       /**
        * Return comparable location of the object
-       * 
+       *
        * @param identifer
        * @return
        */
@@ -1501,9 +1518,8 @@ public class StorageImpl implements Storage
    /**
     * Iterator over query result's.
     */
-   private class QueryResultIterator implements ItemsIterator<Result>
+   private class QueryResultIterator extends LazyIterator<Result>
    {
-
       private final Iterator<ScoredRow> rows;
 
       private final Set<SelectorName> selectors;
@@ -1511,8 +1527,6 @@ public class StorageImpl implements Storage
       private final int size;
 
       private final org.xcmis.search.model.Query qom;
-
-      private Result next;
 
       QueryResultIterator(List<ScoredRow> rows, org.xcmis.search.model.Query qom)
       {
@@ -1526,50 +1540,9 @@ public class StorageImpl implements Storage
       /**
        * {@inheritDoc}
        */
-      public boolean hasNext()
-      {
-         return next != null;
-      }
-
-      /**
-       * {@inheritDoc}
-       */
-      public Result next()
-      {
-         if (next == null)
-         {
-            throw new NoSuchElementException();
-         }
-         Result r = next;
-         fetchNext();
-         return r;
-      }
-
-      /**
-       * {@inheritDoc}
-       */
-      public void remove()
-      {
-         throw new UnsupportedOperationException("remove");
-      }
-
-      /**
-       * {@inheritDoc}
-       */
       public int size()
       {
          return size;
-      }
-
-      /**
-       * {@inheritDoc}
-       */
-      public void skip(int skip) throws NoSuchElementException
-      {
-         while (skip-- > 0)
-         {
-            next();
-         }
       }
 
       /**
@@ -1609,8 +1582,8 @@ public class StorageImpl implements Storage
                   }
                }
                next =
-                  new ResultImpl(objectId, properties == null ? null
-                     : properties.toArray(new String[properties.size()]), score);
+                  new ResultImpl(objectId, properties == null ? null : properties
+                     .toArray(new String[properties.size()]), score);
             }
          }
       }

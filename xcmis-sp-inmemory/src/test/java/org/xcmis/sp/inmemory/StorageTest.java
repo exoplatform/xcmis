@@ -23,6 +23,9 @@ import org.xcmis.spi.FolderData;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.ObjectData;
 import org.xcmis.spi.model.AccessControlEntry;
+import org.xcmis.spi.model.ChangeEvent;
+import org.xcmis.spi.model.ChangeType;
+import org.xcmis.spi.model.impl.StringProperty;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,6 +44,50 @@ import java.util.Set;
  */
 public class StorageTest extends BaseTest
 {
+
+   public void testChangeLog() throws Exception
+   {
+      DocumentData document = createDocument(rootFolder, "testChangeLog", documentTypeDefinition, null, null);
+      String id = document.getObjectId();
+      document.setProperty(new StringProperty("cmis:name", "cmis:name", "cmis:name", "cmis:name",
+         "testChangeLog_Rename"));
+      List<ChangeEvent> l = new ArrayList<ChangeEvent>();
+      for (ItemsIterator<ChangeEvent> changeLog = storage.getChangeLog(null); changeLog.hasNext();)
+      {
+         ChangeEvent next = changeLog.next();
+         if (id.equals(next.getObjectId())
+            && (next.getType() == ChangeType.CREATED || next.getType() == ChangeType.UPDATED))
+         {
+            l.add(next);
+         }
+      }
+      assertEquals("Expect for two change event: 'create' and 'updated'. ", 2, l.size());
+      assertEquals(ChangeType.CREATED, l.get(0).getType());
+      assertEquals(ChangeType.UPDATED, l.get(1).getType());
+   }
+
+   public void testChangeLogLogToken() throws Exception
+   {
+      DocumentData document = createDocument(rootFolder, "testChangeLogLogToken", documentTypeDefinition, null, null);
+      String id = document.getObjectId();
+      document.setProperty(new StringProperty("cmis:name", "cmis:name", "cmis:name", "cmis:name",
+         "testChangeLogLogToken_Rename"));
+
+      String logToken = storage.getRepositoryInfo().getLatestChangeLogToken();
+      List<ChangeEvent> l = new ArrayList<ChangeEvent>();
+      // Get limited list of changes, event "created" should be skipped.
+      for (ItemsIterator<ChangeEvent> changeLog = storage.getChangeLog(logToken); changeLog.hasNext();)
+      {
+         ChangeEvent next = changeLog.next();
+         if (id.equals(next.getObjectId())
+            && (next.getType() == ChangeType.CREATED || next.getType() == ChangeType.UPDATED))
+         {
+            l.add(next);
+         }
+      }
+      assertEquals("Expect for one change event: 'updated'. ", 1, l.size());
+      assertEquals(ChangeType.UPDATED, l.get(0).getType());
+   }
 
    public void testAddAcl() throws Exception
    {

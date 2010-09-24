@@ -39,6 +39,8 @@ import org.xcmis.spi.UpdateConflictException;
 import org.xcmis.spi.VersioningException;
 import org.xcmis.spi.model.AccessControlEntry;
 import org.xcmis.spi.model.BaseType;
+import org.xcmis.spi.model.ChangeEvent;
+import org.xcmis.spi.model.ChangeType;
 import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.PropertyDefinition;
 import org.xcmis.spi.model.PropertyType;
@@ -58,6 +60,7 @@ import org.xcmis.spi.utils.Logger;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -79,6 +82,52 @@ abstract class BaseObjectData implements ObjectData
 {
 
    private static final Logger LOG = Logger.getLogger(BaseObjectData.class);
+
+   /**
+    * Util method for obtaining deep copy of property.
+    *
+    * @param source source property
+    * @return
+    */
+   @SuppressWarnings("unchecked")
+   static Property<?> createCopyOfProperty(Property<?> source)
+   {
+      switch (source.getType())
+      {
+         case BOOLEAN :
+            return new BooleanProperty(source.getId(), source.getQueryName(), source.getLocalName(), source
+               .getDisplayName(), new ArrayList<Boolean>((List<Boolean>)source.getValues()));
+         case DATETIME :
+            List<Calendar> dates = (List<Calendar>)source.getValues();
+            List<Calendar> work = new ArrayList<Calendar>(dates.size());
+            for (Calendar c : dates)
+            {
+               work.add((Calendar)c.clone());
+            }
+            return new DateTimeProperty(source.getId(), source.getQueryName(), source.getLocalName(), source
+               .getDisplayName(), work);
+         case DECIMAL :
+            return new DecimalProperty(source.getId(), source.getQueryName(), source.getLocalName(), source
+               .getDisplayName(), new ArrayList<BigDecimal>((List<BigDecimal>)source.getValues()));
+         case HTML :
+            return new HtmlProperty(source.getId(), source.getQueryName(), source.getLocalName(), source
+               .getDisplayName(), new ArrayList<String>((List<String>)source.getValues()));
+         case ID :
+            return new IdProperty(source.getId(), source.getQueryName(), source.getLocalName(),
+               source.getDisplayName(), new ArrayList<String>((List<String>)source.getValues()));
+         case INTEGER :
+            return new IntegerProperty(source.getId(), source.getQueryName(), source.getLocalName(), source
+               .getDisplayName(), new ArrayList<BigInteger>((List<BigInteger>)source.getValues()));
+         case STRING :
+            return new StringProperty(source.getId(), source.getQueryName(), source.getLocalName(), source
+               .getDisplayName(), new ArrayList<String>((List<String>)source.getValues()));
+         case URI :
+            return new UriProperty(source.getId(), source.getQueryName(), source.getLocalName(), source
+               .getDisplayName(), new ArrayList<URI>((List<URI>)source.getValues()));
+         default :
+            return null;
+      }
+   }
 
    protected final TypeDefinition type;
 
@@ -115,6 +164,8 @@ abstract class BaseObjectData implements ObjectData
       {
          throw new CmisRuntimeException("Unable apply policy. " + e.getMessage(), e);
       }
+      storage.changes.add(new ChangeEvent(StorageImpl.generateId(), getObjectId(), ChangeType.SECURITY, Calendar
+         .getInstance(), null, new HashSet<String>(entry.getPolicies()), null));
    }
 
    public boolean equals(Object obj)
@@ -397,7 +448,8 @@ abstract class BaseObjectData implements ObjectData
 
    public int hashCode()
    {
-      return getObjectId().hashCode();
+      int hash = 8;
+      return hash * 31 + getObjectId().hashCode();
    }
 
    /**
@@ -414,6 +466,9 @@ abstract class BaseObjectData implements ObjectData
       {
          throw new CmisRuntimeException("Unable remove policy. " + e.getMessage(), e);
       }
+
+      storage.changes.add(new ChangeEvent(StorageImpl.generateId(), getObjectId(), ChangeType.SECURITY, Calendar
+         .getInstance(), null, new HashSet<String>(entry.getPolicies()), null));
    }
 
    /**
@@ -432,6 +487,18 @@ abstract class BaseObjectData implements ObjectData
       {
          throw new CmisRuntimeException("Unable set ACL. " + e.getMessage(), e);
       }
+      if (acl != null)
+      {
+         // null may mind replace all applied ACL
+         List<AccessControlEntry> copy = new ArrayList<AccessControlEntry>(acl.size());
+         for (AccessControlEntry ace : acl)
+         {
+            copy.add(new AccessControlEntry(ace.getPrincipal(), new HashSet<String>(ace.getPermissions()), ace
+               .isDirect()));
+         }
+         storage.changes.add(new ChangeEvent(StorageImpl.generateId(), getObjectId(), ChangeType.SECURITY, Calendar
+            .getInstance(), null, null, copy));
+      }
    }
 
    /**
@@ -440,11 +507,17 @@ abstract class BaseObjectData implements ObjectData
    public void setProperties(Map<String, Property<?>> properties) throws NameConstraintViolationException,
       UpdateConflictException, VersioningException, StorageException
    {
+      List<Property<?>> chl = new ArrayList<Property<?>>();
       for (Property<?> property : properties.values())
       {
-         doSetProperty(property);
+         if (doSetProperty(property))
+         {
+            chl.add(createCopyOfProperty(property));
+         }
       }
       save();
+      storage.changes.add(new ChangeEvent(StorageImpl.generateId(), getObjectId(), ChangeType.UPDATED, Calendar
+         .getInstance(), chl, null, null));
    }
 
    /**
@@ -455,6 +528,11 @@ abstract class BaseObjectData implements ObjectData
    {
       doSetProperty(property);
       save();
+      List<Property<?>> chl = new ArrayList<Property<?>>(1);
+      // Create copy of property to be sure it will unchangeable in changes log.
+      chl.add(createCopyOfProperty(property));
+      storage.changes.add(new ChangeEvent(StorageImpl.generateId(), getObjectId(), ChangeType.UPDATED, Calendar
+         .getInstance(), chl, null, null));
    }
 
    /**
@@ -537,8 +615,11 @@ abstract class BaseObjectData implements ObjectData
     * Update properties, skip on-create and read-only properties
     *
     * @param property property to be updated
+    * @return <code>true</code> if property was updated and <code>false</code>
+    *         otherwise, e.g. property was not updated since it is read-only
+    *         property
     */
-   protected void doSetProperty(Property<?> property) throws NameConstraintViolationException
+   protected boolean doSetProperty(Property<?> property) throws NameConstraintViolationException
    {
       PropertyDefinition<?> definition = type.getPropertyDefinition(property.getId());
       Updatability updatability = definition.getUpdatability();
@@ -572,7 +653,7 @@ abstract class BaseObjectData implements ObjectData
             }
             if (name.equals(getName()))
             {
-               return;
+               return false;
             }
 
             for (FolderData parent : getParents())
@@ -589,6 +670,7 @@ abstract class BaseObjectData implements ObjectData
          }
 
          entry.setProperty(property);
+         return true;
       }
       else
       {
@@ -596,6 +678,7 @@ abstract class BaseObjectData implements ObjectData
          {
             LOG.debug("Property " + property.getId() + " is not updatable.");
          }
+         return false;
       }
    }
 
