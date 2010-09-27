@@ -24,6 +24,9 @@ import org.xcmis.spi.model.AllowableActions;
 import org.xcmis.spi.model.BaseType;
 import org.xcmis.spi.model.CapabilityACL;
 import org.xcmis.spi.model.CapabilityRendition;
+import org.xcmis.spi.model.ChangeEvent;
+import org.xcmis.spi.model.ChangeInfo;
+import org.xcmis.spi.model.ChangeType;
 import org.xcmis.spi.model.CmisObject;
 import org.xcmis.spi.model.ContentStreamAllowed;
 import org.xcmis.spi.model.IncludeRelationships;
@@ -41,6 +44,7 @@ import org.xcmis.spi.model.Updatability;
 import org.xcmis.spi.model.VersioningState;
 import org.xcmis.spi.model.Permission.BasicPermissions;
 import org.xcmis.spi.model.impl.DecimalProperty;
+import org.xcmis.spi.model.impl.IdProperty;
 import org.xcmis.spi.query.Query;
 import org.xcmis.spi.query.Result;
 import org.xcmis.spi.query.Score;
@@ -1599,14 +1603,14 @@ public abstract class Connection
     * crawlers or other applications that need to efficiently understand what
     * has changed in the storage.
     *
-    * @param changeLogToken if {@link ChangeLogTokenHolder#getToken()} return
+    * @param changeLogTokenHolder if {@link ChangeLogTokenHolder#getToken()} return
     *        value other than <code>null</code>, then change event corresponded
     *        to the value of the specified change log token will be returned as
     *        the first result in the output. If not specified, then will be
     *        returned the first change event recorded in the change log. When
-    *        set of changes passed is returned then <code>changeLogToken</code>
-    *        must contains log token corresponded to the last change event. Then
-    *        it may be used by client for getting next set on change events.
+    *        set of changes is returned then <code>changeLogToken</code> must
+    *        contains log token corresponded to the last change event. Then it
+    *        may be used by client for getting next set on change events.
     * @param includeProperties if <code>true</code>, then the result includes
     *        the updated property values for 'updated' change events. If
     *        <code>false</code>, then the result will not include the updated
@@ -1629,6 +1633,8 @@ public abstract class Connection
     * @param maxItems max number of items in response. If -1 then no limit of
     *        max items in result set
     * @return content changes
+    * @throws NullPointerException if <code>changeLogTokenHolder</code> is
+    *         <code>null</code>
     * @throws ConstraintException if the event corresponding to the change log
     *         token provided as an input parameter is no longer available in the
     *         change log. (E.g. because the change log was truncated)
@@ -1636,12 +1642,76 @@ public abstract class Connection
     *         syntax or contains at least one property name that is not in
     *         object's property definition
     */
-   public ItemsList<CmisObject> getContentChanges(ChangeLogTokenHolder changeLogToken, boolean includeProperties,
+   public ItemsList<CmisObject> getContentChanges(ChangeLogTokenHolder changeLogTokenHolder, boolean includeProperties,
       String propertyFilter, boolean includePolicyIDs, boolean includeAcl, boolean includeObjectInfo, int maxItems)
       throws ConstraintException, FilterNotValidException
    {
-      // lets storage implementor override this method
-      throw new NotSupportedException("Changes log feature is not supported.");
+      if (changeLogTokenHolder == null)
+      {
+         throw new NullPointerException("ChangeLogTokenHolder may not by null.");
+      }
+      String token = changeLogTokenHolder.getValue();
+
+      ItemsIterator<ChangeEvent> iterator = storage.getChangeLog(token);
+
+      // Not need filter if all properties rejected.
+      PropertyFilter parsedPropertyFilter = includeProperties ? new PropertyFilter(propertyFilter) : null;
+      ItemsList<CmisObject> cmisChanges = new ItemsList<CmisObject>();
+      for (int count = 0; iterator.hasNext() && (maxItems < 0 || count < maxItems); count++)
+      {
+         ChangeEvent event = iterator.next();
+         String objectId = event.getObjectId();
+         CmisObject cmis = new CmisObject();
+         // policies
+         if (includePolicyIDs && event.getType() == ChangeType.SECURITY && event.getPolicyIds() != null
+            && event.getPolicyIds().size() > 0)
+         {
+            cmis.getPolicyIds().addAll(event.getPolicyIds());
+         }
+         // ACL
+         if (includeAcl && event.getType() == ChangeType.SECURITY && event.getAcl() != null
+            && event.getAcl().size() > 0)
+         {
+            cmis.getACL().addAll(event.getAcl());
+         }
+         // properties
+         if (includeProperties && event.getType() == ChangeType.UPDATED && event.getProperties() != null)
+         {
+            for (Property<?> property : event.getProperties())
+            {
+               if (parsedPropertyFilter.accept(property.getQueryName()))
+               {
+                  String id = property.getId();
+                  cmis.getProperties().put(id, property);
+               }
+            }
+         }
+         // cmis:objectId must be always returned
+         if (cmis.getProperties().get(CmisConstants.OBJECT_ID) == null)
+         {
+            // NOTE Do not provide query, local and display names for property
+            // since we can be not able to determine it.
+            cmis.getProperties().put(CmisConstants.OBJECT_ID,
+               new IdProperty(CmisConstants.OBJECT_ID, null, null, null, objectId));
+         }
+         // able to provide object id only
+         if (includeObjectInfo)
+         {
+            ObjectInfo objectInfo = new ObjectInfo();
+            objectInfo.setId(objectId);
+            cmis.setObjectInfo(objectInfo);
+         }
+         cmis.setChangeInfo(new ChangeInfo(event.getDate(), event.getType()));
+         // update token, it will keep latestChangeLogToken when all events
+         // will be retrieved all maxItems limit reached.
+         token = event.getLogToken();
+      }
+
+      // Indicate that we have some more results.
+      cmisChanges.setHasMoreItems(iterator.hasNext());
+      cmisChanges.setNumItems(iterator.size()); // ItemsIterator gives -1 if total number is unknown.
+      changeLogTokenHolder.setValue(token);
+      return cmisChanges;
    }
 
    /**
@@ -3450,4 +3520,5 @@ public abstract class Connection
     *         to object change token
     */
    protected abstract void validateChangeToken(ObjectData object, String changeToken) throws UpdateConflictException;
+
 }

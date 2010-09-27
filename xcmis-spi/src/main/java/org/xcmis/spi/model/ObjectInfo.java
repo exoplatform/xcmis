@@ -6,12 +6,11 @@ import org.xcmis.spi.Connection;
 import java.util.Calendar;
 
 /**
- * This interface is provided methods for object information holder. Particular
- * this info is useful for AtomPub binding. AtomPub binding needs some
- * information to build correct Atom document but this info may be excluded by
- * property filter provided by client application. Method for retrieving CMIS
- * object in {@link Connection} has additional parameter
- * <code>includeObjectInfo</code>, e.g.
+ * Object information holder. Particular this info is useful for AtomPub
+ * binding. AtomPub binding needs some information to build correct Atom
+ * document but this info may be excluded by property filter provided by client
+ * application. Methods for retrieving CMIS object in {@link Connection} has
+ * additional parameter <code>includeObjectInfo</code>, e.g.
  * {@link Connection#getObject(String, boolean, org.xcmis.spi.IncludeRelationships, boolean, boolean, boolean, String, String)}
  * . If this parameter is <code>true</code> caller if method must get additional
  * information about object, see {@link CmisObject#getObjectInfo()}.

@@ -189,7 +189,7 @@ public final class ChangeEvent
     *
     * @return set of policies' ids or <code>null</code>
     */
-   public Set<String> getPoliciesId()
+   public Set<String> getPolicyIds()
    {
       return policiesId;
    }
