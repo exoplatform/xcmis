@@ -136,15 +136,19 @@ public class DiscoveryServicePortImpl implements DiscoveryServicePort
       try
       {
          conn = CmisRegistry.getInstance().getConnection(repositoryId);
-
+         ChangeLogTokenHolder changeLogTokenHolder = new ChangeLogTokenHolder();
+         if (changeLogToken != null)
+            changeLogTokenHolder.setValue(changeLogToken.value);
          objects.value =
-            TypeConverter.getCmisObjectListType(conn.getContentChanges(changeLogToken == null ? null
-               : new ChangeLogTokenHolder(), //
+            TypeConverter.getCmisObjectListType(conn.getContentChanges( //
+               changeLogTokenHolder, //
                includeProperties == null ? false : includeProperties, //
                propertyFilter, //
                includePolicyIds == null ? false : includePolicyIds, //
                includeACL == null ? false : includeACL, //
                true, maxItems == null ? CmisConstants.MAX_ITEMS : maxItems.intValue()));
+         if (changeLogToken != null)
+            changeLogToken.value = changeLogTokenHolder.getValue();
       }
       catch (Exception e)
       {
