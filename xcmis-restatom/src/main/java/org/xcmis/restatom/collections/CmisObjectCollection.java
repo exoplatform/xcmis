@@ -1121,11 +1121,11 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
 
    /**
     * Get self link which provides the URI to retrieve this resource again.
-    * 
+    *
     * The atom:link with relation self MUST be generated to return the URI of the feed. If paging or any
     * other mechanism is used to filter, sort, or change the representation of the feed, the URI MUST
     * point back a resource with the same representation.
-    * 
+    *
     * @param id the object id
     * @param request the request context
     * @return link which provides the URI to retrieve this resource again.
@@ -1329,7 +1329,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       {
          conn = getConnection(request);
          RepositoryCapabilities capabilities = conn.getStorage().getRepositoryInfo().getCapabilities();
-         if (capabilities.isCapabilityGetFolderTree())
+         if (capabilities.isCapabilityGetDescendants())
          {
             Map<String, String> params = new HashMap<String, String>();
             params.put("repoid", getRepositoryId(request));
