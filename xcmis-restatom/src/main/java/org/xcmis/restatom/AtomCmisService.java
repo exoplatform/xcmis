@@ -718,6 +718,13 @@ public class AtomCmisService implements ResourceContainer
       {
          throw new WebApplicationException(others, createErrorResponse(others, 500));
       }
+      finally
+      {
+         if (conn != null)
+         {
+            conn.close();
+         }
+      }
 
       Workspace ws = service.addWorkspace(repositoryId);
       ws.setTitle(repoInfo.getRepositoryName());
