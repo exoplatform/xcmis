@@ -206,7 +206,7 @@ public class VersioningServicePortImpl implements VersioningServicePort
 
          List<CmisObject> list = conn.getAllVersions(versionSeriesId, //
             includeAllowableActions == null ? false : includeAllowableActions, //
-            true, propertyFilter);
+            false, propertyFilter);
          for (CmisObject one : list)
          {
             res.add(TypeConverter.getCmisObjectType(one));
@@ -252,7 +252,7 @@ public class VersioningServicePortImpl implements VersioningServicePort
                .fromValue(includeRelationships.value()), //
             includePolicyIds == null ? false : includePolicyIds, //
             includeACL == null ? false : includeACL, //
-            true, propertyFilter, //
+            false, propertyFilter, //
             renditionFilter));
       }
       catch (Exception e)
@@ -286,7 +286,7 @@ public class VersioningServicePortImpl implements VersioningServicePort
 
          return TypeConverter.getCmisPropertiesType(conn.getPropertiesOfLatestVersion(objectId, //
             major == null ? false : major, //
-            true, filter));
+            false, filter));
       }
       catch (Exception e)
       {

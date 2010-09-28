@@ -97,7 +97,7 @@ public class DiscoveryServicePortImpl implements DiscoveryServicePort
          QueryResponse response = new QueryResponse();
          CmisObjectListType result =
             TypeConverter.getCmisObjectListType(conn.query(statement, allVersions, includeAllowableActions,
-               includeRelationships, true, renditionFilter, maxItems, skipCount));
+               includeRelationships, false, renditionFilter, maxItems, skipCount));
          response.setObjects(result);
          return response;
       }
@@ -146,7 +146,7 @@ public class DiscoveryServicePortImpl implements DiscoveryServicePort
                propertyFilter, //
                includePolicyIds == null ? false : includePolicyIds, //
                includeACL == null ? false : includeACL, //
-               true, maxItems == null ? CmisConstants.MAX_ITEMS : maxItems.intValue()));
+               false, maxItems == null ? CmisConstants.MAX_ITEMS : maxItems.intValue()));
          if (changeLogToken != null)
             changeLogToken.value = changeLogTokenHolder.getValue();
       }

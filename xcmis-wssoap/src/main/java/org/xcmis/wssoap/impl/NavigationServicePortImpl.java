@@ -92,7 +92,7 @@ public class NavigationServicePortImpl implements NavigationServicePort
             includeAllowableActions == null ? false : includeAllowableActions, //
             includeRelationships == null ? IncludeRelationships.NONE : IncludeRelationships
                .fromValue(includeRelationships.value()), //
-            true, propertyFilter, //
+            false, propertyFilter, //
             renditionFilter, //
             orderBy, //
             maxItems == null ? CmisConstants.MAX_ITEMS : maxItems.intValue(), //
@@ -141,7 +141,7 @@ public class NavigationServicePortImpl implements NavigationServicePort
             includeRelationships == null ? IncludeRelationships.NONE : IncludeRelationships
                .fromValue(includeRelationships.value()), //
             includePathSegments == null ? false : includePathSegments, //
-            true, propertyFilter, //
+            false, propertyFilter, //
             renditionFilter, //
             orderBy, //
             maxItems == null ? CmisConstants.MAX_ITEMS : maxItems.intValue(), //
@@ -190,7 +190,7 @@ public class NavigationServicePortImpl implements NavigationServicePort
             includeRelationships == null ? IncludeRelationships.NONE : IncludeRelationships
                .fromValue(includeRelationships.value()), //
             includePathSegments == null ? false : includePathSegments, //
-            true, propertyFilter, //
+            false, propertyFilter, //
             renditionFilter));
       }
       catch (Exception e)
@@ -222,7 +222,7 @@ public class NavigationServicePortImpl implements NavigationServicePort
       {
          conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
-         return TypeConverter.getCmisObjectType(conn.getFolderParent(folderId, true, propertyFilter));
+         return TypeConverter.getCmisObjectType(conn.getFolderParent(folderId, false, propertyFilter));
       }
       catch (Exception e)
       {
@@ -266,7 +266,7 @@ public class NavigationServicePortImpl implements NavigationServicePort
             includeRelationships == null ? IncludeRelationships.NONE : IncludeRelationships
                .fromValue(includeRelationships.value()), //
             includePathSegments == null ? false : includePathSegments, //
-            true, propertyFilter, //
+            false, propertyFilter, //
             renditionFilter));
       }
       catch (Exception e)
@@ -311,7 +311,7 @@ public class NavigationServicePortImpl implements NavigationServicePort
                includeRelationships == null ? IncludeRelationships.NONE : IncludeRelationships
                   .fromValue(includeRelationships.value()), //
                includeRelativePathSegment == null ? true : includeRelativePathSegment, //
-               true, propertyFilter, //
+               false, propertyFilter, //
                renditionFilter);
 
          for (ObjectParent one : out)

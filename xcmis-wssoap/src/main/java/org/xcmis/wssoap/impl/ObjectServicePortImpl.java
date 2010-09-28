@@ -511,7 +511,7 @@ public class ObjectServicePortImpl implements ObjectServicePort
                .fromValue(includeRelationships.value()), //
             includePolicyIds == null ? false : includePolicyIds, //
             includeACL == null ? false : includeACL, //
-            true, propertyFilter, //
+            false, propertyFilter, //
             renditionFilter));
       }
       catch (Exception e)
@@ -557,7 +557,7 @@ public class ObjectServicePortImpl implements ObjectServicePort
                .fromValue(includeRelationships.value()), //
             includePolicyIds == null ? false : includePolicyIds, //
             includeACL == null ? false : includeACL, //
-            true, propertyFilter, //
+            false, propertyFilter, //
             renditionFilter));
       }
       catch (Exception e)
@@ -590,7 +590,7 @@ public class ObjectServicePortImpl implements ObjectServicePort
       {
          conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
-         return TypeConverter.getCmisPropertiesType(conn.getProperties(objectId, true, propertyFilter));
+         return TypeConverter.getCmisPropertiesType(conn.getProperties(objectId, false, propertyFilter));
       }
       catch (Exception e)
       {

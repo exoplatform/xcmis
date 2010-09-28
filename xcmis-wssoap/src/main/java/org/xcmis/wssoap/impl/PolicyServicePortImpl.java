@@ -99,7 +99,7 @@ public class PolicyServicePortImpl implements PolicyServicePort
       {
          conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
-         return TypeConverter.getCmisObjectTypeList(conn.getAppliedPolicies(objectId, true, propertyFilter));
+         return TypeConverter.getCmisObjectTypeList(conn.getAppliedPolicies(objectId, false, propertyFilter));
       }
       catch (Exception e)
       {

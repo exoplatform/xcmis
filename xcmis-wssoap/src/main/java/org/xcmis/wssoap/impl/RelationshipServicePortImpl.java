@@ -89,7 +89,7 @@ public class RelationshipServicePortImpl implements RelationshipServicePort
             typeId, //
             includeSubRelationshipTypes == null ? false : includeSubRelationshipTypes, //
             includeAllowableActions == null ? false : includeAllowableActions, //
-            true, propertyFilter, //
+            false, propertyFilter, //
             maxItems == null ? CmisConstants.MAX_ITEMS : maxItems.intValue(), //
             skipCount == null ? 0 : skipCount.intValue() //
             ).getItems());
