@@ -22,11 +22,11 @@ package org.xcmis.restatom.collections;
 import org.apache.abdera.factory.Factory;
 import org.apache.abdera.i18n.iri.IRI;
 import org.apache.abdera.model.Content;
-import org.apache.abdera.model.Content.Type;
 import org.apache.abdera.model.Entry;
 import org.apache.abdera.model.Feed;
 import org.apache.abdera.model.Link;
 import org.apache.abdera.model.Person;
+import org.apache.abdera.model.Content.Type;
 import org.apache.abdera.protocol.server.RequestContext;
 import org.apache.abdera.protocol.server.ResponseContext;
 import org.apache.abdera.protocol.server.TargetType;
@@ -1390,7 +1390,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       {
          conn = getConnection(request);
          RepositoryCapabilities capabilities = conn.getStorage().getRepositoryInfo().getCapabilities();
-         if (capabilities.isCapabilityGetFolderTree())
+         if (capabilities.isCapabilityGetDescendants())
          {
             Map<String, String> params = new HashMap<String, String>();
             params.put("repoid", getRepositoryId(request));
