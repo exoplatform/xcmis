@@ -1705,6 +1705,8 @@ public abstract class Connection
          // update token, it will keep latestChangeLogToken when all events
          // will be retrieved all maxItems limit reached.
          token = event.getLogToken();
+
+         cmisChanges.getItems().add(cmis);
       }
 
       // Indicate that we have some more results.
