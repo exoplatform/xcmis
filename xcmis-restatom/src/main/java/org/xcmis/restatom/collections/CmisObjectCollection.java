@@ -155,15 +155,8 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
    /** The Constant SPACES_AIR_SPECIFIC_REFERER. */
    protected static final String SPACES_AIR_SPECIFIC_REFERER = "app:/CMISSpacesAir.swf";
 
-   /** The Constant ANONYMOUS. */
-   protected static final String ANONYMOUS = "anonymous";
-
-   /** The Constant SYSTEM. */
-   protected static final String SYSTEM = "system";
-
    /**
     * Instantiates a new cmis object collection.
-    *
     */
    public CmisObjectCollection()
    {

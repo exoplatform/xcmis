@@ -61,7 +61,7 @@ public abstract class CmisTypeCollection extends AbstractCmisCollection<TypeDefi
     */
    public String getAuthor(RequestContext request) throws ResponseContextException
    {
-      return "system";
+      return SYSTEM;
    }
 
    /**

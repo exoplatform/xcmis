@@ -36,7 +36,7 @@ public abstract class PropertyElement<T extends BaseProperty<?>> extends Extensi
 
    /**
     * Instantiates a new property element.
-    * 
+    *
     * @param internal the internal
     */
    public PropertyElement(Element internal)
@@ -46,7 +46,7 @@ public abstract class PropertyElement<T extends BaseProperty<?>> extends Extensi
 
    /**
     * Instantiates a new property element.
-    * 
+    *
     * @param factory the factory
     * @param qname the qname
     */
@@ -57,7 +57,7 @@ public abstract class PropertyElement<T extends BaseProperty<?>> extends Extensi
 
    /**
     * Builds the element.
-    * 
+    *
     * @param property the property
     */
    public void build(T property)
@@ -65,44 +65,42 @@ public abstract class PropertyElement<T extends BaseProperty<?>> extends Extensi
       if (property != null)
       {
          setAttributeValue(AtomCMIS.PROPERTY_DEFINITION_ID.getLocalPart(), property.getId());
-         setAttributeValue(AtomCMIS.LOCAL_NAME.getLocalPart(), property.getLocalName());
-         if (property.getDisplayName() != null)
-         {
-            setAttributeValue(AtomCMIS.DISPLAY_NAME.getLocalPart(), property.getDisplayName());
-         }
-         if (property.getQueryName() != null)
-         {
-            setAttributeValue(AtomCMIS.QUERY_NAME.getLocalPart(), property.getQueryName());
-         }
+         String queryName = property.getQueryName();
+         if (queryName != null)
+            setAttributeValue(AtomCMIS.QUERY_NAME.getLocalPart(), queryName);
+         String localName = property.getLocalName();
+         if (localName != null)
+            setAttributeValue(AtomCMIS.LOCAL_NAME.getLocalPart(), localName);
+         String displayName = property.getDisplayName();
+         if (displayName != null)
+            setAttributeValue(AtomCMIS.DISPLAY_NAME.getLocalPart(), displayName);
       }
    }
 
    /**
     * Gets the property.
-    * 
+    *
     * @return the property
     */
    public abstract T getProperty();
 
    /**
     * Process property element.
-    * 
+    *
     * @param obj the obj
     */
    protected void processPropertyElement(T obj)
    {
       obj.setId(getAttributeValue(AtomCMIS.PROPERTY_DEFINITION_ID.getLocalPart()));
-      obj.setLocalName(getAttributeValue(AtomCMIS.LOCAL_NAME.getLocalPart()));
-      String displayName = getAttributeValue(AtomCMIS.DISPLAY_NAME.getLocalPart());
-      if (displayName != null)
-      {
-         obj.setDisplayName(getAttributeValue(AtomCMIS.DISPLAY_NAME.getLocalPart()));
-      }
       String queryName = getAttributeValue(AtomCMIS.QUERY_NAME.getLocalPart());
       if (queryName != null)
-      {
          obj.setQueryName(queryName);
-      }
+      String localName = getAttributeValue(AtomCMIS.LOCAL_NAME.getLocalPart());
+      if (localName != null)
+         obj.setLocalName(localName);
+      String displayName = getAttributeValue(AtomCMIS.DISPLAY_NAME.getLocalPart());
+      if (displayName != null)
+         obj.setDisplayName(displayName);
    }
 
 }

@@ -22,6 +22,7 @@ package org.xcmis.restatom;
 import org.xcmis.spi.utils.CmisUtils;
 
 import java.util.Calendar;
+import java.util.Date;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
@@ -38,6 +39,19 @@ public class AtomUtils
     */
    public static String getAtomDate(Calendar c)
    {
+      return CmisUtils.convertToString(c);
+   }
+
+   /**
+    * Gets the atom date.
+    *
+    * @param d the Date
+    * @return the atom date
+    */
+   public static String getAtomDate(Date d)
+   {
+      Calendar c = Calendar.getInstance();
+      c.setTime(d);
       return CmisUtils.convertToString(c);
    }
 

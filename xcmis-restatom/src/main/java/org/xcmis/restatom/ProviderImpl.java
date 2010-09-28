@@ -32,6 +32,7 @@ import org.apache.abdera.protocol.server.impl.SimpleSubjectResolver;
 import org.apache.abdera.protocol.server.impl.SimpleWorkspaceInfo;
 import org.apache.abdera.protocol.server.impl.TemplateTargetBuilder;
 import org.xcmis.restatom.collections.AllVersionsCollection;
+import org.xcmis.restatom.collections.ChangesLogCollection;
 import org.xcmis.restatom.collections.CheckedOutCollection;
 import org.xcmis.restatom.collections.FolderChildrenCollection;
 import org.xcmis.restatom.collections.FolderDescentantsCollection;
@@ -78,8 +79,9 @@ public class ProviderImpl extends AbstractProvider
       targetBuilder.setTemplate(TargetType.ENTRY, "{target_base}/cmisatom/{repoid}/{atomdoctype}/{id}");
       targetBuilder.setTemplate(TargetType.SERVICE, "{target_base}/cmisatom/{repoid}");
       targetBuilder
-         .setTemplate("feed",
-            "{target_base}/cmisatom/{repoid}/{atomdoctype}/{id}{-opt|?|q,maxItems,skipCount}{-join|&|q,maxItems,skipCount}");
+         .setTemplate(
+            "feed",
+            "{target_base}/cmisatom/{repoid}/{atomdoctype}/{id}{-opt|?|q,maxItems,skipCount,changeLogToken}{-join|&|q,maxItems,skipCount,changeLogToken}");
 
       resolver = new DecodeRegexTargetResolver();
 
@@ -170,6 +172,11 @@ public class ProviderImpl extends AbstractProvider
          "repoid", //
          "slash"); // Slash.
 
+      resolver.setPattern("/cmisatom/([^/]+)/changes(/)?(\\??.*)?", //
+         TargetType.TYPE_COLLECTION, //
+         "repoid",//
+         "slash"); // Slash.
+
       SimpleWorkspaceInfo wInfo = new SimpleWorkspaceInfo();
       wInfo.addCollection(new FolderChildrenCollection());
       wInfo.addCollection(new ParentsCollection());
@@ -183,6 +190,7 @@ public class ProviderImpl extends AbstractProvider
       wInfo.addCollection(new QueryCollection());
       wInfo.addCollection(new PoliciesCollection());
       wInfo.addCollection(new UnfiledCollection());
+      wInfo.addCollection(new ChangesLogCollection());
 
       // The other described patterns according collections by WorkspaceManagerImpl#getCollectionAdapter
       manager = new WorkspaceManagerImpl();

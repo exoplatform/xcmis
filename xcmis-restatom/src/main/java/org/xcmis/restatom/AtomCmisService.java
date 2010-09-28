@@ -19,7 +19,9 @@
 
 package org.xcmis.restatom;
 
+import org.apache.abdera.factory.Factory;
 import org.apache.abdera.model.Document;
+import org.apache.abdera.model.Link;
 import org.apache.abdera.model.Service;
 import org.apache.abdera.model.Workspace;
 import org.apache.abdera.parser.stax.FOMExtensibleElement;
@@ -47,6 +49,8 @@ import org.xcmis.spi.UpdateConflictException;
 import org.xcmis.spi.model.AccessControlEntry;
 import org.xcmis.spi.model.AccessControlPropagation;
 import org.xcmis.spi.model.AllowableActions;
+import org.xcmis.spi.model.CapabilityChanges;
+import org.xcmis.spi.model.RepositoryCapabilities;
 import org.xcmis.spi.model.RepositoryInfo;
 import org.xcmis.spi.model.RepositoryShortInfo;
 import org.xcmis.spi.model.UnfileObject;
@@ -403,6 +407,14 @@ public class AtomCmisService
    }
 
    @GET
+   @Path("{repositoryId}/changes")
+   public Response getContentChanges(@Context HttpServletRequest httpRequest,
+      @PathParam("repositoryId") String repositoryId)
+   {
+      return getFeed(repositoryId, httpRequest);
+   }
+
+   @GET
    @Path("{repositoryId}/checkedout")
    public Response getCheckedOut(@Context HttpServletRequest httpRequest, @PathParam("repositoryId") String repositoryId)
    {
@@ -499,6 +511,8 @@ public class AtomCmisService
 
       Set<RepositoryShortInfo> shortInfos = CmisRegistry.getInstance().getStorageInfos();
 
+      RequestContext request = initRequestContext(httpRequest);
+
       if (shortInfos != null && !shortInfos.isEmpty())
       {
          for (RepositoryShortInfo info : shortInfos)
@@ -514,7 +528,7 @@ public class AtomCmisService
                   .toString();
 
             String rootFolderId = info.getRootFolderId();
-            includeCollections(ws, info.getRepositoryId(), httpRequest, repoPath, rootFolderId);
+            includeCollections(ws, info.getRepositoryId(), request, repoPath, rootFolderId);
 
             includeURITemplates(ws, repoPath);
          }
@@ -728,18 +742,52 @@ public class AtomCmisService
 
       String repoPath = UriBuilder.fromUri(baseUri).path(getClass()).path(repositoryId).build().toString();
 
-      includeCollections(ws, repositoryId, httpRequest, repoPath, repoInfo.getRootFolderId());
+      RequestContext request = initRequestContext(httpRequest);
+
+      includeCollections(ws, repositoryId, request, repoPath, repoInfo.getRootFolderId());
 
       includeURITemplates(ws, repoPath);
 
-      return ws;
+      // Add links
+      Factory factory = AbderaFactory.getInstance().getFactory();
+      Link typeTypeDescendantsLink = factory.newLink(ws);
+      typeTypeDescendantsLink.setTitle("Type descendants");
+      typeTypeDescendantsLink.setRel(AtomCMIS.LINK_CMIS_TYPEDESCENDANTS);
+      typeTypeDescendantsLink.setMimeType(AtomCMIS.MEDIATYPE_CMISTREE);
+      typeTypeDescendantsLink.setHref(repoPath + "/typedescendants");
 
+      RepositoryCapabilities capabilities = repoInfo.getCapabilities();
+      if (capabilities.isCapabilityGetDescendants())
+      {
+         Link descendantsLink = factory.newLink(ws);
+         descendantsLink.setTitle("Root folder descendants");
+         descendantsLink.setRel(AtomCMIS.LINK_CMIS_ROOTDESCENDANTS);
+         descendantsLink.setMimeType(AtomCMIS.MEDIATYPE_CMISTREE);
+         descendantsLink.setHref(repoPath + "/descendants/" + repoInfo.getRootFolderId());
+      }
+      if (capabilities.isCapabilityGetFolderTree())
+      {
+         Link treeLink = factory.newLink(ws);
+         treeLink.setTitle("Root folder tree");
+         treeLink.setRel(AtomCMIS.LINK_CMIS_FOLDERTREE);
+         treeLink.setMimeType(AtomCMIS.MEDIATYPE_CMISTREE);
+         treeLink.setHref(repoPath + "/foldertree/" + repoInfo.getRootFolderId());
+      }
+      if (CapabilityChanges.NONE != capabilities.getCapabilityChanges())
+      {
+         Link treeLink = factory.newLink(ws);
+         treeLink.setTitle("Changes log");
+         treeLink.setRel(AtomCMIS.LINK_CMIS_CHANGES);
+         treeLink.setMimeType(AtomCMIS.MEDIATYPE_ATOM_FEED);
+         treeLink.setHref(repoPath + "/changes");
+      }
+
+      return ws;
    }
 
-   private void includeCollections(Workspace ws, String repositoryId, HttpServletRequest httpRequest, String repoPath,
+   private void includeCollections(Workspace ws, String repositoryId, RequestContext request, String repoPath,
       String rootFolderId)
    {
-      RequestContext request = initRequestContext(httpRequest);
       Collection<CollectionInfo> collectionsInfo = getCollectionsInfo(request);
       for (CollectionInfo collectionInfo : collectionsInfo)
       {
@@ -822,7 +870,7 @@ public class AtomCmisService
          .append("searchAllVersions={searchAllVersions}&") //
          .append("maxItems={maxItems}&") //
          .append("skipCount={skipCount}&") //
-         .append("includeAllowableActions={includeAllowableActions}=&")//
+         .append("includeAllowableActions={includeAllowableActions}&")//
          .append("includeRelationships={includeRelationships}").toString());
       query.setType(AtomCMIS.URITEMPLATE_QUERY);
       UriTemplateTypeElement queryElement = ws.addExtension(AtomCMIS.URITEMPLATE);
@@ -835,6 +883,22 @@ public class AtomCmisService
       typeById.setType(AtomCMIS.URITEMPLATE_TYPEBYID);
       UriTemplateTypeElement typeByIdElement = ws.addExtension(AtomCMIS.URITEMPLATE);
       typeByIdElement.build(typeById);
+
+      // changes
+      CmisUriTemplateType changes = new CmisUriTemplateType();
+      changes.setMediatype(AtomCMIS.MEDIATYPE_ATOM_FEED);
+      changes.setTemplate(new StringBuilder() //
+         .append(repoPath) //
+         .append("/changes?")//
+         .append("changeLogToken={changeLogToken}&")//
+         .append("includeProperties={includeProperties}&") //
+         .append("includePolicyIds={includePolicyIds}&") //
+         .append("includeACL={includeACL}&") //
+         .append("filter={filter}&")//
+         .append("maxItems={maxItems}").toString());
+      changes.setType(AtomCMIS.URITEMPLATE_CHANGES);
+      UriTemplateTypeElement changesElement = ws.addExtension(AtomCMIS.URITEMPLATE);
+      changesElement.build(changes);
    }
 
    protected Response createErrorResponse(Throwable t, int status)

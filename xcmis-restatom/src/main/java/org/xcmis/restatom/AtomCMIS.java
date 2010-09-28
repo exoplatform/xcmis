@@ -398,6 +398,8 @@ public interface AtomCMIS extends CmisConstants
 
    String PARAM_ORDER_BY = "orderBy";
 
+   String PARAM_CHANGE_LOG_TOKEN = "changeLogToken";
+
    String PARAM_CHILD_TYPES = "childTypes";
 
    String PARAM_CONTINUE_ON_FAILURE = "continueOnFailure";
@@ -549,6 +551,8 @@ public interface AtomCMIS extends CmisConstants
    String URITEMPLATE_QUERY = "query";
 
    String URITEMPLATE_TYPEBYID = "typebyid";
+
+   String URITEMPLATE_CHANGES = "changes";
 
    String CONTENT_DISPOSITION_HEADER = "Content-Disposition";
 

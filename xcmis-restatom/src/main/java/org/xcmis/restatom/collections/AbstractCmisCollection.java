@@ -55,6 +55,12 @@ public abstract class AbstractCmisCollection<T> extends AbstractEntityCollection
    /** The logger. */
    private static final Logger LOG = Logger.getLogger(AbstractCmisCollection.class);
 
+   /** The Constant ANONYMOUS. */
+   protected static final String ANONYMOUS = "anonymous";
+
+   /** The Constant SYSTEM. */
+   protected static final String SYSTEM = "system";
+
    /**
     * Instantiates a new abstract cmis collection.
     *
