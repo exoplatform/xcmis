@@ -26,7 +26,6 @@ import org.apache.abdera.model.Entry;
 import org.apache.abdera.model.Feed;
 import org.apache.abdera.model.Person;
 import org.apache.abdera.protocol.server.RequestContext;
-import org.apache.abdera.protocol.server.TargetType;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.AtomUtils;
@@ -149,16 +148,6 @@ public class ChangesLogCollection extends AbstractCmisCollection<CmisObject>
       return new Date();
    }
 
-   private String getSelfLink(String changeLogToken, RequestContext request)
-   {
-      Map<String, String> params = new HashMap<String, String>();
-      params.put("repoid", getRepositoryId(request));
-      params.put("atomdoctype", "changes");
-      params.put(AtomCMIS.PARAM_CHANGE_LOG_TOKEN, changeLogToken);
-      String link = request.absoluteUrlFor(TargetType.ENTRY, params);
-      return link;
-   }
-
    /**
     * {@inheritDoc}
     */
@@ -184,15 +173,11 @@ public class ChangesLogCollection extends AbstractCmisCollection<CmisObject>
       String service = getServiceLink(request);
       entry.addLink(service, AtomCMIS.LINK_SERVICE, AtomCMIS.MEDIATYPE_ATOM_SERVICE, null, null, -1);
 
-      // Self link.
-      String self = getSelfLink(objectId, request);
-      entry.addLink(self, AtomCMIS.LINK_SELF);
-
       ObjectTypeElement objectElement = new ObjectTypeElement(request.getAbdera().getFactory(), AtomCMIS.OBJECT);
       objectElement.build(object);
       entry.addExtension(objectElement);
 
-      return self;
+      return objectId;
    }
 
    /**
