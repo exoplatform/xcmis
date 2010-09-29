@@ -50,24 +50,25 @@ public class Main
       suite.addTest(new JUnit4TestAdapter(PolicyTest.class));
       suite.addTest(new JUnit4TestAdapter(VersioningTest.class));
       suite.run(res);
-      System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-      System.out.println("Test running resluts: errors: " + res.errorCount() + ", failures: " + res.failureCount());
       if (res.errorCount() > 0){
          Enumeration<TestFailure> en = res.errors();
-         while (en.hasMoreElements()){
-            TestFailure one = en.nextElement();
-            System.out.println(one.exceptionMessage());
-            System.out.println(one.trace());
+         while (en.hasMoreElements())
+         {
+            TestFailure error = en.nextElement();
+            System.out.println(error.exceptionMessage());
+            System.out.println(error.trace());
          }
       }
       if (res.failureCount() > 0){
          Enumeration<TestFailure> en = res.failures();
-         while (en.hasMoreElements()){
-            TestFailure one = en.nextElement();
-            System.out.println(one.exceptionMessage());
-            System.out.println(one.trace());
+         while (en.hasMoreElements())
+         {
+            TestFailure failure = en.nextElement();
+            System.out.println(failure.exceptionMessage());
+            System.out.println(failure.trace());
          }
       }
-
+      System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+      System.out.println("Tests run: " + res.runCount() + ", Errors: " + res.errorCount() + ", Failures: " + res.failureCount());
    }
 }
