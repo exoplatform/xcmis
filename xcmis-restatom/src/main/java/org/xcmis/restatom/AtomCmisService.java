@@ -160,7 +160,7 @@ public class AtomCmisService implements ResourceContainer
 
    @POST
    @Path("{repositoryId}/types")
-   @RolesAllowed({"administrator"})
+   @RolesAllowed({"administrators"})
    public Response addType(@Context HttpServletRequest httpRequest, @PathParam("repositoryId") String repositoryId)
    {
       return createItem(repositoryId, httpRequest);
@@ -289,7 +289,7 @@ public class AtomCmisService implements ResourceContainer
 
    @DELETE
    @Path("{repositoryId}/types/{typeId}")
-   @RolesAllowed({"administrator"})
+   @RolesAllowed({"administrators"})
    public Response deleteType(@Context HttpServletRequest httpRequest, @PathParam("repositoryId") String repositoryId)
    {
       return deleteItem(repositoryId, httpRequest);
