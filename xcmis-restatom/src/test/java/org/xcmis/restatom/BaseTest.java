@@ -35,8 +35,10 @@ import org.everrest.core.impl.RequestHandlerImpl;
 import org.everrest.core.impl.ResourceBinderImpl;
 import org.everrest.core.impl.SimpleDependencySupplier;
 import org.everrest.core.tools.DummyContainerResponseWriter;
+import org.everrest.core.tools.DummySecurityContext;
 import org.everrest.core.tools.ResourceLauncher;
 import org.everrest.test.mock.MockHttpServletRequest;
+import org.everrest.test.mock.MockPrincipal;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xcmis.restatom.abdera.CMISExtensionFactory;
@@ -59,12 +61,16 @@ import org.xcmis.spi.model.impl.StringProperty;
 import org.xcmis.spi.utils.Logger;
 
 import java.io.ByteArrayInputStream;
+import java.security.Principal;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.SecurityContext;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
@@ -170,6 +176,13 @@ public abstract class BaseTest extends TestCase
       MockHttpServletRequest httpRequest =
          new MockHttpServletRequest(requestURI, in, in != null ? in.available() : 0, method, headers);
       envctx.put(HttpServletRequest.class, httpRequest);
+
+      Principal adminPrincipal = new MockPrincipal("admin");
+      Set<String> adminRoles = new HashSet<String>();
+      adminRoles.add("users");
+      adminRoles.add("administrators");
+
+      envctx.put(SecurityContext.class, new DummySecurityContext(adminPrincipal, adminRoles));
       return launcher.service(method, requestURI, baseURI, headers, data, writer, envctx);
    }
 
