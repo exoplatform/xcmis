@@ -19,7 +19,7 @@
 <!-- xCMIS users -->
   <role rolename="users"/>
   <role rolename="administrators"/>
-  <user username="root" password="exo" roles="users,administartors"/>
+  <user username="root" password="exo" roles="users,administrators"/>
   <user username="exo" password="exo" roles="users"/>
   <user username="xcmis" password="xcmis" roles="users"/>
 </tomcat-users>
