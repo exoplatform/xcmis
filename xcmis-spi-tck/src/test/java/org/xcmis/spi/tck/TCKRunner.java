@@ -34,7 +34,7 @@ import junit.framework.TestSuite;
  *
  * @version $Id$
  */
-public class Main
+public class TCKRunner
 {
    
    public static void main(String[] args){

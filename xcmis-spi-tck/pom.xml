@@ -36,13 +36,13 @@
          <activation>
             <activeByDefault>true</activeByDefault>
          </activation>
-         <dependencies>
+         <!--  dependencies>
             <dependency>
                <groupId>org.xcmis</groupId>
                <artifactId>xcmis-sp-inmemory</artifactId>
                <scope>test</scope>
             </dependency>
-         </dependencies>
+         </dependencies -->
          <build>
             <plugins>
                <plugin>
@@ -56,9 +56,11 @@
                      <includes>
                         <include>**/AllTests.java</include>
                      </includes>
+                     <skipTests>true</skipTests>
                      <testFailureIgnore>true</testFailureIgnore>
                   </configuration>
                </plugin>
+               <!--   
                <plugin>
                   <groupId>org.apache.maven.plugins</groupId>
                   <artifactId>maven-antrun-plugin</artifactId>
@@ -89,6 +91,7 @@
                      </dependency>
                   </dependencies>
                </plugin>
+               -->
                <plugin>
                   <groupId>org.apache.maven.plugins</groupId>
                   <artifactId>maven-jar-plugin</artifactId>
