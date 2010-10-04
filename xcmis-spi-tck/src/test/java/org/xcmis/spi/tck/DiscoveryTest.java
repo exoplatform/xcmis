@@ -42,7 +42,6 @@ import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.utils.MimeType;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
