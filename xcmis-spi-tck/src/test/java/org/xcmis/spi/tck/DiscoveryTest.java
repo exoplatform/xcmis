@@ -42,6 +42,7 @@ import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.utils.MimeType;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -136,12 +137,12 @@ public class DiscoveryTest extends BaseTest
          return;
       }
 
-      String logToken = connection.getStorage().getRepositoryInfo().getLatestChangeLogToken();
-      ChangeLogTokenHolder logTokenHolder = new ChangeLogTokenHolder();
-      logTokenHolder.setValue(logToken);
       TypeDefinition documentType = connection.getTypeDefinition(CmisConstants.DOCUMENT);
       createDocument(testRootFolderId, documentType.getId(), generateName(documentType, null), null, null, null, null,
          null);
+      String logToken = connection.getStorage().getRepositoryInfo().getLatestChangeLogToken();
+      ChangeLogTokenHolder logTokenHolder = new ChangeLogTokenHolder();
+      logTokenHolder.setValue(logToken);
       ItemsList<CmisObject> changes =
          connection.getContentChanges(logTokenHolder, //
             capabilityChanges == CapabilityChanges.ALL || capabilityChanges == CapabilityChanges.PROPERTIES ? true
