@@ -50,11 +50,6 @@
             </dependency>
             <dependency>
                <groupId>org.everrest</groupId>
-               <artifactId>everrest-commons</artifactId>
-               <scope>runtime</scope>
-            </dependency>
-            <dependency>
-               <groupId>org.everrest</groupId>
                <artifactId>everrest-core</artifactId>
                <scope>runtime</scope>
             </dependency>
@@ -167,16 +162,6 @@
             <dependency>
                <groupId>org.xcmis</groupId>
                <artifactId>xcmis-restatom</artifactId>
-               <scope>runtime</scope>
-            </dependency>
-            <dependency>
-               <groupId>org.everrest</groupId>
-               <artifactId>everrest-commons</artifactId>
-               <scope>runtime</scope>
-            </dependency>
-            <dependency>
-               <groupId>org.everrest</groupId>
-               <artifactId>everrest-core</artifactId>
                <scope>runtime</scope>
             </dependency>
             <dependency>
