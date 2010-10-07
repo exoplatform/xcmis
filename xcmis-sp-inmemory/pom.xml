@@ -33,4 +33,54 @@
          <artifactId>xcmis-search-parser-cmis</artifactId>
       </dependency>
    </dependencies>
+   <profiles>
+      <profile>
+         <id>TCK</id>
+         <activation>
+            <activeByDefault>false</activeByDefault>
+         </activation>
+         <build>
+            <plugins>
+               <plugin>
+                  <groupId>org.apache.maven.plugins</groupId>
+                  <artifactId>maven-dependency-plugin</artifactId>
+                  <executions>
+                     <execution>
+                        <id>unpack</id>
+                        <phase>process-test-classes</phase>
+                        <goals>
+                           <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                           <artifactItems>
+                              <artifactItem>
+                                 <groupId>org.xcmis</groupId>
+                                 <artifactId>xcmis-spi-tck</artifactId>
+                                 <version>1.2.0-SNAPSHOT</version>
+                                 <type>test-jar</type>
+                                 <outputDirectory>${project.build.directory}/test-classes/
+                           </outputDirectory>
+                              </artifactItem>
+                           </artifactItems>
+                        </configuration>
+                     </execution>
+                  </executions>
+               </plugin>
+               <plugin>
+                  <groupId>org.apache.maven.plugins</groupId>
+                  <artifactId>maven-surefire-plugin</artifactId>
+                  <configuration>
+                     <systemPropertyVariables>
+                        <org.xcmis.CmisRegistryFactory>org.xcmis.sp.inmemory.tck.InmemoryCmisRegistryFactory
+                        </org.xcmis.CmisRegistryFactory>
+                     </systemPropertyVariables>
+                     <includes>
+                        <include>**/AllTests.class</include>
+                     </includes>
+                  </configuration>
+               </plugin>
+            </plugins>
+         </build>
+      </profile>
+   </profiles>
 </project>
