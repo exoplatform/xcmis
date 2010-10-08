@@ -35,7 +35,7 @@
    </dependencies>
    <profiles>
       <profile>
-         <id>TCK</id>
+         <id>tck</id>
          <activation>
             <activeByDefault>false</activeByDefault>
          </activation>
