@@ -35,7 +35,6 @@ import org.apache.abdera.protocol.server.context.ResponseContextException;
 import org.apache.abdera.protocol.server.impl.AbstractEntityCollectionAdapter;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.ProviderImpl;
-import org.xcmis.spi.CmisRegistry;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.utils.Logger;
 
@@ -61,12 +60,11 @@ public abstract class AbstractCmisCollection<T> extends AbstractEntityCollection
    /** The Constant SYSTEM. */
    protected static final String SYSTEM = "system";
 
-   /**
-    * Instantiates a new abstract cmis collection.
-    *
-    */
-   public AbstractCmisCollection()
+   /*protected*/private final Connection connection;
+
+   public AbstractCmisCollection(Connection connection)
    {
+      this.connection = connection;
    }
 
    /**
@@ -294,7 +292,8 @@ public abstract class AbstractCmisCollection<T> extends AbstractEntityCollection
     */
    protected Connection getConnection(RequestContext request)
    {
-      return CmisRegistry.getInstance().getConnection(getRepositoryId(request));
+      return connection;
+      //return CmisRegistry.getInstance().getConnection(getRepositoryId(request));
    }
 
    protected boolean getBooleanParameter(RequestContext request, String name, boolean defaultValue)

@@ -45,12 +45,9 @@ import java.util.List;
 public class AllVersionsCollection extends CmisObjectCollection
 {
 
-   /**
-    * Instantiates a new all versions collection.
-    */
-   public AllVersionsCollection()
+   public AllVersionsCollection(Connection connection)
    {
-      super();
+      super(connection);
       setHref("/versions");
    }
 
@@ -59,17 +56,18 @@ public class AllVersionsCollection extends CmisObjectCollection
     */
    protected void addFeedDetails(Feed feed, RequestContext request) throws ResponseContextException
    {
-      String objectId = getId(request);
-      String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
-      boolean includeAllowableActions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS, false);
-      int maxItems = getIntegerParameter(request, AtomCMIS.PARAM_MAX_ITEMS, CmisConstants.MAX_ITEMS);
-      int skipCount = getIntegerParameter(request, AtomCMIS.PARAM_SKIP_COUNT, CmisConstants.SKIP_COUNT);
-      Connection conn = null;
       try
       {
-         conn = getConnection(request);
+         String objectId = getId(request);
+         String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
+         boolean includeAllowableActions =
+            getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS, false);
+         int maxItems = getIntegerParameter(request, AtomCMIS.PARAM_MAX_ITEMS, CmisConstants.MAX_ITEMS);
+         int skipCount = getIntegerParameter(request, AtomCMIS.PARAM_SKIP_COUNT, CmisConstants.SKIP_COUNT);
 
-         List<CmisObject> list = conn.getAllVersions(objectId, includeAllowableActions, true, propertyFilter);
+         Connection connection = getConnection(request);
+
+         List<CmisObject> list = connection.getAllVersions(objectId, includeAllowableActions, true, propertyFilter);
 
          if (list.size() > 0)
          {
@@ -77,14 +75,8 @@ public class AllVersionsCollection extends CmisObjectCollection
             Element numItems = feed.addExtension(AtomCMIS.NUM_ITEMS);
             numItems.setText(Integer.toString(list.size()));
             //Paging inks
-            addPageLinks(objectId, //
-               feed, //
-               "versions", //
-               maxItems, //
-               skipCount, //
-               list.size(), //
-               (skipCount + maxItems) < list.size(), //
-               request);
+            addPageLinks(objectId, feed, "versions", maxItems, skipCount, list.size(), (skipCount + maxItems) < list
+               .size(), request);
 
             for (CmisObject one : list)
             {
@@ -110,14 +102,6 @@ public class AllVersionsCollection extends CmisObjectCollection
       {
          throw new ResponseContextException(createErrorResponse(t, 500));
       }
-      finally
-      {
-         if (conn != null)
-         {
-            conn.close();
-         }
-      }
-
    }
 
    /**

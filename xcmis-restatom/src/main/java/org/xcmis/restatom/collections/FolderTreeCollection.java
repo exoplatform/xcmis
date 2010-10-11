@@ -43,12 +43,9 @@ import java.util.List;
 public class FolderTreeCollection extends FolderDescentantsCollection
 {
 
-   /**
-    * Instantiates a new folder tree collection.
-    */
-   public FolderTreeCollection()
+   public FolderTreeCollection(Connection connection)
    {
-      super();
+      super(connection);
       setHref("/foldertree");
    }
 
@@ -67,31 +64,41 @@ public class FolderTreeCollection extends FolderDescentantsCollection
    @Override
    protected void addFeedDetails(Feed feed, RequestContext request) throws ResponseContextException
    {
-      boolean includeAllowableActions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS, false);
-      boolean includePathSegments = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_PATH_SEGMENT, false);
-      String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
-      String renditionFilter = request.getParameter(AtomCMIS.PARAM_RENDITION_FILTER);
-      IncludeRelationships includeRelationships;
       try
       {
-         includeRelationships =
-            request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS) == null
-               || request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS).length() == 0 ? IncludeRelationships.NONE
-               : IncludeRelationships.fromValue(request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS));
-      }
-      catch (IllegalArgumentException iae)
-      {
-         String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS);
-         throw new ResponseContextException(msg, 400);
-      }
-      int depth = getIntegerParameter(request, AtomCMIS.PARAM_DEPTH, CmisConstants.DEPTH);
-      Connection conn = null;
-      try
-      {
-         conn = getConnection(request);
+         boolean includeAllowableActions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS, false);
+         boolean includePathSegments = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_PATH_SEGMENT, false);
+         String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
+         String renditionFilter = request.getParameter(AtomCMIS.PARAM_RENDITION_FILTER);
+         IncludeRelationships includeRelationships;
+         try
+         {
+            includeRelationships =
+               request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS) == null
+                  || request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS).length() == 0 ? IncludeRelationships.NONE
+                  : IncludeRelationships.fromValue(request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS));
+         }
+         catch (IllegalArgumentException iae)
+         {
+            String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS);
+            throw new ResponseContextException(msg, 400);
+         }
+         int depth = getIntegerParameter(request, AtomCMIS.PARAM_DEPTH, CmisConstants.DEPTH);
+
+         Connection connection = getConnection(request);
+         String objectId = getId(request);
+
+         // Parent link for not root folder.
+         if (!objectId.equals(connection.getStorage().getRepositoryInfo().getRootFolderId()))
+         {
+            CmisObject parent = connection.getFolderParent(objectId, true, null);
+            feed.addLink(getObjectLink(getId(parent), request), AtomCMIS.LINK_UP, AtomCMIS.MEDIATYPE_ATOM_ENTRY, null,
+               null, -1);
+         }
+
          List<ItemsTree<CmisObject>> tree =
-            conn.getFolderTree(getId(request), depth, includeAllowableActions, includeRelationships,
-               includePathSegments, true, propertyFilter, renditionFilter);
+            connection.getFolderTree(objectId, depth, includeAllowableActions, includeRelationships, includePathSegments,
+               true, propertyFilter, renditionFilter);
          if (tree.size() > 0)
          {
             // add cmisra:numItems
@@ -127,13 +134,6 @@ public class FolderTreeCollection extends FolderDescentantsCollection
       catch (Throwable t)
       {
          throw new ResponseContextException(createErrorResponse(t, 500));
-      }
-      finally
-      {
-         if (conn != null)
-         {
-            conn.close();
-         }
       }
    }
 

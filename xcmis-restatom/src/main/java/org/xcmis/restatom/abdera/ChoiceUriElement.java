@@ -30,16 +30,17 @@ import java.util.List;
 import javax.xml.namespace.QName;
 
 /**
- * @author <a href="mailto:alexey.zavizionov@exoplatform.com.ua">Alexey Zavizionov</a>
- * @version $Id: ChoiceUriElement.java 2 2010-02-04 17:21:49Z andrew00x $
- *          Jul 15, 2009
+ * @author <a href="mailto:alexey.zavizionov@exoplatform.com.ua">Alexey
+ *         Zavizionov</a>
+ * @version $Id: ChoiceUriElement.java 2 2010-02-04 17:21:49Z andrew00x $ Jul
+ *          15, 2009
  */
 public class ChoiceUriElement extends ChoiceElement<Choice<String>>
 {
 
    /**
     * Instantiates a new choice uri element.
-    *
+    * 
     * @param internal the internal
     */
    public ChoiceUriElement(Element internal)
@@ -49,7 +50,7 @@ public class ChoiceUriElement extends ChoiceElement<Choice<String>>
 
    /**
     * Instantiates a new choice uri element.
-    *
+    * 
     * @param factory the factory
     * @param qname the qname
     */

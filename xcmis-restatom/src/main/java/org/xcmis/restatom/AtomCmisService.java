@@ -25,21 +25,19 @@ import org.apache.abdera.model.Link;
 import org.apache.abdera.model.Service;
 import org.apache.abdera.model.Workspace;
 import org.apache.abdera.parser.stax.FOMExtensibleElement;
-import org.apache.abdera.protocol.server.CollectionAdapter;
 import org.apache.abdera.protocol.server.CollectionInfo;
 import org.apache.abdera.protocol.server.RequestContext;
 import org.apache.abdera.protocol.server.ResponseContext;
 import org.apache.abdera.protocol.server.WorkspaceInfo;
 import org.apache.abdera.protocol.server.context.BaseResponseContext;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
-import org.apache.abdera.protocol.server.impl.AbstractCollectionAdapter;
-import org.apache.abdera.protocol.server.impl.AbstractEntityCollectionAdapter;
 import org.apache.abdera.protocol.server.servlet.ServletRequestContext;
 import org.apache.commons.fileupload.FileItem;
 import org.xcmis.restatom.abdera.AccessControlEntryTypeElement;
 import org.xcmis.restatom.abdera.AllowableActionsElement;
 import org.xcmis.restatom.abdera.RepositoryInfoTypeElement;
 import org.xcmis.restatom.abdera.UriTemplateTypeElement;
+import org.xcmis.restatom.collections.AbstractCmisCollection;
 import org.xcmis.restatom.types.CmisUriTemplateType;
 import org.xcmis.spi.CmisRegistry;
 import org.xcmis.spi.Connection;
@@ -110,13 +108,12 @@ public class AtomCmisService
    public Response addACL(@Context HttpServletRequest httpRequest, @PathParam("repositoryId") String repositoryId,
       @PathParam("objectId") String objectId)
    {
-      Connection conn = null;
+      Connection connection = null;
       try
       {
-         conn = CmisRegistry.getInstance().getConnection(repositoryId);
-
+         connection = CmisRegistry.getInstance().getConnection(repositoryId);
          RequestContext request = initRequestContext(httpRequest);
-         Document doc = request.getDocument();
+         Document<?> doc = request.getDocument();
          List<AccessControlEntryTypeElement> listEl = doc.getRoot().getElements();
          List<AccessControlEntry> listACE = new ArrayList<AccessControlEntry>();
          for (AccessControlEntryTypeElement el : listEl)
@@ -124,10 +121,8 @@ public class AtomCmisService
             listACE.add(el.getACE());
          }
          List<AccessControlEntry> removeACL = new ArrayList<AccessControlEntry>();
-
-         conn.applyACL(objectId, listACE, removeACL, AccessControlPropagation.REPOSITORYDETERMINED);
-
-         List<AccessControlEntry> list = conn.getACL(objectId, false);
+         connection.applyACL(objectId, listACE, removeACL, AccessControlPropagation.REPOSITORYDETERMINED);
+         List<AccessControlEntry> list = connection.getACL(objectId, false);
          FOMExtensibleElement accessControlListTypeElement =
             AbderaFactory.getInstance().getFactory().newElement(AtomCMIS.ACL);
          for (AccessControlEntry accessControlEntry : list)
@@ -135,7 +130,6 @@ public class AtomCmisService
             AccessControlEntryTypeElement ace = accessControlListTypeElement.addExtension(AtomCMIS.PERMISSION);
             ace.build(accessControlEntry);
          }
-
          //return Response.status(201).build();
          return Response.ok(accessControlListTypeElement).header(HttpHeaders.CACHE_CONTROL, "no-cache").build();
       }
@@ -149,9 +143,9 @@ public class AtomCmisService
       }
       finally
       {
-         if (conn != null)
+         if (connection != null)
          {
-            conn.close();
+            connection.close();
          }
       }
 
@@ -214,8 +208,21 @@ public class AtomCmisService
       @PathParam("repositoryId") String repositoryId)
    {
       RequestContext request = initRequestContext(httpRequest);
-      ResponseContext abderaResponse = ((AbstractCollectionAdapter)getCollection(request)).deleteMedia(request);
-      return Response.status(abderaResponse.getStatus()).entity(abderaResponse).build();
+      Connection connection = null;
+      try
+      {
+         connection = CmisRegistry.getInstance().getConnection(repositoryId);
+         AbstractCmisCollection<?> collection = getCollection(request, connection);
+         ResponseContext abderaResponse = collection.deleteMedia(request);
+         return Response.status(abderaResponse.getStatus()).entity(abderaResponse).build();
+      }
+      finally
+      {
+         if (connection != null)
+         {
+            connection.close();
+         }
+      }
    }
 
    @DELETE
@@ -240,7 +247,6 @@ public class AtomCmisService
       @PathParam("folderId") String folderId, @QueryParam("unfileObject") String unfileNonfolderObjects,
       @DefaultValue("false") @QueryParam("continueOnFailure") boolean continueOnFailure)
    {
-
       UnfileObject unfileObject;
       try
       {
@@ -251,14 +257,12 @@ public class AtomCmisService
       {
          throw new IllegalArgumentException("Unsupported 'unfileObject' attribute: " + unfileNonfolderObjects);
       }
-
-      Connection conn = null;
+      Connection connection = null;
       try
       {
-         conn = CmisRegistry.getInstance().getConnection(repositoryId);
-
+         connection = CmisRegistry.getInstance().getConnection(repositoryId);
          Boolean deleteAllVersions = true; // TODO
-         conn.deleteTree(folderId, deleteAllVersions, unfileObject, continueOnFailure);
+         connection.deleteTree(folderId, deleteAllVersions, unfileObject, continueOnFailure);
          return Response.noContent().build();
       }
       catch (UpdateConflictException uce)
@@ -279,9 +283,9 @@ public class AtomCmisService
       }
       finally
       {
-         if (conn != null)
+         if (connection != null)
          {
-            conn.close();
+            connection.close();
          }
       }
    }
@@ -300,12 +304,11 @@ public class AtomCmisService
    public Response getACL(@PathParam("repositoryId") String repositoryId, @PathParam("objectId") String objectId,
       @DefaultValue("true") @QueryParam("onlyBasicPermissions") boolean onlyBasicPermissions)
    {
-      Connection conn = null;
+      Connection connection = null;
       try
       {
-         conn = CmisRegistry.getInstance().getConnection(repositoryId);
-
-         List<AccessControlEntry> list = conn.getACL(objectId, onlyBasicPermissions);
+         connection = CmisRegistry.getInstance().getConnection(repositoryId);
+         List<AccessControlEntry> list = connection.getACL(objectId, onlyBasicPermissions);
          FOMExtensibleElement accessControlListTypeElement =
             AbderaFactory.getInstance().getFactory().newElement(AtomCMIS.ACL);
          for (AccessControlEntry accessControlEntry : list)
@@ -325,9 +328,9 @@ public class AtomCmisService
       }
       finally
       {
-         if (conn != null)
+         if (connection != null)
          {
-            conn.close();
+            connection.close();
          }
       }
    }
@@ -338,12 +341,11 @@ public class AtomCmisService
    public Response getAllowableActions(@PathParam("repositoryId") String repositoryId,
       @PathParam("objectId") String objectId)
    {
-      Connection conn = null;
+      Connection connection = null;
       try
       {
-         conn = CmisRegistry.getInstance().getConnection(repositoryId);
-
-         AllowableActions result = conn.getAllowableActions(objectId);
+         connection = CmisRegistry.getInstance().getConnection(repositoryId);
+         AllowableActions result = connection.getAllowableActions(objectId);
          AllowableActionsElement el = AbderaFactory.getInstance().getFactory().newElement(AtomCMIS.ALLOWABLE_ACTIONS);
          el.build(result);
          return Response.ok(el).header(HttpHeaders.CACHE_CONTROL, "no-cache").build();
@@ -362,9 +364,9 @@ public class AtomCmisService
       }
       finally
       {
-         if (conn != null)
+         if (connection != null)
          {
-            conn.close();
+            connection.close();
          }
       }
    }
@@ -435,13 +437,26 @@ public class AtomCmisService
       @PathParam("repositoryId") String repositoryId)
    {
       RequestContext request = initRequestContext(httpRequest);
-      @SuppressWarnings("unchecked")
-      ResponseContext abderaResponse = ((AbstractEntityCollectionAdapter)getCollection(request)).getMedia(request);
-      ResponseBuilder builder = Response.status(abderaResponse.getStatus());
-      copyAbderaHeaders(builder, abderaResponse);
-      builder.entity(abderaResponse);
-      // Cache-Control headers ?
-      return builder.build();
+      Connection connection = null;
+      try
+      {
+         connection = CmisRegistry.getInstance().getConnection(repositoryId);
+         AbstractCmisCollection<?> collection = getCollection(request, connection);
+         ResponseContext abderaResponse = collection.getMedia(request);
+         ResponseBuilder builder = Response.status(abderaResponse.getStatus());
+         copyAbderaHeaders(builder, abderaResponse);
+         builder.entity(abderaResponse);
+         // Cache-Control headers ?
+         return builder.build();
+      }
+      finally
+      {
+         if (connection != null)
+         {
+            connection.close();
+         }
+      }
+
    }
 
    @GET
@@ -508,11 +523,8 @@ public class AtomCmisService
    {
       Service service = AbderaFactory.getInstance().getFactory().newService();
       service.declareNS(AtomCMIS.CMISRA_NS_URI, AtomCMIS.CMISRA_PREFIX);
-
       Set<RepositoryShortInfo> shortInfos = CmisRegistry.getInstance().getStorageInfos();
-
       RequestContext request = initRequestContext(httpRequest);
-
       if (shortInfos != null && !shortInfos.isEmpty())
       {
          for (RepositoryShortInfo info : shortInfos)
@@ -527,8 +539,17 @@ public class AtomCmisService
                UriBuilder.fromUri(uriInfo.getBaseUri()).path(getClass()).path(info.getRepositoryId()).build()
                   .toString();
 
-            String rootFolderId = info.getRootFolderId();
-            includeCollections(ws, info.getRepositoryId(), request, repoPath, rootFolderId);
+            Collection<CollectionInfo> collectionsInfo = getCollectionsInfo(request);
+            for (CollectionInfo collectionInfo : collectionsInfo)
+            {
+               CmisCollectionInfo cmisCollectionInfo = (CmisCollectionInfo)collectionInfo;
+               String collectionType = cmisCollectionInfo.getCollectionType();
+               if (AtomCMIS.COLLECTION_TYPE_ROOT.equals(collectionType))
+                  ws.addCollection(((CmisCollectionInfo)collectionInfo).asCollectionElement(request, repoPath, info
+                     .getRootFolderId()));
+               else
+                  ws.addCollection(((CmisCollectionInfo)collectionInfo).asCollectionElement(request, repoPath));
+            }
 
             includeURITemplates(ws, repoPath);
          }
@@ -584,11 +605,25 @@ public class AtomCmisService
    public Response query(@Context HttpServletRequest httpRequest, @PathParam("repositoryId") String repositoryId)
    {
       RequestContext request = initRequestContext(httpRequest);
-      ResponseContext abderaResponse = getCollection(request).getFeed(request);
-      ResponseBuilder builder = Response.status(abderaResponse.getStatus() == 200 ? 201 : abderaResponse.getStatus());
-      copyAbderaHeaders(builder, abderaResponse);
-      builder.header(HttpHeaders.CACHE_CONTROL, "no-cache");
-      return builder.entity(abderaResponse).build();
+      Connection connection = null;
+      try
+      {
+         connection = CmisRegistry.getInstance().getConnection(repositoryId);
+         AbstractCmisCollection<?> collection = getCollection(request, connection);
+         ResponseContext abderaResponse = collection.getFeed(request);
+         ResponseBuilder builder =
+            Response.status(abderaResponse.getStatus() == 200 ? 201 : abderaResponse.getStatus());
+         copyAbderaHeaders(builder, abderaResponse);
+         builder.header(HttpHeaders.CACHE_CONTROL, "no-cache");
+         return builder.entity(abderaResponse).build();
+      }
+      finally
+      {
+         if (connection != null)
+         {
+            connection.close();
+         }
+      }
    }
 
    @GET
@@ -611,17 +646,28 @@ public class AtomCmisService
       @PathParam("repositoryId") String repositoryId)
    {
       RequestContext request = initRequestContext(httpRequest);
-      @SuppressWarnings("unchecked")
-      ResponseContext abderaResponse = ((AbstractEntityCollectionAdapter)getCollection(request)).putMedia(request);
-      ResponseBuilder builder = Response.status(abderaResponse.getStatus());
-      copyAbderaHeaders(builder, abderaResponse);
-      return builder.entity(abderaResponse).build();
+      Connection connection = null;
+      try
+      {
+         connection = CmisRegistry.getInstance().getConnection(repositoryId);
+         AbstractCmisCollection<?> collection = getCollection(request, connection);
+         ResponseContext abderaResponse = collection.putMedia(request);
+         ResponseBuilder builder = Response.status(abderaResponse.getStatus());
+         copyAbderaHeaders(builder, abderaResponse);
+         return builder.entity(abderaResponse).build();
+      }
+      finally
+      {
+         if (connection != null)
+         {
+            connection.close();
+         }
+      }
    }
 
    @POST
    @Path("{repositoryId}/file/{objectId}")
    @Consumes("multipart/form-data")
-   @SuppressWarnings("unchecked")
    public Response setContentStream(@Context HttpServletRequest httpRequest,
       @PathParam("repositoryId") String repositoryId, @QueryParam(HttpHeaders.CONTENT_TYPE) String contentType,
       Iterator<FileItem> files)
@@ -645,9 +691,22 @@ public class AtomCmisService
                }
 
                RequestContext request = initRequestContext(httpRequest);
-               ((AbstractEntityCollectionAdapter)getCollection(request)).putMedia(null, new javax.activation.MimeType(
-                  contentType), null, file.getInputStream(), request);
-               return Response.status(201).build();
+               Connection connection = null;
+               try
+               {
+                  connection = CmisRegistry.getInstance().getConnection(repositoryId);
+                  AbstractCmisCollection<?> collection = getCollection(request, connection);
+                  collection.putMedia(null, new javax.activation.MimeType(contentType), null, file.getInputStream(),
+                     request);
+                  return Response.status(201).build();
+               }
+               finally
+               {
+                  if (connection != null)
+                  {
+                     connection.close();
+                  }
+               }
             }
             catch (IOException ioe)
             {
@@ -663,7 +722,6 @@ public class AtomCmisService
             }
          }
       }
-      // XXX
       throw new WebApplicationException(new InvalidArgumentException("Content of document is missing."), 400);
    }
 
@@ -674,11 +732,23 @@ public class AtomCmisService
       @PathParam("repositoryId") String repositoryId)
    {
       RequestContext request = initRequestContext(httpRequest);
-      @SuppressWarnings("unchecked")
-      ResponseContext abderaResponse = ((AbstractEntityCollectionAdapter)getCollection(request)).putEntry(request);
-      ResponseBuilder builder = Response.status(abderaResponse.getStatus());
-      copyAbderaHeaders(builder, abderaResponse);
-      return builder.entity(abderaResponse).build();
+      Connection connection = null;
+      try
+      {
+         connection = CmisRegistry.getInstance().getConnection(repositoryId);
+         AbstractCmisCollection<?> collection = getCollection(request, connection);
+         ResponseContext abderaResponse = collection.putEntry(request);
+         ResponseBuilder builder = Response.status(abderaResponse.getStatus());
+         copyAbderaHeaders(builder, abderaResponse);
+         return builder.entity(abderaResponse).build();
+      }
+      finally
+      {
+         if (connection != null)
+         {
+            connection.close();
+         }
+      }
    }
 
    private void copyAbderaHeaders(ResponseBuilder responseBuilder, ResponseContext abderaResponse)
@@ -712,12 +782,11 @@ public class AtomCmisService
    private Workspace addCmisRepository(HttpServletRequest httpRequest, Service service, String repositoryId, URI baseUri)
    {
       RepositoryInfo repoInfo;
-      Connection conn = null;
+      Connection connection = null;
       try
       {
-         conn = CmisRegistry.getInstance().getConnection(repositoryId);
-
-         repoInfo = conn.getStorage().getRepositoryInfo();
+         connection = CmisRegistry.getInstance().getConnection(repositoryId);
+         repoInfo = connection.getStorage().getRepositoryInfo();
       }
       catch (InvalidArgumentException iae)
       {
@@ -729,9 +798,9 @@ public class AtomCmisService
       }
       finally
       {
-         if (conn != null)
+         if (connection != null)
          {
-            conn.close();
+            connection.close();
          }
       }
 
@@ -744,7 +813,17 @@ public class AtomCmisService
 
       RequestContext request = initRequestContext(httpRequest);
 
-      includeCollections(ws, repositoryId, request, repoPath, repoInfo.getRootFolderId());
+      Collection<CollectionInfo> collectionsInfo = getCollectionsInfo(request);
+      for (CollectionInfo collectionInfo : collectionsInfo)
+      {
+         CmisCollectionInfo cmisCollectionInfo = (CmisCollectionInfo)collectionInfo;
+         String collectionType = cmisCollectionInfo.getCollectionType();
+         if (AtomCMIS.COLLECTION_TYPE_ROOT.equals(collectionType))
+            ws.addCollection(((CmisCollectionInfo)collectionInfo).asCollectionElement(request, repoPath, repoInfo
+               .getRootFolderId()));
+         else
+            ws.addCollection(((CmisCollectionInfo)collectionInfo).asCollectionElement(request, repoPath));
+      }
 
       includeURITemplates(ws, repoPath);
 
@@ -783,46 +862,6 @@ public class AtomCmisService
       }
 
       return ws;
-   }
-
-   private void includeCollections(Workspace ws, String repositoryId, RequestContext request, String repoPath,
-      String rootFolderId)
-   {
-      Collection<CollectionInfo> collectionsInfo = getCollectionsInfo(request);
-      for (CollectionInfo collectionInfo : collectionsInfo)
-      {
-         AbstractCollectionAdapter collectionAdapter = (AbstractCollectionAdapter)collectionInfo;
-         String href = collectionAdapter.getHref();
-         String collectionType = null;
-         String path = repoPath + href;
-         if (href.equals("/children"))
-         {
-            collectionType = AtomCMIS.COLLECTION_TYPE_ROOT;
-            path += '/' + rootFolderId;
-         }
-         else if (href.equals("/types"))
-         {
-            collectionType = AtomCMIS.COLLECTION_TYPE_TYPES;
-         }
-         else if (href.equals("/checkedout"))
-         {
-            collectionType = AtomCMIS.COLLECTION_TYPE_CHECKEDOUT;
-         }
-         else if (href.equals("/query"))
-         {
-            collectionType = AtomCMIS.COLLECTION_TYPE_QUERY;
-         }
-         else if (href.equals("/unfiled"))
-         {
-            collectionType = AtomCMIS.COLLECTION_TYPE_UNFILED;
-         }
-
-         if (collectionType != null)
-         {
-            org.apache.abdera.model.Collection collection = ws.addCollection(collectionAdapter.getTitle(request), path);
-            collection.addSimpleExtension(AtomCMIS.COLLECTION_TYPE, collectionType);
-         }
-      }
    }
 
    private void includeURITemplates(Workspace ws, String repoPath)
@@ -909,24 +948,52 @@ public class AtomCmisService
    protected Response createItem(String repositoryId, HttpServletRequest httpRequest)
    {
       RequestContext request = initRequestContext(httpRequest);
-      ResponseContext abderaResponse = getCollection(request).postEntry(request);
-      ResponseBuilder builder = Response.status(abderaResponse.getStatus());
-      copyAbderaHeaders(builder, abderaResponse);
-      return builder.entity(abderaResponse).build();
+      Connection connection = null;
+      try
+      {
+         connection = CmisRegistry.getInstance().getConnection(repositoryId);
+         AbstractCmisCollection<?> collection = getCollection(request, connection);
+         ResponseContext abderaResponse = collection.postEntry(request);
+         ResponseBuilder builder = Response.status(abderaResponse.getStatus());
+         copyAbderaHeaders(builder, abderaResponse);
+         return builder.entity(abderaResponse).build();
+      }
+      finally
+      {
+         if (connection != null)
+         {
+            connection.close();
+         }
+      }
    }
 
    protected Response deleteItem(String repositoryId, HttpServletRequest httpRequest)
    {
       RequestContext request = initRequestContext(httpRequest);
-      ResponseContext abderaResponse = getCollection(request).deleteEntry(request);
-      ResponseBuilder builder = Response.status(abderaResponse.getStatus());
-      copyAbderaHeaders(builder, abderaResponse);
-      return builder.entity(abderaResponse).build();
+      Connection connection = null;
+      try
+      {
+         connection = CmisRegistry.getInstance().getConnection(repositoryId);
+         AbstractCmisCollection<?> collection = getCollection(request, connection);
+         ResponseContext abderaResponse = collection.deleteEntry(request);
+         ResponseBuilder builder = Response.status(abderaResponse.getStatus());
+         copyAbderaHeaders(builder, abderaResponse);
+         return builder.entity(abderaResponse).build();
+      }
+      finally
+      {
+         if (connection != null)
+         {
+            connection.close();
+         }
+      }
    }
 
-   protected CollectionAdapter getCollection(RequestContext request)
+   protected AbstractCmisCollection<?> getCollection(RequestContext request, Connection connection)
    {
-      return provider.getWorkspaceManager(request).getCollectionAdapter(request);
+      WorkspaceManagerImpl wm = (WorkspaceManagerImpl)provider.getWorkspaceManager(request);
+      AbstractCmisCollection<?> collection = wm.getCollectionAdapter(request, connection);
+      return collection;
    }
 
    protected Collection<CollectionInfo> getCollectionsInfo(RequestContext request)
@@ -939,21 +1006,47 @@ public class AtomCmisService
    protected Response getEntry(String repositoryId, HttpServletRequest httpRequest)
    {
       RequestContext request = initRequestContext(httpRequest);
-      ResponseContext abderaResponse = getCollection(request).getEntry(request);
-      ResponseBuilder builder = Response.status(abderaResponse.getStatus());
-      copyAbderaHeaders(builder, abderaResponse);
-      builder.header(HttpHeaders.CACHE_CONTROL, "no-cache");
-      return builder.entity(abderaResponse).build();
+      Connection connection = null;
+      try
+      {
+         connection = CmisRegistry.getInstance().getConnection(repositoryId);
+         AbstractCmisCollection<?> collection = getCollection(request, connection);
+         ResponseContext abderaResponse = collection.getEntry(request);
+         ResponseBuilder builder = Response.status(abderaResponse.getStatus());
+         copyAbderaHeaders(builder, abderaResponse);
+         builder.header(HttpHeaders.CACHE_CONTROL, "no-cache");
+         return builder.entity(abderaResponse).build();
+      }
+      finally
+      {
+         if (connection != null)
+         {
+            connection.close();
+         }
+      }
    }
 
    protected Response getFeed(String repositoryId, HttpServletRequest httpRequest)
    {
       RequestContext request = initRequestContext(httpRequest);
-      ResponseContext abderaResponse = getCollection(request).getFeed(request);
-      ResponseBuilder builder = Response.status(abderaResponse.getStatus());
-      copyAbderaHeaders(builder, abderaResponse);
-      builder.header(HttpHeaders.CACHE_CONTROL, "no-cache");
-      return builder.entity(abderaResponse).build();
+      Connection connection = null;
+      try
+      {
+         connection = CmisRegistry.getInstance().getConnection(repositoryId);
+         AbstractCmisCollection<?> collection = getCollection(request, connection);
+         ResponseContext abderaResponse = collection.getFeed(request);
+         ResponseBuilder builder = Response.status(abderaResponse.getStatus());
+         copyAbderaHeaders(builder, abderaResponse);
+         builder.header(HttpHeaders.CACHE_CONTROL, "no-cache");
+         return builder.entity(abderaResponse).build();
+      }
+      finally
+      {
+         if (connection != null)
+         {
+            connection.close();
+         }
+      }
    }
 
    private RequestContext initRequestContext(HttpServletRequest httpRequest)

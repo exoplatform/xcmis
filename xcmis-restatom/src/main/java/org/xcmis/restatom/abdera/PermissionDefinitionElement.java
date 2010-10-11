@@ -29,14 +29,15 @@ import javax.xml.namespace.QName;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id: PermissionDefinitionElement.java 2 2010-02-04 17:21:49Z andrew00x $
+ * @version $Id: PermissionDefinitionElement.java 2 2010-02-04 17:21:49Z
+ *          andrew00x $
  */
 public class PermissionDefinitionElement extends ExtensibleElementWrapper
 {
 
    /**
     * Instantiates a new permission definition element.
-    *
+    * 
     * @param internal the internal
     */
    public PermissionDefinitionElement(Element internal)
@@ -46,7 +47,7 @@ public class PermissionDefinitionElement extends ExtensibleElementWrapper
 
    /**
     * Instantiates a new permission definition element.
-    *
+    * 
     * @param factory the factory
     * @param qname the qname
     */
@@ -57,7 +58,7 @@ public class PermissionDefinitionElement extends ExtensibleElementWrapper
 
    /**
     * Builds the element.
-    *
+    * 
     * @param permission the acl capability
     */
    public void build(Permission permission)

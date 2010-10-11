@@ -29,9 +29,10 @@ import java.io.ByteArrayInputStream;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 /**
- * @author <a href="mailto:alexey.zavizionov@exoplatform.com">Alexey Zavizionov</a>
- * @version $Id:  $
- *
+ * @author <a href="mailto:alexey.zavizionov@exoplatform.com">Alexey
+ *         Zavizionov</a>
+ * @version $Id: $
+ * 
  */
 public class UnfiledCollectionTest extends BaseTest
 {
@@ -40,7 +41,7 @@ public class UnfiledCollectionTest extends BaseTest
    {
       if (!conn.getStorage().getRepositoryInfo().getCapabilities().isCapabilityUnfiling())
          return;
-      
+
       String docId = createDocument(testFolderId, "doc1", null, null);
 
       String s = "<?xml version='1.0' encoding='utf-8'?>" //
@@ -84,9 +85,9 @@ public class UnfiledCollectionTest extends BaseTest
    {
       if (!conn.getStorage().getRepositoryInfo().getCapabilities().isCapabilityUnfiling())
          return;
-         
+
       String doc1Id = createDocument(testFolderId, "doc1", null, null);
-      
+
       ObjectData object = conn.getStorage().getObjectById(doc1Id);
       conn.getStorage().unfileObject(object);
 

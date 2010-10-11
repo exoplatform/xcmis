@@ -61,6 +61,7 @@ import org.xcmis.spi.model.IncludeRelationships;
 import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.Rendition;
 import org.xcmis.spi.model.RepositoryCapabilities;
+import org.xcmis.spi.model.RepositoryInfo;
 import org.xcmis.spi.model.impl.StringProperty;
 import org.xcmis.spi.utils.Logger;
 
@@ -155,12 +156,9 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
    /** The Constant SPACES_AIR_SPECIFIC_REFERER. */
    protected static final String SPACES_AIR_SPECIFIC_REFERER = "app:/CMISSpacesAir.swf";
 
-   /**
-    * Instantiates a new cmis object collection.
-    */
-   public CmisObjectCollection()
+   public CmisObjectCollection(Connection connection)
    {
-      super();
+      super(connection);
    }
 
    /**
@@ -169,11 +167,10 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
    @Override
    public void deleteEntry(String objectId, RequestContext request) throws ResponseContextException
    {
-      Connection conn = null;
       try
       {
-         conn = getConnection(request);
-         conn.deleteObject(objectId, null);
+         Connection connection = getConnection(request);
+         connection.deleteObject(objectId, null);
       }
       catch (ConstraintException cve)
       {
@@ -199,13 +196,6 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       {
          throw new ResponseContextException(createErrorResponse(t, 500));
       }
-      finally
-      {
-         if (conn != null)
-         {
-            conn.close();
-         }
-      }
    }
 
    /**
@@ -214,17 +204,15 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
    @Override
    public ResponseContext deleteMedia(RequestContext request)
    {
-      Connection conn = null;
       try
       {
-         conn = getConnection(request);
+         Connection connection = getConnection(request);
          ChangeTokenHolder changeTokenHolder = new ChangeTokenHolder();
-         changeTokenHolder.setValue(request.getHeader(HttpHeaders.IF_MATCH));
          // TODO : Is it correct to use 'If-Match' header ?
-         String objectId = conn.deleteContentStream(getId(request), //
-            changeTokenHolder // changeToken
-            );
-         CmisObject object = conn.getProperties(objectId, true, CmisConstants.CHANGE_TOKEN);
+         changeTokenHolder.setValue(request.getHeader(HttpHeaders.IF_MATCH));
+         String objectId = connection.deleteContentStream(getId(request), changeTokenHolder /*changeToken*/);
+         CmisObject object = connection.getProperties(objectId, true, CmisConstants.CHANGE_TOKEN);
+         @SuppressWarnings("unchecked")
          Property<String> changeToken = (Property<String>)getProperty(object, CmisConstants.CHANGE_TOKEN);
          // TODO : 204, is it correct ? It used by default when delete content of ATOM resource
          ResponseContext response = new EmptyResponseContext(204);
@@ -258,13 +246,6 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       {
          return createErrorResponse(t, 500);
       }
-      finally
-      {
-         if (conn != null)
-         {
-            conn.close();
-         }
-      }
    }
 
    /**
@@ -273,14 +254,13 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
    @Override
    public void deleteMedia(String documentId, RequestContext request) throws ResponseContextException
    {
-      Connection conn = null;
       try
       {
-         conn = getConnection(request);
+         Connection connection = getConnection(request);
          ChangeTokenHolder changeTokenHolder = new ChangeTokenHolder();
+         // TODO : Is it correct to use 'If-Match' header ?
          changeTokenHolder.setValue(request.getHeader(HttpHeaders.IF_MATCH));
-         conn.deleteContentStream(documentId, //
-            changeTokenHolder);
+         connection.deleteContentStream(documentId, changeTokenHolder);
       }
       catch (ConstraintException cve)
       {
@@ -305,13 +285,6 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       catch (Throwable t)
       {
          throw new ResponseContextException(createErrorResponse(t, 500));
-      }
-      finally
-      {
-         if (conn != null)
-         {
-            conn.close();
-         }
       }
    }
 
@@ -369,42 +342,45 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
    @Override
    public CmisObject getEntry(String id, RequestContext request) throws ResponseContextException
    {
-      boolean includeAllowableActions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS, false);
-      String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
-      boolean includePolicies = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_POLICY_IDS, false);
-      boolean includeACL = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ACL, false);
-      String renditionFilter = request.getParameter(AtomCMIS.PARAM_RENDITION_FILTER);
-      IncludeRelationships includeRelationships;
       try
       {
-         includeRelationships =
-            request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS) == null
-               || request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS).length() == 0 ? IncludeRelationships.NONE
-               : IncludeRelationships.fromValue(request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS));
-      }
-      catch (IllegalArgumentException iae)
-      {
-         String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS);
-         throw new ResponseContextException(createErrorResponse(msg, 400));
-      }
-      Connection conn = null;
-      try
-      {
-         conn = getConnection(request);
+         boolean includeAllowableActions =
+            getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS, false);
+         String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
+         boolean includePolicies = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_POLICY_IDS, false);
+         boolean includeACL = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ACL, false);
+         String renditionFilter = request.getParameter(AtomCMIS.PARAM_RENDITION_FILTER);
+         IncludeRelationships includeRelationships;
+         try
+         {
+            includeRelationships =
+               request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS) == null
+                  || request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS).length() == 0
+                  ? IncludeRelationships.NONE : IncludeRelationships.fromValue(request
+                     .getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS));
+         }
+         catch (IllegalArgumentException iae)
+         {
+            String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS);
+            throw new ResponseContextException(createErrorResponse(msg, 400));
+         }
+
+         Connection connection = getConnection(request);
+
          CmisObject object;
          if (id.charAt(0) != '/')
          {
             // Get by id.
             object =
-               conn.getObject(id, includeAllowableActions, includeRelationships, includePolicies, includeACL, true,
-                  propertyFilter, renditionFilter);
+               connection.getObject(id, includeAllowableActions, includeRelationships, includePolicies, includeACL,
+                  true, propertyFilter, renditionFilter);
          }
          else
          {
             // Get by path.
             object =
-               conn.getObjectByPath(id, includeAllowableActions, includeRelationships, includePolicies, includeACL,
-                  true, propertyFilter, renditionFilter);
+               connection.getObjectByPath(id, includeAllowableActions, includeRelationships, includePolicies,
+                  includeACL, true, propertyFilter, renditionFilter);
          }
          BaseType type = getBaseObjectType(object);
          if (type == BaseType.DOCUMENT)
@@ -441,7 +417,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
 
             // Find latest in Version series.
             String versionSeriesId = object.getObjectInfo().getVersionSeriesId();
-            return conn.getObjectOfLatestVersion(//
+            return connection.getObjectOfLatestVersion(//
                versionSeriesId, //
                enumReturnVersion == EnumReturnVersion.LATESTMAJOR, //
                includeAllowableActions, //
@@ -472,13 +448,6 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       {
          throw new ResponseContextException(createErrorResponse(t, 500));
       }
-      finally
-      {
-         if (conn != null)
-         {
-            conn.close();
-         }
-      }
    }
 
    /**
@@ -505,12 +474,11 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
    @Override
    public ResponseContext getMedia(RequestContext request)
    {
-      Connection conn = null;
       try
       {
-         conn = getConnection(request);
+         Connection connection = getConnection(request);
          // TODO : resolve (optional) offset, length
-         ContentStream content = conn.getContentStream(getId(request), getStreamId(request));
+         ContentStream content = connection.getContentStream(getId(request), getStreamId(request));
          ResponseContext response = new MediaResponseContext(content.getStream(), 200);
          response.setContentType(content.getMediaType().toString());
          response.setContentLength(content.length());
@@ -530,13 +498,6 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       catch (Throwable t)
       {
          return createErrorResponse(t, 500);
-      }
-      finally
-      {
-         if (conn != null)
-         {
-            conn.close();
-         }
       }
    }
 
@@ -592,10 +553,9 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
          return rce.getResponseContext();
       }
 
-      Connection conn = null;
       try
       {
-         conn = getConnection(request);
+         Connection connection = getConnection(request);
          ObjectTypeElement objectElement = entry.getFirstChild(AtomCMIS.OBJECT);
          CmisObject object = objectElement != null ? object = objectElement.getObject() : new CmisObject();
          updatePropertiesFromEntry(object, entry);
@@ -615,8 +575,8 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
             // TODO : ACEs for removing. Not clear from specification how to
             // pass (obtain) ACEs for adding and removing from one object.
             updatedId =
-               conn.checkin(getId(request), major, properties, contentStream, checkinComment, acl, null, policyIds);
-
+               connection.checkin(getId(request), major, properties, contentStream, checkinComment, acl, null,
+                  policyIds);
          }
          else
          {
@@ -630,20 +590,20 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
             // validators in other forms of request.
             // ------------------------------------------
             // Method is PUT - use strong comparison.
-            CmisObject cmisObject = conn.getProperties(getId(request), true, CmisConstants.BASE_TYPE_ID);
+            CmisObject cmisObject = connection.getProperties(getId(request), true, CmisConstants.BASE_TYPE_ID);
             BaseType baseType = cmisObject.getObjectInfo().getBaseType();
 
             ChangeTokenHolder changeTokenHolder = new ChangeTokenHolder();
             changeTokenHolder.setValue(request.getHeader(HttpHeaders.IF_MATCH));
-            updatedId = conn.updateProperties(getId(request), changeTokenHolder, properties);
+            updatedId = connection.updateProperties(getId(request), changeTokenHolder, properties);
             if (baseType == BaseType.DOCUMENT && contentStream != null)
             {
-               updatedId = conn.setContentStream(getId(request), contentStream, changeTokenHolder, true);
+               updatedId = connection.setContentStream(getId(request), contentStream, changeTokenHolder, true);
             }
 
          }
 
-         CmisObject updated = conn.getProperties(updatedId, true, CmisConstants.WILDCARD);
+         CmisObject updated = connection.getProperties(updatedId, true, CmisConstants.WILDCARD);
          entry = request.getAbdera().getFactory().newEntry();
          addEntryDetails(request, entry, request.getResolvedUri(), updated);
          return buildGetEntryResponse(request, entry);
@@ -676,13 +636,6 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       {
          return createErrorResponse(t, 500);
       }
-      finally
-      {
-         if (conn != null)
-         {
-            conn.close();
-         }
-      }
    }
 
    /**
@@ -700,16 +653,15 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
    public void putMedia(CmisObject entryObj, MimeType contentType, String slug, InputStream inputStream,
       RequestContext request) throws ResponseContextException
    {
-      Connection conn = null;
       try
       {
-         conn = getConnection(request);
+         Connection connection = getConnection(request);
          ContentStream content = new BaseContentStream(inputStream, null, convertMimeType(contentType));
          // TODO : is correct ?
          ChangeTokenHolder changeTokenHolder = new ChangeTokenHolder();
          changeTokenHolder.setValue(request.getHeader(HttpHeaders.IF_MATCH));
          boolean overwriteFlag = getBooleanParameter(request, AtomCMIS.PARAM_OVERWRITE_FLAG, true);
-         conn.setContentStream(getId(request), content, changeTokenHolder, overwriteFlag);
+         connection.setContentStream(getId(request), content, changeTokenHolder, overwriteFlag);
       }
       catch (ConstraintException cve)
       {
@@ -736,13 +688,6 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       {
          throw new ResponseContextException(createErrorResponse(t, 500));
       }
-      finally
-      {
-         if (conn != null)
-         {
-            conn.close();
-         }
-      }
    }
 
    /**
@@ -751,20 +696,17 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
    @Override
    public ResponseContext putMedia(RequestContext request)
    {
-      Connection conn = null;
       try
       {
-         conn = getConnection(request);
-
+         Connection connection = getConnection(request);
          ContentStream content =
             new BaseContentStream(request.getInputStream(), null, convertMimeType(request.getContentType()));
-
-         // TODO : is correct ?
          ChangeTokenHolder changeTokenHolder = new ChangeTokenHolder();
+         // TODO : is correct ?
          changeTokenHolder.setValue(request.getHeader(HttpHeaders.IF_MATCH));
          boolean overwriteFlag = getBooleanParameter(request, AtomCMIS.PARAM_OVERWRITE_FLAG, true);
-         String updatedId = conn.setContentStream(getId(request), content, changeTokenHolder, overwriteFlag);
-         CmisObject updated = conn.getProperties(updatedId, true, CmisConstants.CHANGE_TOKEN);
+         String updatedId = connection.setContentStream(getId(request), content, changeTokenHolder, overwriteFlag);
+         CmisObject updated = connection.getProperties(updatedId, true, CmisConstants.CHANGE_TOKEN);
          ResponseContext response = new EmptyResponseContext(201);
          String contentLink = getContentLink(getId(request), request);
          response.setHeader(HttpHeaders.CONTENT_LOCATION, contentLink);
@@ -804,13 +746,6 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       catch (Throwable t)
       {
          return createErrorResponse(t, 500);
-      }
-      finally
-      {
-         if (conn != null)
-         {
-            conn.close();
-         }
       }
    }
 
@@ -1356,14 +1291,11 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
    protected Calendar getCreationDate(CmisObject object)
    {
       Calendar creationDate = object.getObjectInfo().getCreationDate();
-      if (creationDate != null)
+      if (creationDate == null)
       {
-         return creationDate;
+         creationDate = Calendar.getInstance();
       }
-      else
-      {
-         return Calendar.getInstance();
-      }
+      return creationDate;
    }
 
    /**
@@ -1372,35 +1304,26 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
     * return null.
     *
     * @param id folder id
+    * @param repository info
     * @param request request context
     * @return link to AtomPub document that describes folder's descendants or
     *         null if capability 'getDescendants' is not supported.
+    * @see RepositoryInfo
     */
-   protected String getDescendantsLink(String id, RequestContext request)
+   protected String getDescendantsLink(String id, /*RepositoryInfo repoInfo,*/RequestContext request)
    {
-      Connection conn = null;
-      try
+      String children = null;
+      Connection connection = getConnection(request);
+      RepositoryCapabilities capabilities = connection.getStorage().getRepositoryInfo().getCapabilities();
+      if (capabilities.isCapabilityGetDescendants())
       {
-         conn = getConnection(request);
-         RepositoryCapabilities capabilities = conn.getStorage().getRepositoryInfo().getCapabilities();
-         if (capabilities.isCapabilityGetDescendants())
-         {
-            Map<String, String> params = new HashMap<String, String>();
-            params.put("repoid", getRepositoryId(request));
-            params.put("atomdoctype", "descendants");
-            params.put("id", id);
-            String children = request.absoluteUrlFor("feed", params);
-            return children;
-         }
+         Map<String, String> params = new HashMap<String, String>();
+         params.put("repoid", getRepositoryId(request));
+         params.put("atomdoctype", "descendants");
+         params.put("id", id);
+         children = request.absoluteUrlFor("feed", params);
       }
-      finally
-      {
-         if (conn != null)
-         {
-            conn.close();
-         }
-      }
-      return null;
+      return children;
    }
 
    /**
@@ -1414,29 +1337,18 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
     */
    protected String getFolderTreeLink(String id, RequestContext request)
    {
-      Connection conn = null;
-      try
+      String children = null;
+      Connection conn = getConnection(request);
+      RepositoryCapabilities capabilities = conn.getStorage().getRepositoryInfo().getCapabilities();
+      if (capabilities.isCapabilityGetFolderTree())
       {
-         conn = getConnection(request);
-         RepositoryCapabilities capabilities = conn.getStorage().getRepositoryInfo().getCapabilities();
-         if (capabilities.isCapabilityGetFolderTree())
-         {
-            Map<String, String> params = new HashMap<String, String>();
-            params.put("repoid", getRepositoryId(request));
-            params.put("atomdoctype", "foldertree");
-            params.put("id", id);
-            String children = request.absoluteUrlFor("feed", params);
-            return children;
-         }
+         Map<String, String> params = new HashMap<String, String>();
+         params.put("repoid", getRepositoryId(request));
+         params.put("atomdoctype", "foldertree");
+         params.put("id", id);
+         children = request.absoluteUrlFor("feed", params);
       }
-      finally
-      {
-         if (conn != null)
-         {
-            conn.close();
-         }
-      }
-      return null;
+      return children;
    }
 
    /**
@@ -1448,14 +1360,11 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
    protected Calendar getLastModificationDate(CmisObject object)
    {
       Calendar lastModification = object.getObjectInfo().getLastModificationDate();
-      if (lastModification != null)
+      if (lastModification == null)
       {
-         return lastModification;
+         lastModification = Calendar.getInstance();
       }
-      else
-      {
-         return Calendar.getInstance();
-      }
+      return lastModification;
    }
 
    /**
@@ -1520,17 +1429,19 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
    protected Property<?> getProperty(CmisObject object, String propertyName)
    {
       Map<String, Property<?>> properties = object.getProperties();
+      Property<?> property = null;
       if (properties != null && !properties.isEmpty())
       {
-         for (Property<?> prop : properties.values())
-         {
-            if (propertyName.equals(prop.getId()))
-            {
-               return prop;
-            }
-         }
+         //         for (Property<?> prop : properties.values())
+         //         {
+         //            if (propertyName.equals(prop.getId()))
+         //            {
+         //               return prop;
+         //            }
+         //         }
+         property = properties.get(propertyName);
       }
-      return null;
+      return property;
    }
 
    /**
@@ -1560,8 +1471,8 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
    protected String getResourceName(RequestContext request)
    {
       // TODO : can get smarter?
-      String path;
-      if ((path = request.getTarget().getParameter("path")) != null)
+      String path = request.getTarget().getParameter("path");
+      if (path != null)
       {
          try
          {
@@ -1606,26 +1517,6 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
             prop.getValues().add(title);
          }
       }
-      //      // atom:id SHOULD be derived from cmis:objectId.
-      //      IRIElement idElement = entry.getIdElement();
-      //      String id = idElement != null ? idElement.getValue().Text() : null;
-      //      if (id != null && id.length() > 0)
-      //      {
-      //         IdProperty prop = (IdProperty)getProperty(object, CmisConstants.OBJECT_ID);
-      //         if (prop == null)
-      //         {
-      //            prop = new IdProperty();
-      //            prop.setId(CmisConstants.OBJECT_ID);
-      //            prop.setLocalName(CmisConstants.OBJECT_ID);
-      //            prop.getValues().add(id);
-      //            object.getProperties().put(prop.getId(), prop);
-      //         }
-      //         else
-      //         {
-      //            prop.getValues().clear();
-      //            prop.getValues().add(id);
-      //         }
-      //      }
       // atom:author/atom:name MUST be cmis:createdBy
       String author = entry.getAuthor() != null ? entry.getAuthor().getName() : null;
       if (author != null && author.length() > 0)

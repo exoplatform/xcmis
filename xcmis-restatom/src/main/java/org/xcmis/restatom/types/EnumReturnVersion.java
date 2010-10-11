@@ -22,9 +22,10 @@ package org.xcmis.restatom.types;
 /**
  * Enum for Return Version.
  * 
- * @author <a href="mailto:alexey.zavizionov@exoplatform.com">Alexey Zavizionov</a>
+ * @author <a href="mailto:alexey.zavizionov@exoplatform.com">Alexey
+ *         Zavizionov</a>
  * @version $Id: EnumReturnVersion.java 34360 2009-07-22 23:58:59Z sunman $
- *
+ * 
  */
 
 public enum EnumReturnVersion {

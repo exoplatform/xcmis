@@ -37,15 +37,23 @@ public class AbderaFactory
    public static Abdera getInstance()
    {
       Abdera abdera = ainst.get();
-      if (abdera == null)
+      if (abdera != null)
       {
-         Abdera a = new Abdera();
-         Factory factory = a.getFactory();
-         factory.registerExtension(new CMISExtensionFactory());
-         ainst.compareAndSet(null, a);
-         abdera = ainst.get();
+         return abdera;
       }
-      return abdera;
+      synchronized(ainst)
+      {
+         abdera = ainst.get();
+         if (abdera != null)
+         {
+            return abdera;
+         }
+         abdera = new Abdera();
+         Factory factory = abdera.getFactory();
+         factory.registerExtension(new CMISExtensionFactory());
+         ainst.compareAndSet(null, abdera);
+      }
+      return ainst.get();
    }
 
 }

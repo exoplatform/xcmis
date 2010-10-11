@@ -40,7 +40,7 @@ public class AccessControlEntryTypeElement extends ExtensibleElementWrapper
 
    /**
     * Instantiates a new access control entry type element.
-    *
+    * 
     * @param internal the internal
     */
    public AccessControlEntryTypeElement(Element internal)
@@ -50,7 +50,7 @@ public class AccessControlEntryTypeElement extends ExtensibleElementWrapper
 
    /**
     * Instantiates a new access control entry type element.
-    *
+    * 
     * @param factory the factory
     * @param qname the qname
     */
@@ -61,7 +61,7 @@ public class AccessControlEntryTypeElement extends ExtensibleElementWrapper
 
    /**
     * Builds the element.
-    *
+    * 
     * @param accessControlEntry the AccessControlEntry
     */
    public void build(AccessControlEntry accessControlEntry)
@@ -92,7 +92,7 @@ public class AccessControlEntryTypeElement extends ExtensibleElementWrapper
 
    /**
     * Gets the AccessControlEntry.
-    *
+    * 
     * @return AccessControlEntry
     */
    public AccessControlEntry getACE()

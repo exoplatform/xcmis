@@ -40,7 +40,7 @@ public class ChoiceHtmlElement extends ChoiceElement<Choice<String>>
 
    /**
     * Instantiates a new choice html element.
-    *
+    * 
     * @param internal the internal
     */
    public ChoiceHtmlElement(Element internal)
@@ -50,7 +50,7 @@ public class ChoiceHtmlElement extends ChoiceElement<Choice<String>>
 
    /**
     * Instantiates a new choice html element.
-    *
+    * 
     * @param factory the factory
     * @param qname the qname
     */

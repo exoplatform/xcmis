@@ -40,7 +40,7 @@ public class ChoiceBooleanElement extends ChoiceElement<Choice<Boolean>>
 
    /**
     * Instantiates a new choice boolean element.
-    *
+    * 
     * @param internal the internal
     */
    public ChoiceBooleanElement(Element internal)
@@ -50,7 +50,7 @@ public class ChoiceBooleanElement extends ChoiceElement<Choice<Boolean>>
 
    /**
     * Instantiates a new choice boolean element.
-    *
+    * 
     * @param factory the factory
     * @param qname the qname
     */

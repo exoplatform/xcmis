@@ -28,7 +28,8 @@ import javax.ws.rs.core.Application;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id: CmisRestApplicationSingle.java 2 2010-02-04 17:21:49Z andrew00x $
+ * @version $Id: CmisRestApplicationSingle.java 2 2010-02-04 17:21:49Z andrew00x
+ *          $
  */
 public class CmisRestApplicationSingle extends Application
 {
@@ -38,7 +39,6 @@ public class CmisRestApplicationSingle extends Application
 
    /**
     * Instantiates a new cmis rest application single.
-    *
     */
    public CmisRestApplicationSingle()
    {

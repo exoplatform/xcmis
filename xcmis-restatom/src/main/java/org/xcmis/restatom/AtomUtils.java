@@ -33,7 +33,7 @@ public class AtomUtils
 
    /**
     * Gets the atom date.
-    *
+    * 
     * @param c the Calendar
     * @return the atom date
     */
@@ -44,7 +44,7 @@ public class AtomUtils
 
    /**
     * Gets the atom date.
-    *
+    * 
     * @param d the Date
     * @return the atom date
     */
@@ -57,7 +57,7 @@ public class AtomUtils
 
    /**
     * Parses the calendar.
-    *
+    * 
     * @param date the date
     * @return the calendar
     */

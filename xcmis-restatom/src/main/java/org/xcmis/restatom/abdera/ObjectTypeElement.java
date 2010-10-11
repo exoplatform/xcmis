@@ -57,7 +57,7 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
 
    /**
     * Instantiates a new object type element.
-    *
+    * 
     * @param internal the internal
     */
    public ObjectTypeElement(Element internal)
@@ -67,7 +67,7 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
 
    /**
     * Instantiates a new object type element.
-    *
+    * 
     * @param factory the factory
     * @param qname the qname
     */
@@ -78,7 +78,7 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
 
    /**
     * Gets the allowable actions element.
-    *
+    * 
     * @return the allowable actions element
     */
    public AllowableActionsElement getAllowableActionsElement()
@@ -88,7 +88,7 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
 
    /**
     * Gets the object.
-    *
+    * 
     * @return the object
     */
    public CmisObject getObject()
@@ -113,7 +113,7 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
 
    /**
     * Builds the element.
-    *
+    * 
     * @param objectType the object type
     */
    public void build(CmisObject objectType)

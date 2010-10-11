@@ -34,8 +34,9 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 /**
  * Created by The eXo Platform SAS .
- *
- * @author <a href="mailto:alexey.zavizionov@exoplatform.com.ua">Alexey Zavizionov</a>
+ * 
+ * @author <a href="mailto:alexey.zavizionov@exoplatform.com.ua">Alexey
+ *         Zavizionov</a>
  * @version $Id: RepositoryServiceTest.java 2734 2009-08-19 15:42:18Z andrew00x
  *          $ Jul 20, 2009
  */

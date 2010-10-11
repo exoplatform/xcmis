@@ -35,8 +35,8 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
 /**
- * Need this cause to problem in sjsxp-1.0. See CMIS-66 for details.
- * Remove this when change to sjsxp-1.0.1.
+ * Need this cause to problem in sjsxp-1.0. See CMIS-66 for details. Remove this
+ * when change to sjsxp-1.0.1.
  * 
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
  * @version $Id: XmlWriter.java 44 2010-02-08 17:36:56Z andrew00x $

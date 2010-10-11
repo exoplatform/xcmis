@@ -56,7 +56,7 @@ public class PropertyStringElement extends PropertyElement<StringProperty>
       super(factory, qname);
    }
 
-   /** 
+   /**
     * {@inheritDoc}
     */
    @Override

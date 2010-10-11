@@ -63,13 +63,9 @@ public class FolderChildrenCollection extends CmisObjectCollection
 
    //   private static final Log LOG = ExoLogger.getLogger(FolderChildrenCollection.class);
 
-   /**
-    * Instantiates a new folder children collection.
-    *
-    */
-   public FolderChildrenCollection()
+   public FolderChildrenCollection(Connection connection)
    {
-      super();
+      super(connection);
       setHref("/children");
    }
 
@@ -79,33 +75,42 @@ public class FolderChildrenCollection extends CmisObjectCollection
    @Override
    protected void addFeedDetails(Feed feed, RequestContext request) throws ResponseContextException
    {
-      boolean includeAllowableActions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS, false);
-      IncludeRelationships includeRelationships;
       try
       {
-         includeRelationships =
-            request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS) == null
-               || request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS).length() == 0 ? IncludeRelationships.NONE
-               : IncludeRelationships.fromValue(request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS));
-      }
-      catch (IllegalArgumentException iae)
-      {
-         String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS);
-         throw new ResponseContextException(msg, 400);
-      }
-      int maxItems = getIntegerParameter(request, AtomCMIS.PARAM_MAX_ITEMS, CmisConstants.MAX_ITEMS);
-      int skipCount = getIntegerParameter(request, AtomCMIS.PARAM_SKIP_COUNT, CmisConstants.SKIP_COUNT);
-      boolean includePathSegments = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_PATH_SEGMENT, false);
-      String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
-      String renditionFilter = request.getParameter(AtomCMIS.PARAM_RENDITION_FILTER);
-      String orderBy = request.getParameter(AtomCMIS.PARAM_ORDER_BY);
-      Connection conn = null;
-      try
-      {
-         conn = getConnection(request);
+         boolean includeAllowableActions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS, false);
+         IncludeRelationships includeRelationships;
+         try
+         {
+            includeRelationships =
+               request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS) == null
+                  || request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS).length() == 0 ? IncludeRelationships.NONE
+                  : IncludeRelationships.fromValue(request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS));
+         }
+         catch (IllegalArgumentException iae)
+         {
+            String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS);
+            throw new ResponseContextException(msg, 400);
+         }
+         int maxItems = getIntegerParameter(request, AtomCMIS.PARAM_MAX_ITEMS, CmisConstants.MAX_ITEMS);
+         int skipCount = getIntegerParameter(request, AtomCMIS.PARAM_SKIP_COUNT, CmisConstants.SKIP_COUNT);
+         boolean includePathSegments = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_PATH_SEGMENT, false);
+         String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
+         String renditionFilter = request.getParameter(AtomCMIS.PARAM_RENDITION_FILTER);
+         String orderBy = request.getParameter(AtomCMIS.PARAM_ORDER_BY);
+
+         Connection connection = getConnection(request);
          String objectId = getId(request);
+
+         // Parent link for not root folder.
+         if (!objectId.equals(connection.getStorage().getRepositoryInfo().getRootFolderId()))
+         {
+            CmisObject parent = connection.getFolderParent(objectId, true, null);
+            feed.addLink(getObjectLink(getId(parent), request), AtomCMIS.LINK_UP, AtomCMIS.MEDIATYPE_ATOM_ENTRY, null,
+               null, -1);
+         }
+
          ItemsList<CmisObject> list =
-            conn.getChildren(objectId, includeAllowableActions, includeRelationships, includePathSegments, true,
+            connection.getChildren(objectId, includeAllowableActions, includeRelationships, includePathSegments, true,
                propertyFilter, renditionFilter, orderBy, maxItems, skipCount);
          addPageLinks(objectId, feed, "children", maxItems, skipCount, list.getNumItems(), list.isHasMoreItems(),
             request);
@@ -145,13 +150,6 @@ public class FolderChildrenCollection extends CmisObjectCollection
       catch (Throwable t)
       {
          throw new ResponseContextException(createErrorResponse(t, 500));
-      }
-      finally
-      {
-         if (conn != null)
-         {
-            conn.close();
-         }
       }
    }
 
@@ -203,7 +201,6 @@ public class FolderChildrenCollection extends CmisObjectCollection
             {
                id = ((IdProperty)p).getValues().get(0);
             }
-
          }
       }
       else
@@ -215,10 +212,9 @@ public class FolderChildrenCollection extends CmisObjectCollection
          object.getProperties().put(idProperty.getId(), idProperty);
       }
 
-      Connection conn = null;
       try
       {
-         conn = getConnection(request);
+         Connection connection = getConnection(request);
          String objectId = null;
          String targetFolderId = getId(request);
          if (id != null)
@@ -226,29 +222,23 @@ public class FolderChildrenCollection extends CmisObjectCollection
             if (sourceFolderId == null)
             {
                // If not specified the 'sourceFolderId', addObjectToFolder will be performed.
-               conn.addObjectToFolder(id, targetFolderId, true);
+               connection.addObjectToFolder(id, targetFolderId, true);
                objectId = id;
             }
             else
             {
                // If specified the 'sourceFolderId' moveObject will be performed.
-               objectId = conn.moveObject(id, targetFolderId, sourceFolderId);
+               objectId = connection.moveObject(id, targetFolderId, sourceFolderId);
             }
          }
          else
          {
-            List<AccessControlEntry> addACL = object.getACL();
-            // TODO : ACEs for removing. Not clear from specification how to
-            // pass (obtain) ACEs for adding and removing from one object.
+            List<AccessControlEntry> addACL = null;
             List<AccessControlEntry> removeACL = null;
             List<String> policies = null;
-            if (object.getPolicyIds() != null && object.getPolicyIds().size() > 0)
-            {
-               policies = (List<String>)object.getPolicyIds();
-            }
 
             TypeDefinition type = null;
-            type = conn.getTypeDefinition(typeId);
+            type = connection.getTypeDefinition(typeId);
 
             if (type.getBaseId() == BaseType.DOCUMENT)
             {
@@ -265,20 +255,20 @@ public class FolderChildrenCollection extends CmisObjectCollection
                   return createErrorResponse("Invalid argument " + versioningStateParam, 400);
                }
                objectId =
-                  conn.createDocument(getId(request), object.getProperties(), getContentStream(entry, request), addACL,
+                  connection.createDocument(getId(request), object.getProperties(), getContentStream(entry, request), addACL,
                      removeACL, policies, versioningState);
             }
             else if (type.getBaseId() == BaseType.FOLDER)
             {
-               objectId = conn.createFolder(getId(request), object.getProperties(), addACL, removeACL, policies);
+               objectId = connection.createFolder(getId(request), object.getProperties(), addACL, removeACL, policies);
             }
             else if (type.getBaseId() == BaseType.POLICY)
             {
-               objectId = conn.createPolicy(getId(request), object.getProperties(), addACL, removeACL, policies);
+               objectId = connection.createPolicy(getId(request), object.getProperties(), addACL, removeACL, policies);
             }
             else
             {
-               objectId = conn.createRelationship(object.getProperties(), addACL, removeACL, policies);
+               objectId = connection.createRelationship(object.getProperties(), addACL, removeACL, policies);
             }
          }
 
@@ -291,7 +281,7 @@ public class FolderChildrenCollection extends CmisObjectCollection
          boolean isIncludeAcl = false;
 
          newObject =
-            conn.getObject(objectId, isIncludeAllowableActions, isIncludeRelationships, isIncludePolicyIDs,
+            connection.getObject(objectId, isIncludeAllowableActions, isIncludeRelationships, isIncludePolicyIDs,
                isIncludeAcl, true, propertyFilter, renditionFilter);
 
       }
@@ -326,13 +316,6 @@ public class FolderChildrenCollection extends CmisObjectCollection
       catch (Throwable t)
       {
          return createErrorResponse(t, 500);
-      }
-      finally
-      {
-         if (conn != null)
-         {
-            conn.close();
-         }
       }
 
       entry = request.getAbdera().getFactory().newEntry();
@@ -386,44 +369,6 @@ public class FolderChildrenCollection extends CmisObjectCollection
          feed.addLink(folderTree, AtomCMIS.LINK_CMIS_FOLDERTREE, AtomCMIS.MEDIATYPE_ATOM_FEED, null, null, -1);
       }
 
-      // Parent link for not root folder.
-      Connection conn = null;
-      try
-      {
-         conn = getConnection(request);
-         if (!id.equals(conn.getStorage().getRepositoryInfo().getRootFolderId()))
-         {
-            try
-            {
-               CmisObject parent = conn.getFolderParent(id, true, null);
-               feed.addLink(getObjectLink(getId(parent), request), AtomCMIS.LINK_UP, AtomCMIS.MEDIATYPE_ATOM_ENTRY,
-                  null, null, -1);
-            }
-            catch (FilterNotValidException fe)
-            {
-               throw new ResponseContextException(createErrorResponse(fe, 400));
-            }
-            catch (ObjectNotFoundException onfe)
-            {
-               throw new ResponseContextException(createErrorResponse(onfe, 404));
-            }
-            catch (InvalidArgumentException iae)
-            {
-               throw new ResponseContextException(createErrorResponse(iae, 400));
-            }
-            catch (Throwable t)
-            {
-               throw new ResponseContextException(createErrorResponse(t, 500));
-            }
-         }
-      }
-      finally
-      {
-         if (conn != null)
-         {
-            conn.close();
-         }
-      }
       return feed;
    }
 

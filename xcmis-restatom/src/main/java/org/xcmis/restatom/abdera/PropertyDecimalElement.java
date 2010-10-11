@@ -75,7 +75,7 @@ public class PropertyDecimalElement extends PropertyElement<DecimalProperty>
       }
    }
 
-   /** 
+   /**
     * {@inheritDoc}
     */
    public DecimalProperty getProperty()

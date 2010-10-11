@@ -54,12 +54,9 @@ import java.util.NoSuchElementException;
 public class UnfiledCollection extends CmisObjectCollection
 {
 
-   /**
-    * Instantiates a new unfiled collection.
-    */
-   public UnfiledCollection()
+   public UnfiledCollection(Connection connection)
    {
-      super();
+      super(connection);
       setHref("/unfiled");
    }
 
@@ -113,11 +110,10 @@ public class UnfiledCollection extends CmisObjectCollection
          }
       }
 
-      Connection conn = null;
       try
       {
-         conn = getConnection(request);
-         conn.removeObjectFromFolder(id, null);
+         Connection connection = getConnection(request);
+         connection.removeObjectFromFolder(id, null);
 
          entry = request.getAbdera().getFactory().newEntry();
          try
@@ -142,13 +138,6 @@ public class UnfiledCollection extends CmisObjectCollection
       catch (Throwable t)
       {
          return createErrorResponse(t, 500);
-      }
-      finally
-      {
-         if (conn != null)
-         {
-            conn.close();
-         }
       }
    }
 
@@ -176,33 +165,30 @@ public class UnfiledCollection extends CmisObjectCollection
     */
    protected void addFeedDetails(Feed feed, RequestContext request) throws ResponseContextException
    {
-      boolean includeAllowableActions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS, false);
-      String orderBy = request.getParameter(AtomCMIS.PARAM_ORDER_BY);
-      String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
-      String renditionFilter = request.getParameter(AtomCMIS.PARAM_RENDITION_FILTER);
-      IncludeRelationships includeRelationships;
       try
       {
-         includeRelationships =
-            request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS) == null
-               || request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS).length() == 0 ? IncludeRelationships.NONE
-               : IncludeRelationships.fromValue(request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS));
-      }
-      catch (IllegalArgumentException iae)
-      {
-         String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS);
-         throw new ResponseContextException(msg, 400);
-      }
-      int maxItems = getIntegerParameter(request, AtomCMIS.PARAM_MAX_ITEMS, CmisConstants.MAX_ITEMS);
-      int skipCount = getIntegerParameter(request, AtomCMIS.PARAM_SKIP_COUNT, CmisConstants.SKIP_COUNT);
+         boolean includeAllowableActions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS, false);
+         //String orderBy = request.getParameter(AtomCMIS.PARAM_ORDER_BY);
+         String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
+         String renditionFilter = request.getParameter(AtomCMIS.PARAM_RENDITION_FILTER);
+         IncludeRelationships includeRelationships;
+         try
+         {
+            includeRelationships =
+               request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS) == null
+                  || request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS).length() == 0 ? IncludeRelationships.NONE
+                  : IncludeRelationships.fromValue(request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS));
+         }
+         catch (IllegalArgumentException iae)
+         {
+            String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS);
+            throw new ResponseContextException(msg, 400);
+         }
+         int maxItems = getIntegerParameter(request, AtomCMIS.PARAM_MAX_ITEMS, CmisConstants.MAX_ITEMS);
+         int skipCount = getIntegerParameter(request, AtomCMIS.PARAM_SKIP_COUNT, CmisConstants.SKIP_COUNT);
 
-      Connection conn = null;
-      try
-      {
-         conn = getConnection(request);
-
-         Iterator<String> iterator = conn.getStorage().getUnfiledObjectsId();
-
+         Connection connection = getConnection(request);
+         Iterator<String> iterator = connection.getStorage().getUnfiledObjectsId();
          try
          {
             if (skipCount > 0)
@@ -223,7 +209,7 @@ public class UnfiledCollection extends CmisObjectCollection
          {
             String objectId = iterator.next();
             list.getItems().add(
-               conn.getObject(objectId, includeAllowableActions, includeRelationships, false, false, true,
+               connection.getObject(objectId, includeAllowableActions, includeRelationships, false, false, true,
                   propertyFilter, renditionFilter));
          }
 
@@ -271,13 +257,6 @@ public class UnfiledCollection extends CmisObjectCollection
       catch (Throwable t)
       {
          throw new ResponseContextException(createErrorResponse(t, 500));
-      }
-      finally
-      {
-         if (conn != null)
-         {
-            conn.close();
-         }
       }
    }
 

@@ -38,7 +38,7 @@ public class ChoiceIdElement extends ChoiceElement<Choice<String>>
 
    /**
     * Instantiates a new choice id element.
-    *
+    * 
     * @param internal the internal
     */
    public ChoiceIdElement(Element internal)
@@ -48,7 +48,7 @@ public class ChoiceIdElement extends ChoiceElement<Choice<String>>
 
    /**
     * Instantiates a new choice id element.
-    *
+    * 
     * @param factory the factory
     * @param qname the qname
     */

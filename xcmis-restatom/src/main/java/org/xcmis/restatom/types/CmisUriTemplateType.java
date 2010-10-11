@@ -20,9 +20,10 @@
 package org.xcmis.restatom.types;
 
 /**
- * @author <a href="mailto:alexey.zavizionov@exoplatform.com">Alexey Zavizionov</a>
+ * @author <a href="mailto:alexey.zavizionov@exoplatform.com">Alexey
+ *         Zavizionov</a>
  * @version $Id: CmisUriTemplateType.java 34360 2009-07-22 23:58:59Z sunman $
- *
+ * 
  */
 public class CmisUriTemplateType
 {
@@ -35,6 +36,7 @@ public class CmisUriTemplateType
 
    /**
     * Gets the value of the template property.
+    * 
     * @return String template
     */
    public String getTemplate()
@@ -44,6 +46,7 @@ public class CmisUriTemplateType
 
    /**
     * Sets the value of the template property.
+    * 
     * @param value String value
     */
    public void setTemplate(String value)
@@ -53,6 +56,7 @@ public class CmisUriTemplateType
 
    /**
     * Gets the value of the type property.
+    * 
     * @return string type
     */
    public String getType()
@@ -62,6 +66,7 @@ public class CmisUriTemplateType
 
    /**
     * Sets the value of the type property.
+    * 
     * @param value string value
     */
    public void setType(String value)
@@ -71,6 +76,7 @@ public class CmisUriTemplateType
 
    /**
     * Gets the value of the mediatype property.
+    * 
     * @return string media type
     */
    public String getMediatype()
@@ -80,6 +86,7 @@ public class CmisUriTemplateType
 
    /**
     * Sets the value of the mediatype property.
+    * 
     * @param value string value
     */
    public void setMediatype(String value)

@@ -93,7 +93,6 @@ public class AbderaResponseEntityProvider implements MessageBodyWriter<ResponseC
                finally
                {
                   w.flush();
-                  w.close();
                }
             }
          }

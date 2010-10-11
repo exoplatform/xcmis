@@ -36,7 +36,7 @@ import javax.xml.namespace.QName;
 public class CMISExtensionFactory extends AbstractExtensionFactory
 {
 
-   /** The  classes2QNamePropertyType property types map. */
+   /** The classes2QNamePropertyType property types map. */
    private static final Map<PropertyType, QName> classes2QNamePropertyType = new HashMap<PropertyType, QName>();
 
    /**
@@ -91,7 +91,7 @@ public class CMISExtensionFactory extends AbstractExtensionFactory
 
    /**
     * Gets the Property Definition Type element name.
-    *
+    * 
     * @param propertyType the PropertyType
     * @return the QName element name
     */

@@ -56,7 +56,7 @@ public class PropertyIdElement extends PropertyElement<IdProperty>
       super(factory, qname);
    }
 
-   /** 
+   /**
     * {@inheritDoc}
     */
    @Override

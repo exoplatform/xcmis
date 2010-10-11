@@ -28,7 +28,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 /**
  * Created by The eXo Platform SAS .
- *
+ * 
  * @author <a href="mailto:alexey.zavizionov@exoplatform.com.ua">Alexey
  *         Zavizionov</a>
  * @version $Id: ParentsCollectionTest.java 2 2010-02-04 17:21:49Z andrew00x $

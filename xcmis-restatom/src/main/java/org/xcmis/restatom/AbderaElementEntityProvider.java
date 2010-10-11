@@ -40,7 +40,7 @@ import javax.ws.rs.ext.Provider;
 
 /**
  * Created by The eXo Platform SAS .
- *
+ * 
  * @version $Id: AbderaElementEntityProvider.java 2192 2009-07-17 13:19:12Z
  *          sunman $
  */

@@ -35,7 +35,8 @@ import java.util.Map;
 import javax.xml.namespace.QName;
 
 /**
- * @author <a href="mailto:alexey.zavizionov@exoplatform.com">Alexey Zavizionov</a>
+ * @author <a href="mailto:alexey.zavizionov@exoplatform.com">Alexey
+ *         Zavizionov</a>
  * @version $Id: CmisTypeDefinitionTypeElementWrapper.java 2192 2009-07-17
  *          13:19:12Z sunman $ Jul 14, 2009
  */
@@ -44,7 +45,7 @@ public class TypeDefinitionTypeElement extends ExtensibleElementWrapper
 
    /**
     * Instantiates a new type definition type element.
-    *
+    * 
     * @param internal the internal
     */
    public TypeDefinitionTypeElement(Element internal)
@@ -54,7 +55,7 @@ public class TypeDefinitionTypeElement extends ExtensibleElementWrapper
 
    /**
     * Instantiates a new type definition type element.
-    *
+    * 
     * @param factory the factory
     * @param qname the qname
     */
@@ -65,7 +66,7 @@ public class TypeDefinitionTypeElement extends ExtensibleElementWrapper
 
    /**
     * Gets the properties element.
-    *
+    * 
     * @return the properties element
     */
    public Map<String, PropertyDefinition<?>> getPropertyDefinitions()
@@ -85,7 +86,7 @@ public class TypeDefinitionTypeElement extends ExtensibleElementWrapper
 
    /**
     * Gets the type definition.
-    *
+    * 
     * @return the type definition
     */
    public TypeDefinition getTypeDefinition()
@@ -161,7 +162,7 @@ public class TypeDefinitionTypeElement extends ExtensibleElementWrapper
 
    /**
     * Builds the element.
-    *
+    * 
     * @param type the type
     */
    public void build(TypeDefinition type)

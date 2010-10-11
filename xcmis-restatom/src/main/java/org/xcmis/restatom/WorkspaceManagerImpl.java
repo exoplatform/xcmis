@@ -20,11 +20,23 @@
 package org.xcmis.restatom;
 
 import org.apache.abdera.protocol.server.CollectionAdapter;
-import org.apache.abdera.protocol.server.CollectionInfo;
 import org.apache.abdera.protocol.server.RequestContext;
-import org.apache.abdera.protocol.server.WorkspaceInfo;
-import org.apache.abdera.protocol.server.impl.AbstractEntityCollectionAdapter;
 import org.apache.abdera.protocol.server.impl.AbstractWorkspaceManager;
+import org.xcmis.restatom.collections.AbstractCmisCollection;
+import org.xcmis.restatom.collections.AllVersionsCollection;
+import org.xcmis.restatom.collections.ChangesLogCollection;
+import org.xcmis.restatom.collections.CheckedOutCollection;
+import org.xcmis.restatom.collections.FolderChildrenCollection;
+import org.xcmis.restatom.collections.FolderDescentantsCollection;
+import org.xcmis.restatom.collections.FolderTreeCollection;
+import org.xcmis.restatom.collections.ParentsCollection;
+import org.xcmis.restatom.collections.PoliciesCollection;
+import org.xcmis.restatom.collections.QueryCollection;
+import org.xcmis.restatom.collections.RelationshipsCollection;
+import org.xcmis.restatom.collections.TypesChildrenCollection;
+import org.xcmis.restatom.collections.TypesDescendantsCollection;
+import org.xcmis.restatom.collections.UnfiledCollection;
+import org.xcmis.spi.Connection;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
@@ -38,6 +50,12 @@ public class WorkspaceManagerImpl extends AbstractWorkspaceManager
     */
    public CollectionAdapter getCollectionAdapter(RequestContext req)
    {
+      throw new UnsupportedOperationException();
+   }
+
+
+   public AbstractCmisCollection<?> getCollectionAdapter(RequestContext req, Connection connection)
+   {
       String path = req.getTargetPath();
       // skip 'cmis/<repositoryId>'
       for (int seg = 2; seg > 0; seg--)
@@ -50,32 +68,65 @@ public class WorkspaceManagerImpl extends AbstractWorkspaceManager
                path = path.substring(next);
          }
       }
-      for (WorkspaceInfo wi : workspaces)
+      AbstractCmisCollection<?> c = null;
+      if (path.startsWith("/children") || path.startsWith("/object") || path.startsWith("/objectbypath")
+         || path.startsWith("/file") || path.startsWith("/alternate"))
       {
-         for (CollectionInfo ci : wi.getCollections(req))
-         {
-            AbstractEntityCollectionAdapter<?> ca = (AbstractEntityCollectionAdapter<?>)ci;
-            String href = ca.getHref();
-            if (path.startsWith(href))
-            {
-               return ca;
-            }
-            else
-            {
-               // XXX improve
-               if ((href.startsWith("/children") // For CmisObjectCollection.
-                  && (path.startsWith("/object") || path.startsWith("/objectbypath") //
-                     || path.startsWith("/file") || path.startsWith("/alternate"))//
-                  ) //
-                  || (href.startsWith("/types") // For CmisTypeCollection.
-                  && path.startsWith("/typebyid"))) //
-               {
-                  return ca;
-               }
-            }
-         }
+         c = new FolderChildrenCollection(connection);
       }
-      // caller should resolve this.
-      return null;
+      else if (path.startsWith("/types") || path.startsWith("/typebyid"))
+      {
+         c = new TypesChildrenCollection(connection);
+      }
+      else if (path.startsWith("/query"))
+      {
+         c =  new QueryCollection(connection);
+      }
+      else if (path.startsWith("/policies"))
+      {
+         c =  new PoliciesCollection(connection);
+      }
+      else if (path.startsWith("/relationships"))
+      {
+         c =  new RelationshipsCollection(connection);
+      }
+      else if (path.startsWith("/versions"))
+      {
+         c =  new AllVersionsCollection(connection);
+      }
+      else if (path.startsWith("/checkedout"))
+      {
+         c =  new CheckedOutCollection(connection);
+      }
+      else if (path.startsWith("/parents"))
+      {
+         c =  new ParentsCollection(connection);
+      }
+      else if (path.startsWith("/unfiled"))
+      {
+         c =  new UnfiledCollection(connection);
+      }
+      else if (path.startsWith("/descendants"))
+      {
+         c =  new FolderDescentantsCollection(connection);
+      }
+      else if (path.startsWith("/descendants"))
+      {
+         c =  new FolderDescentantsCollection(connection);
+      }
+      else if (path.startsWith("/changes"))
+      {
+         c =  new ChangesLogCollection(connection);
+      }
+      else if (path.startsWith("/foldertree"))
+      {
+         c =  new FolderTreeCollection(connection);
+      }
+      else if (path.startsWith("/typedescendants"))
+      {
+         c =  new TypesDescendantsCollection(connection);
+      }
+      return c;
    }
+
 }

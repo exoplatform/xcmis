@@ -19,7 +19,6 @@
 
 package org.xcmis.restatom;
 
-
 import java.util.HashMap;
 
 import javax.servlet.ServletContext;
@@ -28,7 +27,8 @@ import javax.servlet.ServletContextListener;
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: AtomCmisBootstrapListener.java 1711 2010-09-17 15:10:40Z
+ *          andrew00x $
  */
 public class AtomCmisBootstrapListener implements ServletContextListener
 {

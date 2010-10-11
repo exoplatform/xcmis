@@ -53,7 +53,8 @@ import javax.xml.xpath.XPathFactory;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id: PropertyDefinitionElementTest.java 2 2010-02-04 17:21:49Z andrew00x $
+ * @version $Id: PropertyDefinitionElementTest.java 2 2010-02-04 17:21:49Z
+ *          andrew00x $
  */
 public class PropertyDefinitionElementTest extends TestCase
 {

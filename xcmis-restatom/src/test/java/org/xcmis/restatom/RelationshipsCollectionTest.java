@@ -68,13 +68,16 @@ public class RelationshipsCollectionTest extends BaseTest
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
 
       Property<?> typeIdProperty =
-         new IdProperty(CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID,
-            BaseType.RELATIONSHIP.value());
+         new IdProperty(CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID,
+            CmisConstants.OBJECT_TYPE_ID, BaseType.RELATIONSHIP.value());
       Property<?> sourceIdProperty =
-         new IdProperty(CmisConstants.SOURCE_ID, CmisConstants.SOURCE_ID, CmisConstants.SOURCE_ID, CmisConstants.SOURCE_ID, sourceId);
+         new IdProperty(CmisConstants.SOURCE_ID, CmisConstants.SOURCE_ID, CmisConstants.SOURCE_ID,
+            CmisConstants.SOURCE_ID, sourceId);
       Property<?> targetIdProperty =
-         new IdProperty(CmisConstants.TARGET_ID, CmisConstants.TARGET_ID, CmisConstants.TARGET_ID, CmisConstants.TARGET_ID, targetId);
-      Property<?> nameProperty = new StringProperty(CmisConstants.NAME, CmisConstants.NAME, CmisConstants.NAME, CmisConstants.NAME, "relation1");
+         new IdProperty(CmisConstants.TARGET_ID, CmisConstants.TARGET_ID, CmisConstants.TARGET_ID,
+            CmisConstants.TARGET_ID, targetId);
+      Property<?> nameProperty =
+         new StringProperty(CmisConstants.NAME, CmisConstants.NAME, CmisConstants.NAME, CmisConstants.NAME, "relation1");
 
       properties.put(CmisConstants.OBJECT_TYPE_ID, typeIdProperty);
       properties.put(CmisConstants.SOURCE_ID, sourceIdProperty);
@@ -91,7 +94,7 @@ public class RelationshipsCollectionTest extends BaseTest
       ByteArrayContainerResponseWriter writer = new ByteArrayContainerResponseWriter();
       ContainerResponse resp = service("GET", requestURI, "http://localhost:8080/rest", null, null, writer);
 
-      //      printBody(writer.getBody());
+      //printBody(writer.getBody());
 
       assertEquals(200, resp.getStatus());
 

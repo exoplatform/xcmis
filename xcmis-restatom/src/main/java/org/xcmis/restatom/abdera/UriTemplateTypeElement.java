@@ -54,7 +54,7 @@ public class UriTemplateTypeElement extends ExtensibleElementWrapper
    {
       super(factory, qname);
    }
-   
+
    /**
     * Gets the template.
     * 
@@ -64,7 +64,7 @@ public class UriTemplateTypeElement extends ExtensibleElementWrapper
    {
       return getText(AtomCMIS.TEMPLATE);
    }
-   
+
    /**
     * Gets the type.
     * 
@@ -74,7 +74,7 @@ public class UriTemplateTypeElement extends ExtensibleElementWrapper
    {
       return getText(AtomCMIS.TYPE);
    }
-   
+
    /**
     * Gets the mediatype.
     * 
@@ -113,7 +113,7 @@ public class UriTemplateTypeElement extends ExtensibleElementWrapper
          addSimpleExtension(AtomCMIS.MEDIATYPE, template.getMediatype());
       }
    }
-   
+
    /**
     * Gets the text.
     * 

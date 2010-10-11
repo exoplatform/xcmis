@@ -41,7 +41,8 @@ import java.util.List;
 import javax.xml.namespace.QName;
 
 /**
- * @author <a href="mailto:alexey.zavizionov@exoplatform.com">Alexey Zavizionov</a>
+ * @author <a href="mailto:alexey.zavizionov@exoplatform.com">Alexey
+ *         Zavizionov</a>
  * @version $Id: CmisPropertyDefinitionTypeElementWrapper.java 2279 2009-07-23
  *          11:47:50Z sunman $ Jul 15, 2009
  */
@@ -50,7 +51,7 @@ public class PropertyDefinitionTypeElement extends ExtensibleElementWrapper
 
    /**
     * Instantiates a new property definition type element.
-    *
+    * 
     * @param internal the internal
     */
    public PropertyDefinitionTypeElement(Element internal)
@@ -60,7 +61,7 @@ public class PropertyDefinitionTypeElement extends ExtensibleElementWrapper
 
    /**
     * Instantiates a new property definition type element.
-    *
+    * 
     * @param factory the factory
     * @param qname the qname
     */
@@ -71,7 +72,7 @@ public class PropertyDefinitionTypeElement extends ExtensibleElementWrapper
 
    /**
     * Gets the property definition.
-    *
+    * 
     * @return the property definition
     */
    public PropertyDefinition<?> getPropertyDefinition()
@@ -368,7 +369,7 @@ public class PropertyDefinitionTypeElement extends ExtensibleElementWrapper
 
    /**
     * Builds the element.
-    *
+    * 
     * @param propdef the propdef
     */
    public void build(PropertyDefinition<?> propdef)

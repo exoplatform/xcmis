@@ -41,16 +41,15 @@ import java.util.List;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id: TypesDescendantsCollection.java 216 2010-02-12 17:19:50Z andrew00x $
+ * @version $Id: TypesDescendantsCollection.java 216 2010-02-12 17:19:50Z
+ *          andrew00x $
  */
 public class TypesDescendantsCollection extends CmisTypeCollection
 {
-   /**
-    * Instantiates a new types descendants collection.
-    */
-   public TypesDescendantsCollection()
+
+   public TypesDescendantsCollection(Connection connection)
    {
-      super();
+      super(connection);
       setHref("/typedescendants");
    }
 
@@ -70,16 +69,17 @@ public class TypesDescendantsCollection extends CmisTypeCollection
    @Override
    protected void addFeedDetails(Feed feed, RequestContext request) throws ResponseContextException
    {
-      String typeId = request.getTarget().getParameter(AtomCMIS.PARAM_TYPE_ID);
-      boolean includePropertyDefinitions =
-         getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_PROPERTY_DEFINITIONS, false);
-      int depth = getIntegerParameter(request, AtomCMIS.PARAM_DEPTH, CmisConstants.DEPTH);
-      Connection conn = null;
       try
       {
-         conn = getConnection(request);
+         String typeId = request.getTarget().getParameter(AtomCMIS.PARAM_TYPE_ID);
+         boolean includePropertyDefinitions =
+            getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_PROPERTY_DEFINITIONS, false);
+         int depth = getIntegerParameter(request, AtomCMIS.PARAM_DEPTH, CmisConstants.DEPTH);
+
+         Connection connection = getConnection(request);
+
          List<ItemsTree<TypeDefinition>> descendants =
-            conn.getTypeDescendants(typeId, depth, includePropertyDefinitions);
+            connection.getTypeDescendants(typeId, depth, includePropertyDefinitions);
 
          String down = getTypeChildrenLink(typeId, request);
          feed.addLink(down, AtomCMIS.LINK_DOWN, AtomCMIS.MEDIATYPE_ATOM_FEED, null, null, -1);
@@ -89,7 +89,7 @@ public class TypesDescendantsCollection extends CmisTypeCollection
             String typeLink = getObjectTypeLink(typeId, request);
             feed.addLink(typeLink, AtomCMIS.LINK_VIA, AtomCMIS.MEDIATYPE_ATOM_ENTRY, null, null, -1);
 
-            TypeDefinition type = conn.getTypeDefinition(typeId);
+            TypeDefinition type = connection.getTypeDefinition(typeId);
             String parentType = type.getParentId();
             if (parentType != null)
             {
@@ -121,14 +121,6 @@ public class TypesDescendantsCollection extends CmisTypeCollection
          //t.printStackTrace();
          throw new ResponseContextException(createErrorResponse(t, 500));
       }
-      finally
-      {
-         if (conn != null)
-         {
-            conn.close();
-         }
-      }
-
    }
 
    /**
@@ -141,7 +133,7 @@ public class TypesDescendantsCollection extends CmisTypeCollection
     *
     * @throws ResponseContextException the response context exception
     */
-   protected void addChildren(Entry entry, List children, IRI feedIri, RequestContext request)
+   protected void addChildren(Entry entry, List<ItemsTree<TypeDefinition>> children, IRI feedIri, RequestContext request)
       throws ResponseContextException
    {
       Element childrenElement = entry.addExtension(AtomCMIS.CHILDREN);
@@ -169,10 +161,10 @@ public class TypesDescendantsCollection extends CmisTypeCollection
       Element numItems = request.getAbdera().getFactory().newElement(AtomCMIS.NUM_ITEMS, childrenElement);
       numItems.setText(Integer.toString(children.size()));
 
-      for (ItemsTree<?> typeContainer : (List<ItemsTree<?>>)children)
+      for (ItemsTree<TypeDefinition> typeContainer : children)
       {
          Entry ch = entry.getFactory().newEntry(childrenElement);
-         addEntryDetails(request, ch, feedIri, (TypeDefinition)typeContainer.getContainer());
+         addEntryDetails(request, ch, feedIri, typeContainer.getContainer());
          if (typeContainer.getChildren() != null && typeContainer.getChildren().size() > 0)
          {
             addChildren(ch, typeContainer.getChildren(), feedIri, request);

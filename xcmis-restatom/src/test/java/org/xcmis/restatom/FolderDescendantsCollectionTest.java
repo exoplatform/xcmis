@@ -38,7 +38,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
  * 
  * @author <a href="mailto:alexey.zavizionov@exoplatform.com.ua">Alexey
  *         Zavizionov</a>
- * @version $Id: FolderDescendantsCollectionTest.java 2 2010-02-04 17:21:49Z andrew00x $ Jul 28, 2009
+ * @version $Id: FolderDescendantsCollectionTest.java 2 2010-02-04 17:21:49Z
+ *          andrew00x $ Jul 28, 2009
  */
 public class FolderDescendantsCollectionTest extends BaseTest
 {

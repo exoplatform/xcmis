@@ -49,7 +49,7 @@ public class RepositoryServiceTest extends BaseTest
       ByteArrayContainerResponseWriter writer = new ByteArrayContainerResponseWriter();
       ContainerResponse resp = service("GET", requestURI, "http://localhost:8080/rest", null, null, writer);
 
-      //      printBody(writer.getBody());
+      //printBody(writer.getBody());
 
       assertEquals(200, resp.getStatus());
 
@@ -72,7 +72,7 @@ public class RepositoryServiceTest extends BaseTest
       ByteArrayContainerResponseWriter writer = new ByteArrayContainerResponseWriter();
       ContainerResponse resp = service("GET", requestURI, "http://localhost:8080/rest", null, null, writer);
 
-      //            printBody(writer.getBody());
+      //printBody(writer.getBody());
 
       assertEquals(200, resp.getStatus());
 

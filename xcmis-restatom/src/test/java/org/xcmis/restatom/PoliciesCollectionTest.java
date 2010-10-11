@@ -30,7 +30,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 /**
  * @author <a href="mailto:max.shaposhnik@exoplatform.com">Max Shaposhnik</a>
- * @version $$Id: PoliciesCollectionTest.java 2 2010-02-04 17:21:49Z andrew00x $$
+ * @version $$Id: PoliciesCollectionTest.java 2 2010-02-04 17:21:49Z andrew00x
+ *          $$
  */
 public class PoliciesCollectionTest extends BaseTest
 {

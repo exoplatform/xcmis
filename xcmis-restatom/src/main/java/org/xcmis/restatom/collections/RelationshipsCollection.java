@@ -55,12 +55,9 @@ import java.util.Map;
 public class RelationshipsCollection extends CmisObjectCollection
 {
 
-   /**
-    * Instantiates a new relationships collection.
-    */
-   public RelationshipsCollection()
+   public RelationshipsCollection(Connection connection)
    {
-      super();
+      super(connection);
       setHref("/relationships");
    }
 
@@ -143,12 +140,11 @@ public class RelationshipsCollection extends CmisObjectCollection
 
       String relationshipId;
       CmisObject relationship;
-      Connection conn = null;
       try
       {
-         conn = getConnection(request);
-         relationshipId = conn.createRelationship(properties, addACL, removeACL, policies);
-         relationship = conn.getProperties(relationshipId, true, CmisConstants.WILDCARD);
+         Connection connection = getConnection(request);
+         relationshipId = connection.createRelationship(properties, addACL, removeACL, policies);
+         relationship = connection.getProperties(relationshipId, true, CmisConstants.WILDCARD);
       }
       catch (ConstraintException cve)
       {
@@ -169,13 +165,6 @@ public class RelationshipsCollection extends CmisObjectCollection
       catch (Throwable t)
       {
          return createErrorResponse(t, 500);
-      }
-      finally
-      {
-         if (conn != null)
-         {
-            conn.close();
-         }
       }
 
       entry = request.getAbdera().getFactory().newEntry();
@@ -198,34 +187,33 @@ public class RelationshipsCollection extends CmisObjectCollection
    @Override
    protected void addFeedDetails(Feed feed, RequestContext request) throws ResponseContextException
    {
+      try
+      {
+         String objectId = getId(request);
+         String typeId = request.getParameter(AtomCMIS.PARAM_TYPE_ID);
+         String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
+         boolean includeSubRelationship =
+            getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_SUB_RELATIONSHIP_TYPES, false);
+         boolean includeAllowableActions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS, false);
+         int maxItems = getIntegerParameter(request, AtomCMIS.PARAM_MAX_ITEMS, CmisConstants.MAX_ITEMS);
+         int skipCount = getIntegerParameter(request, AtomCMIS.PARAM_SKIP_COUNT, CmisConstants.SKIP_COUNT);
+         RelationshipDirection direction;
+         try
+         {
+            direction =
+               request.getParameter(AtomCMIS.PARAM_RELATIONSHIP_DIRECTION) == null
+                  || request.getParameter(AtomCMIS.PARAM_RELATIONSHIP_DIRECTION).length() == 0
+                  ? RelationshipDirection.EITHER : RelationshipDirection.fromValue(AtomCMIS.PARAM_RELATIONSHIP_DIRECTION);
+         }
+         catch (IllegalArgumentException iae)
+         {
+            String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_RELATIONSHIP_DIRECTION);
+            throw new ResponseContextException(msg, 400);
+         }
+         Connection connection = getConnection(request);
 
-      String objectId = getId(request);
-      String typeId = request.getParameter(AtomCMIS.PARAM_TYPE_ID);
-      String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
-      boolean includeSubRelationship =
-         getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_SUB_RELATIONSHIP_TYPES, false);
-      boolean includeAllowableActions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS, false);
-      int maxItems = getIntegerParameter(request, AtomCMIS.PARAM_MAX_ITEMS, CmisConstants.MAX_ITEMS);
-      int skipCount = getIntegerParameter(request, AtomCMIS.PARAM_SKIP_COUNT, CmisConstants.SKIP_COUNT);
-      RelationshipDirection direction;
-      try
-      {
-         direction =
-            request.getParameter(AtomCMIS.PARAM_RELATIONSHIP_DIRECTION) == null
-               || request.getParameter(AtomCMIS.PARAM_RELATIONSHIP_DIRECTION).length() == 0
-               ? RelationshipDirection.EITHER : RelationshipDirection.fromValue(AtomCMIS.PARAM_RELATIONSHIP_DIRECTION);
-      }
-      catch (IllegalArgumentException iae)
-      {
-         String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_RELATIONSHIP_DIRECTION);
-         throw new ResponseContextException(msg, 400);
-      }
-      Connection conn = null;
-      try
-      {
-         conn = getConnection(request);
          ItemsList<CmisObject> list =
-            conn.getObjectRelationships(objectId, direction, typeId, includeSubRelationship, includeAllowableActions,
+            connection.getObjectRelationships(objectId, direction, typeId, includeSubRelationship, includeAllowableActions,
                true, propertyFilter, maxItems, skipCount);
          if (list.getItems().size() > 0)
          {
@@ -267,13 +255,6 @@ public class RelationshipsCollection extends CmisObjectCollection
       catch (Throwable t)
       {
          throw new ResponseContextException(createErrorResponse(t, 500));
-      }
-      finally
-      {
-         if (conn != null)
-         {
-            conn.close();
-         }
       }
    }
 

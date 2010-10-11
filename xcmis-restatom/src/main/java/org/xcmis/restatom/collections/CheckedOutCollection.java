@@ -55,14 +55,9 @@ import java.util.Calendar;
 public class CheckedOutCollection extends CmisObjectCollection
 {
 
-   /**
-    * Instantiates a new checked out collection.
-    * @param storageProvider TODO
-    *
-    */
-   public CheckedOutCollection()
+   public CheckedOutCollection(Connection connection)
    {
-      super();
+      super(connection);
       setHref("/checkedout");
    }
 
@@ -71,32 +66,35 @@ public class CheckedOutCollection extends CmisObjectCollection
     */
    protected void addFeedDetails(Feed feed, RequestContext request) throws ResponseContextException
    {
-      boolean includeAllowableActions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS, false);
-      String orderBy = request.getParameter(AtomCMIS.PARAM_ORDER_BY);
-      String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
-      String renditionFilter = request.getParameter(AtomCMIS.PARAM_RENDITION_FILTER);
-      IncludeRelationships includeRelationships;
       try
       {
-         includeRelationships =
-            request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS) == null
-               || request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS).length() == 0 ? IncludeRelationships.NONE
-               : IncludeRelationships.fromValue(request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS));
-      }
-      catch (IllegalArgumentException iae)
-      {
-         String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS);
-         throw new ResponseContextException(msg, 400);
-      }
-      int maxItems = getIntegerParameter(request, AtomCMIS.PARAM_MAX_ITEMS, CmisConstants.MAX_ITEMS);
-      int skipCount = getIntegerParameter(request, AtomCMIS.PARAM_SKIP_COUNT, CmisConstants.SKIP_COUNT);
-      Connection conn = null;
-      try
-      {
-         conn = getConnection(request);
+         boolean includeAllowableActions =
+            getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS, false);
+         String orderBy = request.getParameter(AtomCMIS.PARAM_ORDER_BY);
+         String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
+         String renditionFilter = request.getParameter(AtomCMIS.PARAM_RENDITION_FILTER);
+         IncludeRelationships includeRelationships;
+         try
+         {
+            includeRelationships =
+               request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS) == null
+                  || request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS).length() == 0
+                  ? IncludeRelationships.NONE : IncludeRelationships.fromValue(request
+                     .getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS));
+         }
+         catch (IllegalArgumentException iae)
+         {
+            String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS);
+            throw new ResponseContextException(msg, 400);
+         }
+         int maxItems = getIntegerParameter(request, AtomCMIS.PARAM_MAX_ITEMS, CmisConstants.MAX_ITEMS);
+         int skipCount = getIntegerParameter(request, AtomCMIS.PARAM_SKIP_COUNT, CmisConstants.SKIP_COUNT);
+
+         Connection connection = getConnection(request);
          String folderId = getId(request);
+
          ItemsList<CmisObject> list =
-            conn.getCheckedOutDocs(folderId, includeAllowableActions, includeRelationships, true, propertyFilter,
+            connection.getCheckedOutDocs(folderId, includeAllowableActions, includeRelationships, true, propertyFilter,
                renditionFilter, orderBy, maxItems, skipCount);
          addPageLinks(folderId, feed, "checkedout", maxItems, skipCount, list.getNumItems(), list.isHasMoreItems(),
             request);
@@ -137,13 +135,6 @@ public class CheckedOutCollection extends CmisObjectCollection
       {
          throw new ResponseContextException(createErrorResponse(t, 500));
       }
-      finally
-      {
-         if (conn != null)
-         {
-            conn.close();
-         }
-      }
    }
 
    /**
@@ -178,7 +169,7 @@ public class CheckedOutCollection extends CmisObjectCollection
     */
    public String getTitle(RequestContext request)
    {
-      return "Checkedout collection";
+      return "Checkedout";
    }
 
    /**
@@ -214,11 +205,10 @@ public class CheckedOutCollection extends CmisObjectCollection
          }
       }
 
-      Connection conn = null;
       try
       {
-         conn = getConnection(request);
-         String pwcId = conn.checkout(id);
+         Connection connection = getConnection(request);
+         String pwcId = connection.checkout(id);
          entry = request.getAbdera().getFactory().newEntry();
          try
          {
@@ -254,13 +244,6 @@ public class CheckedOutCollection extends CmisObjectCollection
       catch (Throwable t)
       {
          return createErrorResponse(t, 500);
-      }
-      finally
-      {
-         if (conn != null)
-         {
-            conn.close();
-         }
       }
    }
 

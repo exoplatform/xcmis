@@ -44,12 +44,9 @@ import java.util.List;
 public class ParentsCollection extends CmisObjectCollection
 {
 
-   /**
-    * Instantiates a new parents collection.
-    */
-   public ParentsCollection()
+   public ParentsCollection(Connection connection)
    {
-      super();
+      super(connection);
       setHref("/parents");
    }
 
@@ -80,38 +77,40 @@ public class ParentsCollection extends CmisObjectCollection
    @Override
    protected void addFeedDetails(Feed feed, RequestContext request) throws ResponseContextException
    {
-      boolean includeAllowableActions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS, false);
-      boolean includeRelativePathSegment =
-         getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_RELATIVE_PATH_SEGMENT, false);
-      String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
-      String renditionFilter = request.getParameter(AtomCMIS.PARAM_RENDITION_FILTER);
-      IncludeRelationships includeRelationships;
       try
       {
-         includeRelationships =
-            request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS) == null
-               || request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS).length() == 0 ? IncludeRelationships.NONE
-               : IncludeRelationships.fromValue(request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS));
-      }
-      catch (IllegalArgumentException iae)
-      {
-         String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS);
-         throw new ResponseContextException(msg, 400);
-      }
+         boolean includeAllowableActions =
+            getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS, false);
+         boolean includeRelativePathSegment =
+            getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_RELATIVE_PATH_SEGMENT, false);
+         String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
+         String renditionFilter = request.getParameter(AtomCMIS.PARAM_RENDITION_FILTER);
+         IncludeRelationships includeRelationships;
+         try
+         {
+            includeRelationships =
+               request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS) == null
+                  || request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS).length() == 0
+                  ? IncludeRelationships.NONE : IncludeRelationships.fromValue(request
+                     .getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS));
+         }
+         catch (IllegalArgumentException iae)
+         {
+            String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS);
+            throw new ResponseContextException(msg, 400);
+         }
 
-      Connection conn = null;
-      try
-      {
-         conn = getConnection(request);
+         Connection connection = getConnection(request);
          String objectId = getId(request);
+
          CmisObject object =
-            conn.getObject(objectId, false, IncludeRelationships.NONE, false, false, true, CmisConstants.BASE_TYPE_ID,
-               null);
+            connection.getObject(objectId, false, IncludeRelationships.NONE, false, false, true,
+               CmisConstants.BASE_TYPE_ID, null);
 
          switch (getBaseObjectType(object))
          {
             case FOLDER :
-               CmisObject folderParent = conn.getFolderParent(objectId, true, propertyFilter);
+               CmisObject folderParent = connection.getFolderParent(objectId, true, propertyFilter);
 
                if (folderParent != null)
                {
@@ -132,7 +131,7 @@ public class ParentsCollection extends CmisObjectCollection
                break;
             default :
                List<ObjectParent> parents =
-                  conn.getObjectParents(objectId, includeAllowableActions, includeRelationships,
+                  connection.getObjectParents(objectId, includeAllowableActions, includeRelationships,
                      includeRelativePathSegment, true, propertyFilter, renditionFilter);
                if (parents.size() > 0)
                {
@@ -172,13 +171,6 @@ public class ParentsCollection extends CmisObjectCollection
       catch (Throwable t)
       {
          throw new ResponseContextException(createErrorResponse(t, 500));
-      }
-      finally
-      {
-         if (conn != null)
-         {
-            conn.close();
-         }
       }
    }
 

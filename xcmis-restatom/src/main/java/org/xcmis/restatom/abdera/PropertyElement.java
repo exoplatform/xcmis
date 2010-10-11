@@ -36,7 +36,7 @@ public abstract class PropertyElement<T extends BaseProperty<?>> extends Extensi
 
    /**
     * Instantiates a new property element.
-    *
+    * 
     * @param internal the internal
     */
    public PropertyElement(Element internal)
@@ -46,7 +46,7 @@ public abstract class PropertyElement<T extends BaseProperty<?>> extends Extensi
 
    /**
     * Instantiates a new property element.
-    *
+    * 
     * @param factory the factory
     * @param qname the qname
     */
@@ -57,7 +57,7 @@ public abstract class PropertyElement<T extends BaseProperty<?>> extends Extensi
 
    /**
     * Builds the element.
-    *
+    * 
     * @param property the property
     */
    public void build(T property)
@@ -79,14 +79,14 @@ public abstract class PropertyElement<T extends BaseProperty<?>> extends Extensi
 
    /**
     * Gets the property.
-    *
+    * 
     * @return the property
     */
    public abstract T getProperty();
 
    /**
     * Process property element.
-    *
+    * 
     * @param obj the obj
     */
    protected void processPropertyElement(T obj)

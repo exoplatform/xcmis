@@ -36,7 +36,7 @@ public class AllowableActionsElement extends ExtensibleElementWrapper
 
    /**
     * Instantiates a new allowable actions element.
-    *
+    * 
     * @param internal the internal
     */
    public AllowableActionsElement(Element internal)
@@ -46,7 +46,7 @@ public class AllowableActionsElement extends ExtensibleElementWrapper
 
    /**
     * Instantiates a new allowable actions element.
-    *
+    * 
     * @param factory the factory
     * @param qname the qname
     */
@@ -57,7 +57,7 @@ public class AllowableActionsElement extends ExtensibleElementWrapper
 
    /**
     * Builds the element.
-    *
+    * 
     * @param actions the actions
     */
    public void build(AllowableActions actions)

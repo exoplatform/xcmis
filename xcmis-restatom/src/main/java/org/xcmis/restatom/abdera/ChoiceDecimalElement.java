@@ -32,7 +32,7 @@ import javax.xml.namespace.QName;
 
 /**
  * Created by The eXo Platform SAS .
- *
+ * 
  * @author <a href="mailto:alexey.zavizionov@exoplatform.com.ua">Alexey
  *         Zavizionov</a>
  * @version $Id: ChoiceDecimalTypeElement.java 2487 2009-07-31 14:14:34Z
@@ -43,7 +43,7 @@ public class ChoiceDecimalElement extends ChoiceElement<Choice<BigDecimal>>
 
    /**
     * Instantiates a new choice decimal element.
-    *
+    * 
     * @param internal the internal
     */
    public ChoiceDecimalElement(Element internal)
@@ -53,7 +53,7 @@ public class ChoiceDecimalElement extends ChoiceElement<Choice<BigDecimal>>
 
    /**
     * Instantiates a new choice decimal element.
-    *
+    * 
     * @param factory the factory
     * @param qname the qname
     */

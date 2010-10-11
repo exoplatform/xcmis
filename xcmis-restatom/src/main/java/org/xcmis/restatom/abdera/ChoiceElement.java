@@ -38,7 +38,7 @@ public abstract class ChoiceElement<T extends Choice<?>> extends ExtensibleEleme
 
    /**
     * Instantiates a new choice element.
-    *
+    * 
     * @param internal the internal
     */
    public ChoiceElement(Element internal)
@@ -48,7 +48,7 @@ public abstract class ChoiceElement<T extends Choice<?>> extends ExtensibleEleme
 
    /**
     * Instantiates a new choice element.
-    *
+    * 
     * @param factory the factory
     * @param qname the qname
     */
@@ -59,7 +59,7 @@ public abstract class ChoiceElement<T extends Choice<?>> extends ExtensibleEleme
 
    /**
     * Build Abdera ExtensibleElement that represents CmisChoiceType.
-    *
+    * 
     * @param choice CmisChoiceType.
     */
    public void build(T choice)

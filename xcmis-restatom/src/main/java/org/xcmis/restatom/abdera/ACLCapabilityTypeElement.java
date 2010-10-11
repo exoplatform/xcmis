@@ -43,7 +43,7 @@ public class ACLCapabilityTypeElement extends ExtensibleElementWrapper
 
    /**
     * Instantiates a new aCL capability type element.
-    *
+    * 
     * @param internal the internal
     */
    public ACLCapabilityTypeElement(Element internal)
@@ -53,7 +53,7 @@ public class ACLCapabilityTypeElement extends ExtensibleElementWrapper
 
    /**
     * Instantiates a new aCL capability type element.
-    *
+    * 
     * @param factory the factory
     * @param qname the qname
     */
@@ -64,7 +64,7 @@ public class ACLCapabilityTypeElement extends ExtensibleElementWrapper
 
    /**
     * Builds the element.
-    *
+    * 
     * @param aclCapability the acl capability
     */
    public void build(ACLCapability aclCapability)

@@ -53,12 +53,9 @@ import java.util.Map;
 public class QueryCollection extends CmisObjectCollection
 {
 
-   /**
-    * Instantiates a new query collection.
-    */
-   public QueryCollection()
+   public QueryCollection(Connection connection)
    {
-      super();
+      super(connection);
       setHref("/query");
    }
 
@@ -107,11 +104,8 @@ public class QueryCollection extends CmisObjectCollection
    @Override
    protected void addFeedDetails(Feed feed, RequestContext request) throws ResponseContextException
    {
-      Connection conn = null;
       try
       {
-         conn = getConnection(request);
-
          int maxItems = CmisConstants.MAX_ITEMS;
          int skipCount = CmisConstants.SKIP_COUNT;
          String q = null;
@@ -167,8 +161,10 @@ public class QueryCollection extends CmisObjectCollection
             }
          }
 
+         Connection connection = getConnection(request);
+
          ItemsList<CmisObject> list =
-            conn.query(q, isSearchAllVersions, isIncludeAllowableActions, includeRelationships, true, renditionFilter,
+            connection.query(q, isSearchAllVersions, isIncludeAllowableActions, includeRelationships, true, renditionFilter,
                maxItems, skipCount);
 
          addPageLinks(q, feed, "query", maxItems, skipCount, list.getNumItems(), list.isHasMoreItems(), request);
@@ -205,13 +201,6 @@ public class QueryCollection extends CmisObjectCollection
       catch (Throwable t)
       {
          throw new ResponseContextException(createErrorResponse(t, 500));
-      }
-      finally
-      {
-         if (conn != null)
-         {
-            conn.close();
-         }
       }
    }
 

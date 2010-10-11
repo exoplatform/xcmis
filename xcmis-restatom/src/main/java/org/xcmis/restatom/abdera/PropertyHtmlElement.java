@@ -56,7 +56,7 @@ public class PropertyHtmlElement extends PropertyElement<HtmlProperty>
       super(factory, qname);
    }
 
-   /** 
+   /**
     * {@inheritDoc}
     */
    @Override

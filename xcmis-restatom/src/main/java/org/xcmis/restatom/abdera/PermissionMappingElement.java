@@ -38,7 +38,7 @@ public class PermissionMappingElement extends ExtensibleElementWrapper
 
    /**
     * Instantiates a new permission mapping element.
-    *
+    * 
     * @param internal the internal
     */
    public PermissionMappingElement(Element internal)
@@ -48,7 +48,7 @@ public class PermissionMappingElement extends ExtensibleElementWrapper
 
    /**
     * Instantiates a new permission mapping element.
-    *
+    * 
     * @param factory the factory
     * @param qname the qname
     */
@@ -59,7 +59,7 @@ public class PermissionMappingElement extends ExtensibleElementWrapper
 
    /**
     * Builds the element.
-    *
+    * 
     *@param key String key
     * @param permissions the permissions
     */

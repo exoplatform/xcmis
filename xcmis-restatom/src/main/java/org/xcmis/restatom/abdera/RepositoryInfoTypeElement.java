@@ -32,14 +32,15 @@ import javax.xml.namespace.QName;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id: RepositoryInfoTypeElement.java 2 2010-02-04 17:21:49Z andrew00x $
+ * @version $Id: RepositoryInfoTypeElement.java 2 2010-02-04 17:21:49Z andrew00x
+ *          $
  */
 public class RepositoryInfoTypeElement extends ExtensibleElementWrapper
 {
 
    /**
     * Instantiates a new repository info type element.
-    *
+    * 
     * @param internal the internal
     */
    public RepositoryInfoTypeElement(Element internal)
@@ -49,7 +50,7 @@ public class RepositoryInfoTypeElement extends ExtensibleElementWrapper
 
    /**
     * Instantiates a new repository info type element.
-    *
+    * 
     * @param factory the factory
     * @param qname the qname
     */
@@ -60,7 +61,7 @@ public class RepositoryInfoTypeElement extends ExtensibleElementWrapper
 
    /**
     * Builds the element.
-    *
+    * 
     * @param repoInfo the repo info
     */
    public void build(RepositoryInfo repoInfo)

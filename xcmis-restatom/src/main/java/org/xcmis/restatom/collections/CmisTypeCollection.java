@@ -48,12 +48,9 @@ import java.util.Map;
 public abstract class CmisTypeCollection extends AbstractCmisCollection<TypeDefinition>
 {
 
-   /**
-    * Instantiates a new cmis type collection.
-    */
-   public CmisTypeCollection()
+   public CmisTypeCollection(Connection connection)
    {
-      super();
+      super(connection);
    }
 
    /**
@@ -69,11 +66,11 @@ public abstract class CmisTypeCollection extends AbstractCmisCollection<TypeDefi
     */
    public TypeDefinition getEntry(String typeId, RequestContext request) throws ResponseContextException
    {
-      Connection conn = null;
       try
       {
-         conn = getConnection(request);
-         return conn.getTypeDefinition(typeId);
+         Connection connection = getConnection(request);
+         TypeDefinition type = connection.getTypeDefinition(typeId);
+         return type;
       }
       catch (TypeNotFoundException tne)
       {
@@ -82,13 +79,6 @@ public abstract class CmisTypeCollection extends AbstractCmisCollection<TypeDefi
       catch (Throwable t)
       {
          throw new ResponseContextException(createErrorResponse(t, 500));
-      }
-      finally
-      {
-         if (conn != null)
-         {
-            conn.close();
-         }
       }
    }
 
@@ -162,17 +152,16 @@ public abstract class CmisTypeCollection extends AbstractCmisCollection<TypeDefi
          return rce.getResponseContext();
       }
 
-      Connection conn = null;
       try
       {
-         conn = getConnection(request);
+         Connection connection = getConnection(request);
          TypeDefinitionTypeElement typeElement = entry.getFirstChild(AtomCMIS.TYPE);
          TypeDefinition type = typeElement.getTypeDefinition();
-         String typeId = conn.addType(type);
+         String typeId = connection.addType(type);
          boolean includePropertyDefinition =
             getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_PROPERTY_DEFINITIONS, false);
          // Updated (formed) type definition.
-         type = conn.getTypeDefinition(typeId, includePropertyDefinition);
+         type = connection.getTypeDefinition(typeId, includePropertyDefinition);
          entry = request.getAbdera().getFactory().newEntry();
          addEntryDetails(request, entry, request.getResolvedUri(), type);
       }
@@ -195,13 +184,6 @@ public abstract class CmisTypeCollection extends AbstractCmisCollection<TypeDefi
       catch (ResponseContextException rce)
       {
          return rce.getResponseContext();
-      }
-      finally
-      {
-         if (conn != null)
-         {
-            conn.close();
-         }
       }
 
       Map<String, String> params = new HashMap<String, String>();
@@ -306,11 +288,10 @@ public abstract class CmisTypeCollection extends AbstractCmisCollection<TypeDefi
    @Override
    public void deleteEntry(String typeId, RequestContext request) throws ResponseContextException
    {
-      Connection conn = null;
       try
       {
-         conn = getConnection(request);
-         conn.getStorage().removeType(typeId);
+         Connection connection = getConnection(request);
+         connection.getStorage().removeType(typeId);
       }
       catch (ConstraintException cve)
       {
@@ -327,13 +308,6 @@ public abstract class CmisTypeCollection extends AbstractCmisCollection<TypeDefi
       catch (StorageException re)
       {
          throw new ResponseContextException(createErrorResponse(re, 500));
-      }
-      finally
-      {
-         if (conn != null)
-         {
-            conn.close();
-         }
       }
    }
 

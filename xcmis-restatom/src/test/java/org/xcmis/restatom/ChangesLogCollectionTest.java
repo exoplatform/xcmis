@@ -32,7 +32,8 @@ import javax.xml.xpath.XPathExpressionException;
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: ChangesLogCollectionTest.java 1750 2010-09-28 13:08:58Z
+ *          andrew00x $
  */
 public class ChangesLogCollectionTest extends BaseTest
 {

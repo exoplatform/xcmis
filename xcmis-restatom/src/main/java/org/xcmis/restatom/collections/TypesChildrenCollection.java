@@ -48,12 +48,9 @@ import java.util.Map;
 public class TypesChildrenCollection extends CmisTypeCollection
 {
 
-   /**
-    * Instantiates a new types children collection.
-    */
-   public TypesChildrenCollection()
+   public TypesChildrenCollection(Connection connection)
    {
-      super();
+      super(connection);
       setHref("/types");
    }
 
@@ -62,16 +59,18 @@ public class TypesChildrenCollection extends CmisTypeCollection
     */
    protected void addFeedDetails(Feed feed, RequestContext request) throws ResponseContextException
    {
-      String typeId = request.getTarget().getParameter(AtomCMIS.PARAM_TYPE_ID);
-      boolean includePropertyDefinitions =
-         getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_PROPERTY_DEFINITIONS, false);
-      int maxItems = getIntegerParameter(request, AtomCMIS.PARAM_MAX_ITEMS, CmisConstants.MAX_ITEMS);
-      int skipCount = getIntegerParameter(request, AtomCMIS.PARAM_SKIP_COUNT, CmisConstants.SKIP_COUNT);
-      Connection conn = null;
       try
       {
-         conn = getConnection(request);
-         ItemsList<TypeDefinition> list = conn.getTypeChildren(typeId, includePropertyDefinitions, maxItems, skipCount);
+         String typeId = request.getTarget().getParameter(AtomCMIS.PARAM_TYPE_ID);
+         boolean includePropertyDefinitions =
+            getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_PROPERTY_DEFINITIONS, false);
+         int maxItems = getIntegerParameter(request, AtomCMIS.PARAM_MAX_ITEMS, CmisConstants.MAX_ITEMS);
+         int skipCount = getIntegerParameter(request, AtomCMIS.PARAM_SKIP_COUNT, CmisConstants.SKIP_COUNT);
+
+         Connection connection = getConnection(request);
+
+         ItemsList<TypeDefinition> list =
+            connection.getTypeChildren(typeId, includePropertyDefinitions, maxItems, skipCount);
          addPageLinks(typeId, feed, "types", maxItems, skipCount, list.getNumItems(), list.isHasMoreItems(), request);
 
          String down = getTypeDescendantsLink(typeId, request);
@@ -82,7 +81,7 @@ public class TypesChildrenCollection extends CmisTypeCollection
             String typeLink = getObjectTypeLink(typeId, request);
             feed.addLink(typeLink, AtomCMIS.LINK_VIA, AtomCMIS.MEDIATYPE_ATOM_ENTRY, null, null, -1);
 
-            TypeDefinition type = conn.getTypeDefinition(typeId);
+            TypeDefinition type = connection.getTypeDefinition(typeId);
             String parentType = type.getParentId();
             if (parentType != null)
             {
@@ -108,13 +107,6 @@ public class TypesChildrenCollection extends CmisTypeCollection
       catch (Throwable t)
       {
          throw new ResponseContextException(createErrorResponse(t, 500));
-      }
-      finally
-      {
-         if (conn != null)
-         {
-            conn.close();
-         }
       }
    }
 

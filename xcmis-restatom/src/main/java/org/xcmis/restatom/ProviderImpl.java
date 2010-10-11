@@ -31,19 +31,6 @@ import org.apache.abdera.protocol.server.impl.RegexTargetResolver;
 import org.apache.abdera.protocol.server.impl.SimpleSubjectResolver;
 import org.apache.abdera.protocol.server.impl.SimpleWorkspaceInfo;
 import org.apache.abdera.protocol.server.impl.TemplateTargetBuilder;
-import org.xcmis.restatom.collections.AllVersionsCollection;
-import org.xcmis.restatom.collections.ChangesLogCollection;
-import org.xcmis.restatom.collections.CheckedOutCollection;
-import org.xcmis.restatom.collections.FolderChildrenCollection;
-import org.xcmis.restatom.collections.FolderDescentantsCollection;
-import org.xcmis.restatom.collections.FolderTreeCollection;
-import org.xcmis.restatom.collections.ParentsCollection;
-import org.xcmis.restatom.collections.PoliciesCollection;
-import org.xcmis.restatom.collections.QueryCollection;
-import org.xcmis.restatom.collections.RelationshipsCollection;
-import org.xcmis.restatom.collections.TypesChildrenCollection;
-import org.xcmis.restatom.collections.TypesDescendantsCollection;
-import org.xcmis.restatom.collections.UnfiledCollection;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -102,7 +89,7 @@ public class ProviderImpl extends AbstractProvider
          "slash", // No slash if 'typeid' is absent.
          "typeid");
 
-      resolver.setPattern("/cmisatom/([^/]+)/checkedout(/)?(\\??.*)?", //
+      resolver.setPattern("/" + AtomCMIS.CMIS_REST_RESOURCE_PATH + "/([^/]+)/checkedout(/)?(\\??.*)?", //
          TargetType.TYPE_COLLECTION, //
          "repoid", //
          "slash"); // Slash.
@@ -117,11 +104,11 @@ public class ProviderImpl extends AbstractProvider
          "repoid", //
          "objectid");
 
-      resolver.setPattern("/cmisatom/([^/]+?)/objectbypath(/)?(\\??.*)?", //
+      resolver.setPattern("/" + AtomCMIS.CMIS_REST_RESOURCE_PATH + "/([^/]+?)/objectbypath(/)?(\\??.*)?", //
          TargetType.TYPE_ENTRY, //
          "repoid");
 
-      resolver.setPattern("/cmisatom/([^/]+)/parents/([^/?]+)(\\??.*)?", //
+      resolver.setPattern("/" + AtomCMIS.CMIS_REST_RESOURCE_PATH + "/([^/]+)/parents/([^/?]+)(\\??.*)?", //
          TargetType.TYPE_COLLECTION, //
          "repoid", //
          "objectid");
@@ -136,7 +123,7 @@ public class ProviderImpl extends AbstractProvider
          "repoid", //
          "objectid");
 
-      resolver.setPattern("/cmisatom/([^/]+)/versions/([^/?]+)(\\??.*)?", //
+      resolver.setPattern("/" + AtomCMIS.CMIS_REST_RESOURCE_PATH + "/([^/]+)/versions/([^/?]+)(\\??.*)?", //
          TargetType.TYPE_COLLECTION, //
          "repoid", //
          "versionSeriesId");
@@ -146,7 +133,7 @@ public class ProviderImpl extends AbstractProvider
          "repoid", //
          "objectid");
 
-      resolver.setPattern("/cmisatom/([^/]+)/query(/)?(\\??.*)?", //
+      resolver.setPattern("/" + AtomCMIS.CMIS_REST_RESOURCE_PATH + "/([^/]+)/query(/)?(\\??.*)?", //
          TargetType.TYPE_COLLECTION, //
          "repoid",//
          "slash"); // Slash.
@@ -167,32 +154,24 @@ public class ProviderImpl extends AbstractProvider
          "objectid", //
          "streamid");
 
-      resolver.setPattern("/cmisatom/([^/]+)/unfiled(/)?(\\??.*)?", //
+      resolver.setPattern("/" + AtomCMIS.CMIS_REST_RESOURCE_PATH + "/([^/]+)/unfiled(/)?(\\??.*)?", //
          TargetType.TYPE_COLLECTION, //
          "repoid", //
          "slash"); // Slash.
 
-      resolver.setPattern("/cmisatom/([^/]+)/changes(/)?(\\??.*)?", //
+      resolver.setPattern("/" + AtomCMIS.CMIS_REST_RESOURCE_PATH + "/([^/]+)/changes(/)?(\\??.*)?", //
          TargetType.TYPE_COLLECTION, //
          "repoid",//
          "slash"); // Slash.
 
       SimpleWorkspaceInfo wInfo = new SimpleWorkspaceInfo();
-      wInfo.addCollection(new FolderChildrenCollection());
-      wInfo.addCollection(new ParentsCollection());
-      wInfo.addCollection(new RelationshipsCollection());
-      wInfo.addCollection(new FolderDescentantsCollection());
-      wInfo.addCollection(new FolderTreeCollection());
-      wInfo.addCollection(new TypesChildrenCollection());
-      wInfo.addCollection(new TypesDescendantsCollection());
-      wInfo.addCollection(new CheckedOutCollection());
-      wInfo.addCollection(new AllVersionsCollection());
-      wInfo.addCollection(new QueryCollection());
-      wInfo.addCollection(new PoliciesCollection());
-      wInfo.addCollection(new UnfiledCollection());
-      wInfo.addCollection(new ChangesLogCollection());
 
-      // The other described patterns according collections by WorkspaceManagerImpl#getCollectionAdapter
+      wInfo.addCollection(new CmisCollectionInfo("Folder Children", "/children", AtomCMIS.COLLECTION_TYPE_ROOT));
+      wInfo.addCollection(new CmisCollectionInfo("Types Children", "/types", AtomCMIS.COLLECTION_TYPE_TYPES));
+      wInfo.addCollection(new CmisCollectionInfo("Checkedout", "/checkedout", AtomCMIS.COLLECTION_TYPE_CHECKEDOUT));
+      wInfo.addCollection(new CmisCollectionInfo("Query", "/query", AtomCMIS.COLLECTION_TYPE_QUERY));
+      wInfo.addCollection(new CmisCollectionInfo("Unfiled", "/unfiled", AtomCMIS.COLLECTION_TYPE_UNFILED));
+
       manager = new WorkspaceManagerImpl();
       manager.addWorkspace(wInfo);
    }
@@ -232,6 +211,7 @@ public class ProviderImpl extends AbstractProvider
    private class SubjectResolver extends SimpleSubjectResolver
    {
 
+      @SuppressWarnings("unchecked")
       @Override
       public Subject resolve(Principal principal)
       {

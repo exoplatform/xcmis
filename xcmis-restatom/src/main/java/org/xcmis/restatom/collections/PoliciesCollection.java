@@ -52,12 +52,9 @@ import java.util.Map;
 public class PoliciesCollection extends CmisObjectCollection
 {
 
-   /**
-    * Instantiates a new policies collection.
-    */
-   public PoliciesCollection()
+   public PoliciesCollection(Connection connection)
    {
-      super();
+      super(connection);
       setHref("/policies");
    }
 
@@ -67,16 +64,16 @@ public class PoliciesCollection extends CmisObjectCollection
    @Override
    protected void addFeedDetails(Feed feed, RequestContext request) throws ResponseContextException
    {
-      String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
-      int maxItems = getIntegerParameter(request, AtomCMIS.PARAM_MAX_ITEMS, CmisConstants.MAX_ITEMS);
-      int skipCount = getIntegerParameter(request, AtomCMIS.PARAM_SKIP_COUNT, CmisConstants.SKIP_COUNT);
-
-      Connection conn = null;
       try
       {
-         conn = getConnection(request);
+         String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
+         int maxItems = getIntegerParameter(request, AtomCMIS.PARAM_MAX_ITEMS, CmisConstants.MAX_ITEMS);
+         int skipCount = getIntegerParameter(request, AtomCMIS.PARAM_SKIP_COUNT, CmisConstants.SKIP_COUNT);
+
+         Connection connection = getConnection(request);
          String objectId = getId(request);
-         List<CmisObject> list = conn.getAppliedPolicies(objectId, true, propertyFilter);
+
+         List<CmisObject> list = connection.getAppliedPolicies(objectId, true, propertyFilter);
          if (list.size() > 0)
          {
             // add cmisra:numItems
@@ -84,14 +81,8 @@ public class PoliciesCollection extends CmisObjectCollection
             numItems.setText(Integer.toString(list.size()));
 
             //Paging inks
-            addPageLinks(objectId, //
-               feed, //
-               "policies", //
-               maxItems, //
-               skipCount, //
-               list.size(), //
-               (skipCount + maxItems) < list.size(), //
-               request);
+            addPageLinks(objectId, feed, "policies", maxItems, skipCount, list.size(), (skipCount + maxItems) < list
+               .size(), request);
 
             for (CmisObject one : list)
             {
@@ -112,13 +103,6 @@ public class PoliciesCollection extends CmisObjectCollection
       catch (Throwable t)
       {
          throw new ResponseContextException(createErrorResponse(t, 500));
-      }
-      finally
-      {
-         if (conn != null)
-         {
-            conn.close();
-         }
       }
    }
 
@@ -158,18 +142,17 @@ public class PoliciesCollection extends CmisObjectCollection
          }
       }
 
-      Connection conn = null;
       try
       {
-         conn = getConnection(request);
+         Connection connection = getConnection(request);
          // apply policy
          if (policyId != null)
          {
-            conn.applyPolicy(policyId, objectId);
+            connection.applyPolicy(policyId, objectId);
          }
          entry = request.getAbdera().getFactory().newEntry();
          // updated object
-         addEntryDetails(request, entry, request.getResolvedUri(), conn.getObject(policyId, true,
+         addEntryDetails(request, entry, request.getResolvedUri(), connection.getObject(policyId, true,
             IncludeRelationships.BOTH, true, true, true, null, null));
 
          Map<String, String> params = new HashMap<String, String>();
@@ -199,13 +182,6 @@ public class PoliciesCollection extends CmisObjectCollection
       catch (Throwable t)
       {
          return createErrorResponse(t, 500);
-      }
-      finally
-      {
-         if (conn != null)
-         {
-            conn.close();
-         }
       }
    }
 
@@ -240,13 +216,12 @@ public class PoliciesCollection extends CmisObjectCollection
             policyId = ((IdProperty)p).getValues().get(0);
          }
       }
-      Connection conn = null;
       try
       {
-         conn = getConnection(request);
+         Connection connection = getConnection(request);
          if (policyId != null)
          {
-            conn.removePolicy(policyId, objectId);
+            connection.removePolicy(policyId, objectId);
          }
          ResponseContext response = new EmptyResponseContext(200);
          return response;
@@ -266,13 +241,6 @@ public class PoliciesCollection extends CmisObjectCollection
       catch (Throwable t)
       {
          return createErrorResponse(t, 500);
-      }
-      finally
-      {
-         if (conn != null)
-         {
-            conn.close();
-         }
       }
    }
 

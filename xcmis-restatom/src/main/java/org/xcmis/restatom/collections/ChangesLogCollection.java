@@ -52,9 +52,9 @@ import java.util.Map;
 public class ChangesLogCollection extends AbstractCmisCollection<CmisObject>
 {
 
-   public ChangesLogCollection()
+   public ChangesLogCollection(Connection connection)
    {
-      super();
+      super(connection);
       setHref("/changes");
    }
 
@@ -186,24 +186,24 @@ public class ChangesLogCollection extends AbstractCmisCollection<CmisObject>
    @Override
    protected void addFeedDetails(Feed feed, RequestContext request) throws ResponseContextException
    {
-      String changeLogToken = request.getParameter(AtomCMIS.PARAM_CHANGE_LOG_TOKEN);
-      boolean includeProperties = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_PROPERTIES, false);
-      boolean includePolicyIds = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_POLICY_IDS, false);
-      boolean includeAcl = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ACL, false);
-      String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
-      int maxItems = getIntegerParameter(request, AtomCMIS.PARAM_MAX_ITEMS, CmisConstants.MAX_ITEMS);
-
-      Connection conn = null;
       try
       {
-         conn = getConnection(request);
+         String changeLogToken = request.getParameter(AtomCMIS.PARAM_CHANGE_LOG_TOKEN);
+         boolean includeProperties = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_PROPERTIES, false);
+         boolean includePolicyIds = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_POLICY_IDS, false);
+         boolean includeAcl = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ACL, false);
+         String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
+         int maxItems = getIntegerParameter(request, AtomCMIS.PARAM_MAX_ITEMS, CmisConstants.MAX_ITEMS);
+
+         Connection connection = getConnection(request);
+
          ChangeLogTokenHolder changeLogTokenHolder = new ChangeLogTokenHolder();
          if (changeLogToken != null)
          {
             changeLogTokenHolder.setValue(changeLogToken);
          }
          ItemsList<CmisObject> list =
-            conn.getContentChanges(changeLogTokenHolder, includeProperties, propertyFilter, includePolicyIds,
+            connection.getContentChanges(changeLogTokenHolder, includeProperties, propertyFilter, includePolicyIds,
                includeAcl, true, maxItems);
 
          addPageLinks(changeLogTokenHolder.getValue(), feed, "changes", maxItems, -1, list.getNumItems(), list
@@ -237,13 +237,6 @@ public class ChangesLogCollection extends AbstractCmisCollection<CmisObject>
       catch (Throwable t)
       {
          throw new ResponseContextException(createErrorResponse(t, 500));
-      }
-      finally
-      {
-         if (conn != null)
-         {
-            conn.close();
-         }
       }
    }
 

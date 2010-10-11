@@ -41,7 +41,7 @@ public class ChoiceIntegerElement extends ChoiceElement<Choice<BigInteger>>
 
    /**
     * Instantiates a new choice integer element.
-    *
+    * 
     * @param internal the internal
     */
    public ChoiceIntegerElement(Element internal)
@@ -51,7 +51,7 @@ public class ChoiceIntegerElement extends ChoiceElement<Choice<BigInteger>>
 
    /**
     * Instantiates a new choice integer element.
-    *
+    * 
     * @param factory the factory
     * @param qname the qname
     */

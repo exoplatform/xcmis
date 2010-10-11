@@ -42,7 +42,7 @@ public class ChoiceDateTimeElement extends ChoiceElement<Choice<Calendar>>
 
    /**
     * Instantiates a new choice date time element.
-    *
+    * 
     * @param internal the internal
     */
    public ChoiceDateTimeElement(Element internal)
@@ -52,7 +52,7 @@ public class ChoiceDateTimeElement extends ChoiceElement<Choice<Calendar>>
 
    /**
     * Instantiates a new choice date time element.
-    *
+    * 
     * @param factory the factory
     * @param qname the qname
     */

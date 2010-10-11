@@ -32,7 +32,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id: CheckedOutCollectionTest.java 2 2010-02-04 17:21:49Z andrew00x $
+ * @version $Id: CheckedOutCollectionTest.java 2 2010-02-04 17:21:49Z andrew00x
+ *          $
  */
 public class CheckedOutCollectionTest extends BaseTest
 {
@@ -56,7 +57,7 @@ public class CheckedOutCollectionTest extends BaseTest
          + "</entry>";
       assertNull("Should be no checkedout document.", getCmisObject(docId).getObjectInfo()
          .getVersionSeriesCheckedOutId());
-      
+
       String requestURI = "http://localhost:8080/rest/cmisatom/" + cmisRepositoryId + "/checkedout";
       ByteArrayContainerResponseWriter writer = new ByteArrayContainerResponseWriter();
       ContainerResponse response =
@@ -88,7 +89,7 @@ public class CheckedOutCollectionTest extends BaseTest
       ByteArrayContainerResponseWriter writer = new ByteArrayContainerResponseWriter();
       ContainerResponse response = service("GET", requestURI, "http://localhost:8080/rest", null, null, writer);
 
-      //      printBody(writer.getBody());
+      //printBody(writer.getBody());
       assertEquals(200, response.getStatus());
 
       DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
