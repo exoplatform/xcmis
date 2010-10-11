@@ -137,6 +137,8 @@ public class BaseTest
    {
       CmisRegistry reg = CmisRegistry.getInstance();
       Iterator<RepositoryShortInfo> it = reg.getStorageInfos().iterator();
+      if (!it.hasNext())
+         fail("Could not find storages to test");
       connection = reg.getConnection(it.next().getRepositoryId());
 
       UserContext ctx = new UserContext("root");
