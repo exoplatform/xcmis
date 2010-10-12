@@ -62,6 +62,7 @@
                            </outputDirectory>
                               </artifactItem>
                            </artifactItems>
+                           <excludes>**/TCKRunner.class</excludes>
                         </configuration>
                      </execution>
                   </executions>
