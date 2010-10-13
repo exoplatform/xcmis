@@ -1,10 +1,10 @@
 <assembly>
-  <id>1.1-SNAPSHOT</id>
+  <id>xcmis-standalone-tomcat-resources</id>
   <formats>
     <format>dir</format>
   </formats>
   <includeBaseDirectory>false</includeBaseDirectory>
-    
+
   <fileSets>
     <fileSet>
       <directory>target/classes</directory>

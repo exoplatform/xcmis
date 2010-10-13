@@ -62,7 +62,7 @@
                            </fileset>
                         </copy>
                         <copy todir="${project.build.directory}/xcmis-tomcat/webapps/" verbose="true" flatten="true" overwrite="true">
-                           <fileset dir="${project.build.directory}/lib-${project.version}.dir/" casesensitive="yes">
+                           <fileset dir="${project.build.directory}/lib-xcmis-standalone-tomcat-resources.dir/" casesensitive="yes">
                               <include name="**/*.war" />
                            </fileset>
                            <mapper>
