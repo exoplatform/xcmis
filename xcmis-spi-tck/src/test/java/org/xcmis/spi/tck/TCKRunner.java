@@ -69,6 +69,7 @@ public class TCKRunner
          }
       }
       System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+      System.out.println("Results:");
       System.out.println("Tests run: " + res.runCount() + ", Errors: " + res.errorCount() + ", Failures: " + res.failureCount());
    }
 }
