@@ -160,7 +160,7 @@ public class CmisRegistry
     * Get id of all available storages.
     *
     * @return short information about storages, see {@link RepositoryShortInfo}.
-    *         If no one storages configured than empty set returned never null
+    *         If no one storages configured than empty set should be returned (never null).
     */
    public Set<RepositoryShortInfo> getStorageInfos()
    {
