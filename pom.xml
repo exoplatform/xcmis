@@ -60,9 +60,9 @@
       <wiki.url>http://code.google.com/p/xcmis/w/list</wiki.url>
       <maven.build.timestamp.format>yyyy.MM.dd-HH:mm</maven.build.timestamp.format>
       <eclipse.projectNameTemplate>[artifactId]-[version]</eclipse.projectNameTemplate>
-      
+
       <org.everrest.version>1.0-SNAPSHOT</org.everrest.version>
-      
+
       <!-- Default tests settings -->
       <maven.test.skip>false</maven.test.skip>
       <forkMode>once</forkMode>
@@ -552,6 +552,23 @@
          </plugins>
       </pluginManagement>
       <plugins>
+         <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>buildnumber-maven-plugin</artifactId>
+            <version>1.0-beta-4</version>
+            <executions>
+               <execution>
+                  <phase>validate</phase>
+                  <id>getting-scm.revision</id>
+                  <goals>
+                     <goal>create</goal>
+                  </goals>
+               </execution>
+            </executions>
+            <configuration>
+               <buildNumberPropertyName>exo.product.scm.revision</buildNumberPropertyName>
+            </configuration>
+         </plugin>
          <!-- Manifest management -->
          <plugin>
             <groupId>org.apache.maven.plugins</groupId>
