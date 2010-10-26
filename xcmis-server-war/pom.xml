@@ -4,7 +4,7 @@
    <parent>
       <groupId>org.xcmis</groupId>
       <artifactId>xcmis-parent</artifactId>
-      <version>1.1.1-SNAPSHOT</version>
+      <version>1.1.1</version>
    </parent>
    <artifactId>xcmis-server-war</artifactId>
    <packaging>war</packaging>
