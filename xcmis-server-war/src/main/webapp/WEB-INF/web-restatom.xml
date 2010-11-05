@@ -25,12 +25,12 @@
       <listener-class>org.xcmis.restatom.AtomCmisBootstrapListener</listener-class>
    </listener>
    <listener>
-      <listener-class>org.everrest.core.servlet.RestInitializedListener</listener-class>
+      <listener-class>org.everrest.core.servlet.EverrestInitializedListener</listener-class>
    </listener>
 
    <servlet>
       <servlet-name>RestServer</servlet-name>
-      <servlet-class>org.everrest.core.servlet.StandaloneRestServlet</servlet-class>
+      <servlet-class>org.everrest.core.servlet.EverrestServlet</servlet-class>
    </servlet>
 
    <servlet-mapping>
