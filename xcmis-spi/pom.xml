@@ -28,6 +28,11 @@
          <scope>test</scope>
       </dependency>
       <dependency>
+         <groupId>log4j</groupId>
+         <artifactId>log4j</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
          <groupId>org.exoplatform.core</groupId>
          <artifactId>exo.core.component.document</artifactId>
          <exclusions>
