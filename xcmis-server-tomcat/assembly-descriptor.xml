@@ -1,5 +1,5 @@
 <assembly>
-  <id>1.1-SNAPSHOT</id>
+  <id>1.1.0-GA</id>
   <formats>
     <format>dir</format>
   </formats>
