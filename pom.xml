@@ -61,9 +61,9 @@
       <maven.build.timestamp.format>yyyy.MM.dd-HH:mm</maven.build.timestamp.format>
       <eclipse.projectNameTemplate>[artifactId]-[version]</eclipse.projectNameTemplate>
       <!-- eXo versions -->
-      <org.exoplatform.kernel.version>2.2.7-GA</org.exoplatform.kernel.version>
-      <org.exoplatform.core.version>2.3.7-GA</org.exoplatform.core.version>
-      <org.exoplatform.ws.version>2.1.7-GA</org.exoplatform.ws.version>
+      <org.exoplatform.kernel.version>2.2.8-GA-SNAPSHOT</org.exoplatform.kernel.version>
+      <org.exoplatform.core.version>2.3.8-GA-SNAPSHOT</org.exoplatform.core.version>
+      <org.exoplatform.ws.version>2.1.8-GA-SNAPSHOT</org.exoplatform.ws.version>
       <!-- Default tests settings -->
       <maven.test.skip>false</maven.test.skip>
       <forkMode>once</forkMode>
