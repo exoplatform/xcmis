@@ -35,8 +35,12 @@ import org.xcmis.spi.model.IncludeRelationships;
 import org.xcmis.spi.utils.Logger;
 import org.xcmis.spi.utils.MimeType;
 
+import java.io.FileOutputStream;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
+
+import java.math.*;
 
 /**
  * @author <a href="mailto:max.shaposhnik@exoplatform.com">Max Shaposhnik</a>
@@ -301,5 +305,6 @@ public class VersioningServicePortImpl implements VersioningServicePort
          }
       }
    }
+    
 
 }
