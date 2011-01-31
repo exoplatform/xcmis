@@ -3,7 +3,7 @@
    <modelVersion>4.0.0</modelVersion>
    <groupId>org.xcmis</groupId>
    <artifactId>xcmis-parent</artifactId>
-   <version>1.2-beta1</version>
+   <version>1.2-SNAPSHOT</version>
    <packaging>pom</packaging>
    <name>xCMIS</name>
    <description>An extensible implementation of OASIS's Content Management Interoperability Services (CMIS)
@@ -34,9 +34,9 @@
       <url>http://jira.exoplatform.org/</url>
    </issueManagement>
    <scm>
-      <connection>scm:svn:http://xcmis.googlecode.com/svn/tags/1.2-beta1</connection>
-      <developerConnection>scm:svn:https://xcmis.googlecode.com/svn/tags/1.2-beta1</developerConnection>
-      <url>http://code.google.com/p/xcmis/source/browse/tags/1.2-beta1</url>
+      <connection>scm:svn:http://xcmis.googlecode.com/svn/trunk/</connection>
+      <developerConnection>scm:svn:https://xcmis.googlecode.com/svn/trunk/</developerConnection>
+      <url>http://code.google.com/p/xcmis/source/browse/</url>
    </scm>
    <distributionManagement>
       <repository>
