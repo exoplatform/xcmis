@@ -61,7 +61,7 @@
       <maven.build.timestamp.format>yyyy.MM.dd-HH:mm</maven.build.timestamp.format>
       <eclipse.projectNameTemplate>[artifactId]-[version]</eclipse.projectNameTemplate>
 
-      <org.everrest.version>1.0-SNAPSHOT</org.everrest.version>
+      <org.everrest.version>1.0-beta1</org.everrest.version>
 
       <!-- Default tests settings -->
       <maven.test.skip>false</maven.test.skip>
@@ -850,7 +850,7 @@
       <!-- The list of excluded modules from common build. Do not uncomment it. Build them by yourself. -->
       <!--module>xcmis-server-tomcat</module-->
       <!--module>xcmis-server-tomcat-demo</module-->
-      <!--module>xcmis-spi-tck</module-->
+      <module>xcmis-spi-tck</module>
    </modules>
    <prerequisites>
       <maven>2.2.0</maven>
