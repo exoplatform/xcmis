@@ -72,8 +72,8 @@
       <exo.test.classesdirectory>target/classes</exo.test.classesdirectory>
       <!-- Defaut compiler settings -->
       <maven.compiler.optimize>true</maven.compiler.optimize>
-      <maven.compiler.source>1.5</maven.compiler.source>
-      <maven.compiler.target>1.5</maven.compiler.target>
+      <maven.compiler.source>1.6</maven.compiler.source>
+      <maven.compiler.target>1.6</maven.compiler.target>
       <!-- Default release Settings -->
       <useReleaseProfile>false</useReleaseProfile>
       <arguments>-Prelease,sign-artifacts -Dmaven.test.skip=true</arguments>
