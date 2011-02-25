@@ -24,6 +24,7 @@ import org.xcmis.spi.CmisRegistryFactory;
 import org.xcmis.spi.RenditionManager;
 import org.xcmis.spi.utils.Logger;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -64,7 +65,7 @@ public class InmemoryCmisRegistryFactory implements CmisRegistryFactory
          {
             try
             {
-               properties.load(new BufferedReader(new InputStreamReader(in)));
+               properties.load(new BufferedInputStream(in));
                fconfig = true;
             }
             catch (IOException ioe)
