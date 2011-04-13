@@ -113,7 +113,7 @@ public class UnfiledCollection extends CmisObjectCollection
       try
       {
          Connection connection = getConnection(request);
-         connection.removeObjectFromFolder(id, null);
+         connection.removeObjectFromFolder(id, request.getParameter(AtomCMIS.PARAM_REMOVE_FROM));
 
          entry = request.getAbdera().getFactory().newEntry();
          try
