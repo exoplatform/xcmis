@@ -467,6 +467,8 @@ public interface AtomCMIS extends CmisConstants
    String PARAM_UNFILE_OBJECT = "unfileObjects";
 
    String PARAM_VERSIONING_STATE = "versioningState";
+   
+   String PARAM_ALL_VERSIONS = "allVersions";
 
    String LINK_SELF = "self";
 
