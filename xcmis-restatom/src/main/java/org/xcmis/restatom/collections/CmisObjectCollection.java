@@ -170,7 +170,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       try
       {
          Connection connection = getConnection(request);
-         connection.deleteObject(objectId, null);
+         connection.deleteObject(objectId, getBooleanParameter(request, AtomCMIS.PARAM_ALL_VERSIONS, true));
       }
       catch (ConstraintException cve)
       {
@@ -969,6 +969,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       return self;
    }
 
+   @SuppressWarnings("unchecked")
    protected org.xcmis.spi.utils.MimeType convertMimeType(MimeType abderaMimeType)
    {
       if (abderaMimeType == null)
