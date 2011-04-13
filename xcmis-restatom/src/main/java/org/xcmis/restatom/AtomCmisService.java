@@ -534,6 +534,7 @@ public class AtomCmisService
             RepositoryInfoTypeElement repoInfoElement = ws.addExtension(AtomCMIS.REPOSITORY_INFO);
             repoInfoElement.addSimpleExtension(AtomCMIS.REPOSITORY_ID, info.getRepositoryId());
             repoInfoElement.addSimpleExtension(AtomCMIS.REPOSITORY_NAME, info.getRepositoryName());
+            repoInfoElement.addSimpleExtension(AtomCMIS.ROOT_FOLDER_ID, info.getRootFolderId());
 
             String repoPath =
                UriBuilder.fromUri(uriInfo.getBaseUri()).path(getClass()).path(info.getRepositoryId()).build()
