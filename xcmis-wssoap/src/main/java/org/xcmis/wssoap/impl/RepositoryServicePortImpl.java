@@ -40,8 +40,7 @@ import java.util.Set;
 
 /**
  * @author <a href="mailto:max.shaposhnik@exoplatform.com">Max Shaposhnik</a>
- * @version $Id: RepositoryServicePortImpl.java 2 2010-02-04 17:21:49Z andrew00x
- *          $
+ * @version $Id: RepositoryServicePortImpl.java 2 2010-02-04 17:21:49Z andrew00x $
  */
 @javax.jws.WebService(// name = "RepositoryServicePort",
 serviceName = "RepositoryService", //
@@ -57,7 +56,7 @@ public class RepositoryServicePortImpl implements RepositoryServicePort
 
    /**
     * Constructs instance of <code>RepositoryServicePortImpl</code> .
-    *
+    * 
     */
    public RepositoryServicePortImpl()
    {
@@ -116,9 +115,18 @@ public class RepositoryServicePortImpl implements RepositoryServicePort
          LOG.debug("Executing operation getRepositoryInfo");
       }
       Connection conn = null;
-      conn = CmisRegistry.getInstance().getConnection(repositoryId);
-
-      return TypeConverter.getCmisRepositoryInfoType(conn.getStorage().getRepositoryInfo());
+      try
+      {
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
+         return TypeConverter.getCmisRepositoryInfoType(conn.getStorage().getRepositoryInfo());
+      }
+      finally
+      {
+         if (conn != null)
+         {
+            conn.close();
+         }
+      }
    }
 
    /**
