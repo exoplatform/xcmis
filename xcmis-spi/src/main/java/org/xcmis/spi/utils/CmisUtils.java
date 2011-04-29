@@ -19,10 +19,8 @@
 
 package org.xcmis.spi.utils;
 
-import org.xcmis.spi.ItemsIterator;
-import org.xcmis.spi.ObjectData;
-import org.xcmis.spi.model.AccessControlEntry;
-
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
@@ -39,6 +37,10 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import org.xcmis.spi.ItemsIterator;
+import org.xcmis.spi.ObjectData;
+import org.xcmis.spi.model.AccessControlEntry;
+
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
  * @version $Id: CmisUtils.java 332 2010-03-11 17:24:56Z andrew00x $
@@ -47,7 +49,6 @@ public final class CmisUtils
 {
    public static final Comparator<ObjectData> versionComparator = new Comparator<ObjectData>()
    {
-
       public int compare(ObjectData object1, ObjectData object2)
       {
          Calendar c1 = object1.getLastModificationDate();
@@ -176,6 +177,9 @@ public final class CmisUtils
    private static final Pattern TD_FORMAT =
       Pattern
          .compile("(\\d{4})-(\\d{2})-(\\d{2})[Tt](\\d{2}):(\\d{2}):(\\d{2})(\\.(\\d{1,3}))?([+-])((\\d{2}):(\\d{2}))");
+   
+   /** The ISO 8601 date format */
+   public static final DateFormat ISO_8601_DATE_TIME = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZZZZZ");
 
    /**
     * Get XMLGregorianCalendar that is based on Calendar.
@@ -211,9 +215,11 @@ public final class CmisUtils
     */
    public static String convertToString(Calendar c)
    {
-      return String.format("%04d-%02d-%02dT%02d:%02d:%02d.%03dZ", c.get(Calendar.YEAR), c.get(Calendar.MONTH) + 1, c
-         .get(Calendar.DAY_OF_MONTH), c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), c.get(Calendar.SECOND), c
-         .get(Calendar.MILLISECOND));
+	  String outDate = ISO_8601_DATE_TIME.format(c.getTime());
+	  if (outDate.endsWith("Z"))
+         return outDate;
+	  else 
+         return outDate.substring(0, outDate.length()-2) + ":" + outDate.substring(outDate.length()-2);
    }
 
    /**
