@@ -40,7 +40,9 @@ public class CallendarParserTest extends TestCase
       c.set(Calendar.MINUTE, 31);
       c.set(Calendar.SECOND, 27);
       c.set(Calendar.MILLISECOND, 123);
-      assertEquals("2009-08-20T16:31:27.123Z", AtomUtils.getAtomDate(c));
+      c.set(Calendar.ZONE_OFFSET, 2*60*60*1000);
+      c.set(Calendar.DST_OFFSET, 1*60*60*1000);
+      assertEquals("2009-08-20T16:31:27.123+03:00", AtomUtils.getAtomDate(c));
    }
 
    public void testParseCalendarZ()
