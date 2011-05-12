@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -202,6 +203,8 @@ public final class CmisUtils
       xmlCalendar.setYear(calendar.get(Calendar.YEAR));
       xmlCalendar.setMonth(calendar.get(Calendar.MONTH) + 1);
       xmlCalendar.setDay(calendar.get(Calendar.DAY_OF_MONTH));
+      int zoneOffsetInMinutes = (calendar.get(Calendar.ZONE_OFFSET) + calendar.get(Calendar.DST_OFFSET)) / (60*1000);
+      xmlCalendar.setTimezone(zoneOffsetInMinutes);
       xmlCalendar.setTime(calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), calendar
          .get(Calendar.SECOND), calendar.get(Calendar.MILLISECOND));
       return xmlCalendar;
@@ -215,11 +218,17 @@ public final class CmisUtils
     */
    public static String convertToString(Calendar c)
    {
-	  String outDate = ISO_8601_DATE_TIME.format(c.getTime());
-	  if (outDate.endsWith("Z"))
-         return outDate;
-	  else 
-         return outDate.substring(0, outDate.length()-2) + ":" + outDate.substring(outDate.length()-2);
+      // Can't use SimpleDateFormat here, because can't setTimeZone for it with ZONE_OFFSET in int.
+      int zoneOffsetInMinutes = (c.get(Calendar.ZONE_OFFSET) + c.get(Calendar.DST_OFFSET)) / (60*1000);
+      String signOffset = zoneOffsetInMinutes < 0 ? "-" : "+";
+      zoneOffsetInMinutes = zoneOffsetInMinutes < 0 ? -zoneOffsetInMinutes : zoneOffsetInMinutes;
+      int hoursOffset = zoneOffsetInMinutes / 60;
+      int minutesOffset = zoneOffsetInMinutes % 60;
+      String result =  String.format("%04d-%02d-%02dT%02d:%02d:%02d.%03d" + signOffset + "%02d:%02d", c.get(Calendar.YEAR), c.get(Calendar.MONTH) + 1, 
+            c.get(Calendar.DAY_OF_MONTH), c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), c.get(Calendar.SECOND), 
+            c.get(Calendar.MILLISECOND), hoursOffset, minutesOffset);
+      
+      return result;
    }
 
    /**
@@ -233,15 +242,14 @@ public final class CmisUtils
       Matcher m = Z_FORMAT.matcher(date);
       if (m.matches())
       {
-         Calendar c = Calendar.getInstance();
+         Calendar c = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
          c.set(Calendar.YEAR, Integer.parseInt(m.group(1)));
          c.set(Calendar.MONTH, Integer.parseInt(m.group(2)) - 1);
          c.set(Calendar.DATE, Integer.parseInt(m.group(3)));
          c.set(Calendar.HOUR_OF_DAY, Integer.parseInt(m.group(4)));
          c.set(Calendar.MINUTE, Integer.parseInt(m.group(5)));
          c.set(Calendar.SECOND, Integer.parseInt(m.group(6)));
-         c.set(Calendar.MILLISECOND, //
-            m.group(7) == null ? 0 : Integer.parseInt(m.group(8)));
+         c.set(Calendar.MILLISECOND, m.group(7) == null ? 0 : Integer.parseInt(m.group(8)));
          return c;
       }
       else
@@ -250,17 +258,16 @@ public final class CmisUtils
          if (m.matches())
          {
             int t = m.group(9).equals("+") ? 1 : -1;
-            Calendar c = Calendar.getInstance();
+            Calendar c = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
             c.set(Calendar.YEAR, Integer.parseInt(m.group(1)));
             c.set(Calendar.MONTH, Integer.parseInt(m.group(2)) - 1);
             c.set(Calendar.DATE, Integer.parseInt(m.group(3)));
-            c.set(Calendar.HOUR_OF_DAY, //
-               Integer.parseInt(m.group(4)) + t * Integer.parseInt(m.group(11)));
-            c.set(Calendar.MINUTE, //
-               Integer.parseInt(m.group(5)) + t * Integer.parseInt(m.group(12)));
+            c.set(Calendar.HOUR_OF_DAY, Integer.parseInt(m.group(4)));
+            c.set(Calendar.MINUTE, Integer.parseInt(m.group(5)));
             c.set(Calendar.SECOND, Integer.parseInt(m.group(6)));
-            c.set(Calendar.MILLISECOND, //
-               m.group(7) == null ? 0 : Integer.parseInt(m.group(8)));
+            c.set(Calendar.MILLISECOND, m.group(7) == null ? 0 : Integer.parseInt(m.group(8)));
+            int zoneOffset = t * (Integer.parseInt(m.group(11))*60*60*1000 + Integer.parseInt(m.group(12))*60*1000);
+			   c.set(Calendar.ZONE_OFFSET, zoneOffset);
             return c;
          }
          else
