@@ -61,7 +61,7 @@ public abstract class BasicStorageProvider implements StorageProvider
 
    protected static String PRODUCT_NAME = "xCMIS";
 
-   protected static String PRODUCT_VERSION = "1.1";
+   protected static String PRODUCT_VERSION = "1.2";
 
    protected static String THIN_CLIENT_URI = null;
 
