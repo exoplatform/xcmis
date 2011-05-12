@@ -78,10 +78,11 @@ public class CallendarParserTest extends TestCase
       assertEquals(2009, c.get(Calendar.YEAR));
       assertEquals(7, c.get(Calendar.MONTH));
       assertEquals(20, c.get(Calendar.DATE));
-      assertEquals(19, c.get(Calendar.HOUR_OF_DAY));
-      assertEquals(51, c.get(Calendar.MINUTE));
+      assertEquals(16, c.get(Calendar.HOUR_OF_DAY));
+      assertEquals(21, c.get(Calendar.MINUTE));
       assertEquals(27, c.get(Calendar.SECOND));
       assertEquals(0, c.get(Calendar.MILLISECOND));
+      assertEquals(210, c.get(Calendar.ZONE_OFFSET)/(60*1000));
    }
 
    public void testParseCalendarTDMilliSec()
@@ -91,10 +92,11 @@ public class CallendarParserTest extends TestCase
       assertEquals(2009, c.get(Calendar.YEAR));
       assertEquals(7, c.get(Calendar.MONTH));
       assertEquals(20, c.get(Calendar.DATE));
-      assertEquals(12, c.get(Calendar.HOUR_OF_DAY));
-      assertEquals(51, c.get(Calendar.MINUTE));
+      assertEquals(16, c.get(Calendar.HOUR_OF_DAY));
+      assertEquals(21, c.get(Calendar.MINUTE));
       assertEquals(27, c.get(Calendar.SECOND));
       assertEquals(456, c.get(Calendar.MILLISECOND));
+      assertEquals(-210, c.get(Calendar.ZONE_OFFSET)/(60*1000));
    }
 
 }
