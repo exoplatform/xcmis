@@ -279,7 +279,7 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
          {
             mimeType.getParameters().put(CmisConstants.CHARSET, charset);
          }
-         return new BaseContentStream(contentValue.getBytes(), getName(), mimeType);
+         return new BaseContentStream(contentValue.getBytes(), getContentStreamFileName(), mimeType);
       }
       return null;
    }
@@ -313,6 +313,19 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
    public String getContentStreamMimeType()
    {
       return getString(CmisConstants.CONTENT_STREAM_MIME_TYPE);
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public String getContentStreamFileName()
+   {
+      String contentStreamFileName = getString(CmisConstants.CONTENT_STREAM_FILE_NAME);
+      if (contentStreamFileName == null)
+      {
+         contentStreamFileName = getName();
+      }
+      return contentStreamFileName;
    }
 
    /**
