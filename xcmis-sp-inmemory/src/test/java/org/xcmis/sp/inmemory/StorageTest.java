@@ -18,6 +18,9 @@
  */
 package org.xcmis.sp.inmemory;
 
+import org.xcmis.spi.BaseContentStream;
+import org.xcmis.spi.CmisConstants;
+import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.DocumentData;
 import org.xcmis.spi.FolderData;
 import org.xcmis.spi.ItemsIterator;
@@ -25,15 +28,21 @@ import org.xcmis.spi.ObjectData;
 import org.xcmis.spi.model.AccessControlEntry;
 import org.xcmis.spi.model.ChangeEvent;
 import org.xcmis.spi.model.ChangeType;
+import org.xcmis.spi.model.Property;
+import org.xcmis.spi.model.PropertyDefinition;
+import org.xcmis.spi.model.VersioningState;
 import org.xcmis.spi.model.impl.StringProperty;
+import org.xcmis.spi.utils.MimeType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -178,6 +187,33 @@ public class StorageTest extends BaseTest
       storage.getObjectById(document.getObjectId());
 
       assertEquals(1, getSize(storage.getUnfiledObjectsId()));
+   }
+
+   public void testCreateDocumentDifferentContentName() throws Exception
+   {
+
+      PropertyDefinition<?> def = PropertyDefinitions.getPropertyDefinition("cmis:document", CmisConstants.NAME);
+      Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
+      properties.put(CmisConstants.NAME, new StringProperty(def.getId(), def.getQueryName(), def.getLocalName(), def
+         .getDisplayName(), "createDocumentTest"));
+
+      PropertyDefinition<?> contentNameDef =
+         PropertyDefinitions.getPropertyDefinition("cmis:document", CmisConstants.CONTENT_STREAM_FILE_NAME);
+      properties.put(CmisConstants.CONTENT_STREAM_FILE_NAME, new StringProperty(contentNameDef.getId(), contentNameDef
+         .getQueryName(), contentNameDef.getLocalName(), contentNameDef.getDisplayName(),
+         "createDocumentTest_ContentFile.txt"));
+
+      ContentStream cs =
+         new BaseContentStream("to be or not to be".getBytes(), /*"createDocumentTest"*/null, new MimeType("text",
+            "plain"));
+
+      DocumentData doc =
+         storage.createDocument(rootFolder, documentTypeDefinition, properties, cs, null, null, VersioningState.MAJOR);
+
+      assertEquals("text/plain", doc.getContentStreamMimeType());
+      assertEquals("createDocumentTest", doc.getName());
+      assertEquals("createDocumentTest_ContentFile.txt", doc.getContentStream().getFileName());
+
    }
 
    private int getSize(Iterator<String> iterator)
