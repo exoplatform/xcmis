@@ -1,3 +1,4 @@
+package org.ow2.bonita;
 /**
  * Copyright (C) 2011 BonitaSoft S.A.
  * BonitaSoft, 31 rue Gustave Eiffel - 38000 Grenoble
