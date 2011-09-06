@@ -587,9 +587,9 @@ public class CMISDocumentManagerTest extends TestCase {
       DocumentSearchBuilder searchBuilder = new DocumentSearchBuilder();
       searchBuilder.criterion(DocumentIndex.PROCESS_DEFINITION_UUID).equalsTo("latestVersion").latestVersion();
       SearchResult searchResult = manager.search(searchBuilder, 0, 10);
-      assertEquals(2, searchResult.getCount());  // was:1
+      assertEquals(1, searchResult.getCount());  // was:1
       List<Document> results = searchResult.getDocuments();
-      assertEquals(2, results.size());  // was:1
+      assertEquals(1, results.size());  // was:1
       assertEquals(lastVersion, results.get(0));
    }
 
