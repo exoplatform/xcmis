@@ -265,7 +265,7 @@ public abstract class AbstractCmisCollection<T> extends AbstractEntityCollection
     */
    protected String getRepositoryId(RequestContext request)
    {
-      String id = request.getTarget().getParameter("repoid");
+      String id = request.getTarget().getParameter("repoid").replace(" ", "%20");
       return id;
    }
 
