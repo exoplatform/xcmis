@@ -41,7 +41,7 @@ public interface StorageProvider
    /**
     * Get id of storage.
     * 
-    * @return storages iDs if no one storages configured than empty set returned
+    * @return storage id
     *         never null
     */
    String getStorageID();
