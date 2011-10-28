@@ -19,6 +19,8 @@
 
 package org.xcmis.restatom.types;
 
+import java.io.InputStream;
+
 /**
  * @author <a href="mailto:alexey.zavizionov@exoplatform.com">Alexey
  *         Zavizionov</a>
@@ -30,7 +32,7 @@ public class CmisContentType
 
    protected String mediatype;
 
-   protected String base64;
+   protected InputStream base64;
 
    /**
     * Gets the value of the mediatype property.
@@ -52,24 +54,19 @@ public class CmisContentType
       this.mediatype = value;
    }
 
-   /**
-    * Gets the value of the base64 property.
-    * 
-    * @return string value
-    */
-   public String getBase64()
-   {
-      return base64;
+   public InputStream getBase64() {
+      return base64;      
+   }
+   
+   public void setBase64(InputStream base64) {
+      this.base64 = base64;
    }
 
-   /**
-    * Sets the value of the base64 property.
-    * 
-    * @param value String
-    */
-   public void setBase64(String value)
-   {
-      this.base64 = value;
+   @Override
+   protected void finalize() throws Throwable {
+      if (base64 != null) {
+         base64.close();
+      }
+      super.finalize();
    }
-
 }

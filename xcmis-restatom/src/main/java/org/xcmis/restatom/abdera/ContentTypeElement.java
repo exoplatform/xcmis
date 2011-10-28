@@ -22,8 +22,14 @@ package org.xcmis.restatom.abdera;
 import org.apache.abdera.factory.Factory;
 import org.apache.abdera.model.Element;
 import org.apache.abdera.model.ExtensibleElementWrapper;
+import org.apache.abdera.parser.stax.FOMExtensibleElement;
+import org.apache.commons.io.IOUtils;
 import org.xcmis.restatom.AtomCMIS;
+import org.xcmis.restatom.ContentOutputStream;
 import org.xcmis.restatom.types.CmisContentType;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 import javax.xml.namespace.QName;
 
@@ -59,12 +65,22 @@ public class ContentTypeElement extends ExtensibleElementWrapper
     * Gets the content.
     * 
     * @return content CmisContentType
+    * @throws IOException 
     */
-   public CmisContentType getContent()
+   public CmisContentType getContent() throws IOException
    {
       CmisContentType content = new CmisContentType();
       content.setMediatype(getSimpleExtension(AtomCMIS.MEDIATYPE));
-      content.setBase64(getSimpleExtension(AtomCMIS.BASE64));
+
+      ContentOutputStream contentOutput = new ContentOutputStream();
+      try {
+        ((FOMExtensibleElement) getExtension(AtomCMIS.BASE64)).writeTo(contentOutput);
+      } finally {
+        contentOutput.close();
+      }
+      
+      InputStream inputStream = contentOutput.getInputStream();
+      content.setBase64(inputStream);
       return content;
    }
 
@@ -79,7 +95,13 @@ public class ContentTypeElement extends ExtensibleElementWrapper
       if (contentType != null)
       {
          addSimpleExtension(AtomCMIS.MEDIATYPE, contentType.getMediatype());
-         addSimpleExtension(AtomCMIS.BASE64, contentType.getBase64());
+         String base64 = "";
+         try {
+            byte[] b = IOUtils.toByteArray(contentType.getBase64());
+            base64 = new String(b);
+         } catch (IOException e) {
+         }
+         addSimpleExtension(AtomCMIS.BASE64, base64);
       }
    }
 

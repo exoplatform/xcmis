@@ -1167,14 +1167,10 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       if (cmisContent != null)
       {
          CmisContentType content = cmisContent.getContent();
-         String base64 = content.getBase64();
-         byte[] data = null;
-         if (base64 != null)
-         {
-            data = Base64.decodeBase64(base64.getBytes());
-         }
+         
+         InputStream is = content.getBase64();
          contentStream =
-            new BaseContentStream(data, null, org.xcmis.spi.utils.MimeType.fromString(content.getMediatype()));
+               new BaseContentStream(is, is.available(), null, org.xcmis.spi.utils.MimeType.fromString(content.getMediatype()));
       }
       else
       {
