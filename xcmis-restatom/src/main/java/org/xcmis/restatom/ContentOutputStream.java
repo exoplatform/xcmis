@@ -23,8 +23,9 @@ public class ContentOutputStream extends FilterOutputStream {
    private boolean isFoundEnd;
    private boolean isFirstWrite = true;
    private boolean overflow;
+   private boolean isWasFull;
 
-   private byte[] byteTempBuf;
+   private ByteArrayOutputStream byteTempBufStream;
 
    private File file;
    private OutputStream outFile;
@@ -44,6 +45,7 @@ public class ContentOutputStream extends FilterOutputStream {
    public ContentOutputStream() {
       super(null);
       out = new ByteArrayOutputStream(MAX_BUFFER_SIZE);
+      byteTempBufStream = new ByteArrayOutputStream();
    }
 
    @Override
@@ -58,7 +60,7 @@ public class ContentOutputStream extends FilterOutputStream {
          // run once
          isFirstWrite = false;
          // will be checked on the first iteration only
-         isXmlWrapped = b[0]=="<".getBytes()[0];
+         isXmlWrapped = b[0] == 60; // is the first == '<'
       }
 
       if (!isXmlWrapped) {
@@ -68,9 +70,15 @@ public class ContentOutputStream extends FilterOutputStream {
 
          // finding START element
          if (!isFoundStart) {
-            String original = new String(b, off, len < 130 ? len : 130);
-
-            int indexOfStart = original.indexOf(">");
+            
+            // look for the first '>'
+            int indexOfStart = -1;
+            for (int i = 0; i < len; i++) {
+               if (b[i] == 62) {
+                  indexOfStart = i;
+                  break;
+               }
+            }
 
             if (indexOfStart != -1) {
                isFoundStart = true;
@@ -89,36 +97,40 @@ public class ContentOutputStream extends FilterOutputStream {
                int offForEnd = len < 30 ? off : off + len - 30;
                int lenForEnd = len < 30 ? len : 30;
 
-               String lastBlock = new String(b, offForEnd, lenForEnd);
-               int indexOfEnd = lastBlock.lastIndexOf("<");
-
-               if (indexOfEnd != -1) {
-                  // has the end
-                  isFoundEnd = true;
-                  len = offForEnd + indexOfEnd - off;
-                  // to check the correctness
+               // look for the last '<'
+               for (int indexOfEnd = offForEnd; indexOfEnd < offForEnd + lenForEnd; indexOfEnd++) {
+                  if (b[indexOfEnd] == 60) {
+                     isFoundEnd = true;
+                     len = indexOfEnd - off;
+                  }
                }
-               if (byteTempBuf != null && byteTempBuf.length > 0) {
+
+               if (isWasFull) {
                   // if previous block was full
-                  writeInternal(byteTempBuf, 0, byteTempBuf.length);
-                  byteTempBuf = null;
+                  writeInternal(byteTempBufStream.toByteArray(), 0, -1);
+                  byteTempBufStream.reset();
                }
                writeInternal(b, off, len);
             } else {
                // it is full block
                // middle or full last
                // maybe will be end
-               if (byteTempBuf != null && byteTempBuf.length > 0) {
-                  writeInternal(byteTempBuf, 0, byteTempBuf.length);
+               if (isWasFull) {
+                  writeInternal(byteTempBufStream.toByteArray(), 0, -1);
                }
-               byteTempBuf = new byte[len];
-               System.arraycopy(b, off, byteTempBuf, 0, len);
+               isWasFull = true;
+               byteTempBufStream.reset();
+               byteTempBufStream.write(b, off, len);
             }
          }
       }
    }
 
    private void writeInternal(byte[] b, int off, int len) throws IOException {
+      
+      // if write previous full block, then count the 'len' from array
+      if (len == -1)
+         len = b.length;
 
       if (!overflow) {
          // count the bytes length, whether overflow
@@ -154,23 +166,24 @@ public class ContentOutputStream extends FilterOutputStream {
          isClosed = true;
          // to check BUF and write if is
 
-         if (byteTempBuf != null && byteTempBuf.length > 0) {
+         if (isWasFull) {
             // last block was full
-            int len = byteTempBuf.length;
+            int len = byteTempBufStream.toByteArray().length;
             int off = 0;
             // let's check the end!
             // get the end of the string no more 30 length
             int offForEnd = len < 30 ? 0 : len - 30;
             int lenForEnd = len < 30 ? len : 30;
-            String lastBlock = new String(byteTempBuf, offForEnd, lenForEnd);
-
-            int indexOfEnd = lastBlock.lastIndexOf("<", off);
-            if (indexOfEnd != -1) {
-               isFoundEnd = true;
-               // skip the end of xml
-               len = offForEnd + indexOfEnd - off;
+            
+            // look for the last '<'
+            for (int indexOfEnd = offForEnd; indexOfEnd < offForEnd + lenForEnd; indexOfEnd++) {
+               if (byteTempBufStream.toByteArray()[indexOfEnd] == 60) {
+                  isFoundEnd = true;
+                  len = indexOfEnd - off;
+               }
             }
-            writeInternal(byteTempBuf, off, len);
+            
+            writeInternal(byteTempBufStream.toByteArray(), off, len);
          }
 
          if (overflow) {
