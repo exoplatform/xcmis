@@ -16,6 +16,7 @@ package org.ow2.bonita;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -682,13 +683,52 @@ public class CMISDocumentManagerTest extends TestCase {
       ProcessDefinitionUUID definitionUUID = new ProcessDefinitionUUID(
             "bigProcess");
       int length = byteArray.length;
-      Document document = manager.createDocument("myDocument", definitionUUID,
+      Document document = manager.createDocument("testUploadBigFile", definitionUUID,
             new ProcessInstanceUUID(definitionUUID, 1),
             "CMIS-spec-v1.0.bar", "octet/stream", byteArray);
       assertNotNull(document);
       byte[] content = manager.getContent(document);
       assertNotNull(content);
       assertEquals(length, content.length);
+      
+      // remove
+      manager.deleteDocument(document.getId(), true);
+   }
+   
+   public void testUploadBigFile2() throws DocumentAlreadyExistsException,
+         DocumentationCreationException, InterruptedException, IOException,
+         DocumentNotFoundException {
+      byte[] bytes = null;
+      // to create bytes array 62Mb size
+      ByteArrayOutputStream baos = null;
+      try {
+         baos = new ByteArrayOutputStream();
+         for (int i = 0; i < 8192; i++) {
+            baos.write(43); // '+' char
+         }
+         byte[] bytesTemp = baos.toByteArray();
+         baos.reset();
+         for (int i = 0; i < 7600; i++) {
+            baos.write(bytesTemp);
+         }
+         bytes = baos.toByteArray();
+      } finally {
+         baos.close();
+      }
+      
+      ProcessDefinitionUUID definitionUUID = new ProcessDefinitionUUID(
+            "bigProcess2");
+      int length = bytes.length;
+      Document document = manager.createDocument("testUploadBigFile2", definitionUUID,
+            new ProcessInstanceUUID(definitionUUID, 1), "testUploadBigFile2.txt",
+            "octet/stream", bytes);
+      assertNotNull(document);
+      byte[] content = manager.getContent(document);
+      assertNotNull(content);
+      assertEquals(length, content.length);
+      
+      // remove
+      manager.deleteDocument(document.getId(), true);
    }
 
    // Not supported

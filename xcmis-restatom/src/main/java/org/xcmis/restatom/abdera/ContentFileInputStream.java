@@ -8,23 +8,30 @@ import java.io.FileNotFoundException;
 import java.io.FilterInputStream;
 import java.io.IOException;
 
-class ContentFileInputStream extends FilterInputStream {
+class ContentFileInputStream extends FilterInputStream
+{
 
    private File file;
 
    private boolean deleted;
 
-   public ContentFileInputStream(File file) throws FileNotFoundException {
+   public ContentFileInputStream(File file) throws FileNotFoundException
+   {
       super(new Base64InputStream(new FileInputStream(file)));
       this.file = file;
    }
 
    @Override
-   public void close() throws IOException {
-      try {
+   public void close() throws IOException
+   {
+      try
+      {
          super.close();
-      } finally {
-         if (!deleted) {
+      }
+      finally
+      {
+         if (!deleted)
+         {
             deleted = file.delete();
          }
       }
