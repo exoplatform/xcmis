@@ -25,7 +25,6 @@ import org.apache.abdera.model.ExtensibleElementWrapper;
 import org.apache.abdera.parser.stax.FOMExtensibleElement;
 import org.apache.commons.io.IOUtils;
 import org.xcmis.restatom.AtomCMIS;
-import org.xcmis.restatom.ContentOutputStream;
 import org.xcmis.restatom.types.CmisContentType;
 
 import java.io.IOException;
