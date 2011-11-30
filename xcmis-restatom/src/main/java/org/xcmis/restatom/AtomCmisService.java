@@ -521,6 +521,11 @@ public class AtomCmisService
    @GET
    public Response getRepositories(@Context HttpServletRequest httpRequest, @Context UriInfo uriInfo)
    {
+      String repositoryId = httpRequest.getParameter("repositoryId");
+      if (repositoryId != null && !repositoryId.isEmpty())
+      {
+         return makeRepositoryInfoResponse(httpRequest, uriInfo.getBaseUri(), repositoryId);
+      }
       Service service = AbderaFactory.getInstance().getFactory().newService();
       service.declareNS(AtomCMIS.CMISRA_NS_URI, AtomCMIS.CMISRA_PREFIX);
       Set<RepositoryShortInfo> shortInfos = CmisRegistry.getInstance().getStorageInfos();
@@ -564,16 +569,24 @@ public class AtomCmisService
    public Response getRepositoryInfo(@Context HttpServletRequest httpRequest, @Context UriInfo uriInfo,
       @PathParam("repositoryId") String repositoryId)
    {
+      String queryRepositoryId = httpRequest.getParameter("repositoryId");
+      if (queryRepositoryId != null && !queryRepositoryId.isEmpty())
+         return makeRepositoryInfoResponse(httpRequest, uriInfo.getBaseUri(), queryRepositoryId);
+      return makeRepositoryInfoResponse(httpRequest, uriInfo.getBaseUri(), repositoryId);
+   }
+
+   private Response makeRepositoryInfoResponse(HttpServletRequest httpRequest, URI baseUri, String repositoryId)
+   {
       Service service = AbderaFactory.getInstance().getFactory().newService();
       service.declareNS(AtomCMIS.CMIS_NS_URI, AtomCMIS.CMIS_PREFIX);
       service.declareNS(AtomCMIS.CMISRA_NS_URI, AtomCMIS.CMISRA_PREFIX);
-      addCmisRepository(httpRequest, service, repositoryId, uriInfo.getBaseUri());
+      addCmisRepository(httpRequest, service, repositoryId, baseUri);
       Document<Service> serviceDocument = service.getDocument();
       serviceDocument.setCharset("utf-8");
       ResponseContext abderaResponse = new BaseResponseContext<Document<Service>>(serviceDocument);
       abderaResponse.setStatus(200);
-      return Response.ok(abderaResponse).header(HttpHeaders.CACHE_CONTROL, "no-cache").type(
-         MediaType.APPLICATION_ATOM_XML).build();
+      return Response.ok(abderaResponse).header(HttpHeaders.CACHE_CONTROL, "no-cache")
+         .type(MediaType.APPLICATION_ATOM_XML).build();
    }
 
    @GET
