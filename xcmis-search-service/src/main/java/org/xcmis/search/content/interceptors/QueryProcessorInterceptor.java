@@ -115,17 +115,17 @@ public class QueryProcessorInterceptor extends CommandInterceptor
       Validate.notNull(query, "The query argument may not be null");
 
       // Create the plan ...
-      long start = System.nanoTime();
+      long start = System.currentTimeMillis();
       QueryExecutionPlan executionPlan = planner.createPlan(context, query);
-      long duration = System.nanoTime() - start;
+      long duration = System.currentTimeMillis() - start;
       Statistics stats = new Statistics(duration);
       if (!context.getExecutionExceptions().hasProblems())
       {
          // Optimize the plan ...
-         start = System.nanoTime();
+         start = System.currentTimeMillis();
          QueryExecutionPlan optimizedPlan = optimizer.optimize(context, executionPlan);
 
-         duration = System.nanoTime() - start;
+         duration = System.currentTimeMillis() - start;
          stats = stats.withOptimizationTime(duration);
          if (!context.getExecutionExceptions().hasProblems())
          {
@@ -133,12 +133,12 @@ public class QueryProcessorInterceptor extends CommandInterceptor
             // Execute the plan ...
             try
             {
-               start = System.nanoTime();
+               start = System.currentTimeMillis();
                return execute(ctx, context, query, stats, optimizedPlan);
             }
             finally
             {
-               duration = System.nanoTime() - start;
+               duration = System.currentTimeMillis() - start;
                stats = stats.withOptimizationTime(duration);
             }
          }

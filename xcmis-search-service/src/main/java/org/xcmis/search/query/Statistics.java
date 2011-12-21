@@ -30,30 +30,30 @@ public class Statistics implements Comparable<Statistics>, Serializable
 
    protected static final Statistics EMPTY_STATISTICS = new Statistics();
 
-   private final long planningNanos;
+   private final long planningMillis;
 
-   private final long optimizationNanos;
+   private final long optimizationMillis;
 
-   private final long resultFormulationNanos;
+   private final long resultFormulationMillis;
 
-   private final long executionNanos;
+   private final long executionMillis;
 
    public Statistics()
    {
       this(0L, 0L, 0L, 0L);
    }
 
-   public Statistics(long planningNanos)
+   public Statistics(long planningMillis)
    {
-      this(planningNanos, 0L, 0L, 0L);
+      this(planningMillis, 0L, 0L, 0L);
    }
 
-   public Statistics(long planningNanos, long optimizationNanos, long resultFormulationNanos, long executionNanos)
+   public Statistics(long planningMillis, long optimizationMillis, long resultFormulationMillis, long executionMillis)
    {
-      this.planningNanos = planningNanos;
-      this.optimizationNanos = optimizationNanos;
-      this.resultFormulationNanos = resultFormulationNanos;
-      this.executionNanos = executionNanos;
+      this.planningMillis = planningMillis;
+      this.optimizationMillis = optimizationMillis;
+      this.resultFormulationMillis = resultFormulationMillis;
+      this.executionMillis = executionMillis;
    }
 
    /**
@@ -66,7 +66,7 @@ public class Statistics implements Comparable<Statistics>, Serializable
    public long getPlanningTime(TimeUnit unit)
    {
       Validate.notNull(unit, "Unit should not be null");
-      return unit.convert(planningNanos, TimeUnit.NANOSECONDS);
+      return unit.convert(planningMillis, TimeUnit.MILLISECONDS);
    }
 
    /**
@@ -79,7 +79,7 @@ public class Statistics implements Comparable<Statistics>, Serializable
    public long getOptimizationTime(TimeUnit unit)
    {
       Validate.notNull(unit, "Unit should not be null");
-      return unit.convert(optimizationNanos, TimeUnit.NANOSECONDS);
+      return unit.convert(optimizationMillis, TimeUnit.MILLISECONDS);
    }
 
    /**
@@ -92,7 +92,7 @@ public class Statistics implements Comparable<Statistics>, Serializable
    public long getResultFormulationTime(TimeUnit unit)
    {
       Validate.notNull(unit, "Unit should not be null");
-      return unit.convert(resultFormulationNanos, TimeUnit.NANOSECONDS);
+      return unit.convert(resultFormulationMillis, TimeUnit.MILLISECONDS);
    }
 
    /**
@@ -104,7 +104,7 @@ public class Statistics implements Comparable<Statistics>, Serializable
     */
    public long getExecutionTime(TimeUnit unit)
    {
-      return unit.convert(executionNanos, TimeUnit.NANOSECONDS);
+      return unit.convert(executionMillis, TimeUnit.MILLISECONDS);
    }
 
    /**
@@ -116,64 +116,64 @@ public class Statistics implements Comparable<Statistics>, Serializable
     */
    public long getTotalTime(TimeUnit unit)
    {
-      return unit.convert(totalTime(), TimeUnit.NANOSECONDS);
+      return unit.convert(totalTime(), TimeUnit.MILLISECONDS);
    }
 
    protected long totalTime()
    {
-      return planningNanos + optimizationNanos + resultFormulationNanos + executionNanos;
+      return planningMillis + optimizationMillis + resultFormulationMillis + executionMillis;
    }
 
    /**
     * Create a new statistics object that has the supplied planning time.
     * 
-    * @param planningNanos the number of nanoseconds required by planning
+    * @param planningMillis the number of milliseconds required by planning
     * @return the new statistics object; never null
     * @throws IllegalArgumentException if the time value is negative
     */
-   public Statistics withPlanningTime(long planningNanos)
+   public Statistics withPlanningTime(long planningMillis)
    {
-      Validate.isTrue(planningNanos >= 0, "planningNanos should not >=0");
-      return new Statistics(planningNanos, optimizationNanos, resultFormulationNanos, executionNanos);
+      Validate.isTrue(planningMillis >= 0, "planningMillis should be >=0");
+      return new Statistics(planningMillis, optimizationMillis, resultFormulationMillis, executionMillis);
    }
 
    /**
     * Create a new statistics object that has the supplied optimization time.
     * 
-    * @param optimizationNanos the number of nanoseconds required by optimization
+    * @param optimizationMillis the number of milliseconds required by optimization
     * @return the new statistics object; never null
     * @throws IllegalArgumentException if the time value is negative
     */
-   public Statistics withOptimizationTime(long optimizationNanos)
+   public Statistics withOptimizationTime(long optimizationMillis)
    {
-      Validate.isTrue(optimizationNanos >= 0, "optimizationNanos should not >=0");
-      return new Statistics(planningNanos, optimizationNanos, resultFormulationNanos, executionNanos);
+      Validate.isTrue(optimizationMillis >= 0, "optimizationMillis should be >=0");
+      return new Statistics(planningMillis, optimizationMillis, resultFormulationMillis, executionMillis);
    }
 
    /**
     * Create a new statistics object that has the supplied result formulation time.
     * 
-    * @param resultFormulationNanos the number of nanoseconds required by result formulation
+    * @param resultFormulationMillis the number of milliseconds required by result formulation
     * @return the new statistics object; never null
     * @throws IllegalArgumentException if the time value is negative
     */
-   public Statistics withResultsFormulationTime(long resultFormulationNanos)
+   public Statistics withResultsFormulationTime(long resultFormulationMillis)
    {
-      Validate.isTrue(resultFormulationNanos >= 0, "resultFormulationNanos should not >=0");
-      return new Statistics(planningNanos, optimizationNanos, resultFormulationNanos, executionNanos);
+      Validate.isTrue(resultFormulationMillis >= 0, "resultFormulationMillis should be >=0");
+      return new Statistics(planningMillis, optimizationMillis, resultFormulationMillis, executionMillis);
    }
 
    /**
     * Create a new statistics object that has the supplied execution time.
     * 
-    * @param executionNanos the number of nanoseconds required to execute the query
+    * @param executionMillis the number of milliseconds required to execute the query
     * @return the new statistics object; never null
     * @throws IllegalArgumentException if the time value is negative
     */
-   public Statistics withExecutionTime(long executionNanos)
+   public Statistics withExecutionTime(long executionMillis)
    {
-      Validate.isTrue(executionNanos >= 0, "executionNanos should not >=0");
-      return new Statistics(planningNanos, optimizationNanos, resultFormulationNanos, executionNanos);
+      Validate.isTrue(executionMillis >= 0, "executionMillis should be >=0");
+      return new Statistics(planningMillis, optimizationMillis, resultFormulationMillis, executionMillis);
    }
 
    /**
@@ -186,10 +186,10 @@ public class Statistics implements Comparable<Statistics>, Serializable
     */
    public Statistics withPlanningTime(long planning, TimeUnit unit)
    {
-      Validate.isTrue(planning >= 0, "planning should not >=0");
+      Validate.isTrue(planning >= 0, "planning should be >=0");
       Validate.notNull(unit, "Unit should not be null");
-      long planningNanos = TimeUnit.NANOSECONDS.convert(planning, unit);
-      return new Statistics(planningNanos, optimizationNanos, resultFormulationNanos, executionNanos);
+      long planningMillis = TimeUnit.NANOSECONDS.convert(planning, unit);
+      return new Statistics(planningMillis, optimizationMillis, resultFormulationMillis, executionMillis);
    }
 
    /**
@@ -203,10 +203,10 @@ public class Statistics implements Comparable<Statistics>, Serializable
    public Statistics withOptimizationTime(long optimization, TimeUnit unit)
    {
 
-      Validate.isTrue(optimization >= 0, "optimization should not >=0");
+      Validate.isTrue(optimization >= 0, "optimization should be >=0");
       Validate.notNull(unit, "Unit should not be null");
-      long optimizationNanos = TimeUnit.NANOSECONDS.convert(optimization, unit);
-      return new Statistics(planningNanos, optimizationNanos, resultFormulationNanos, executionNanos);
+      long optimizationMillis = TimeUnit.NANOSECONDS.convert(optimization, unit);
+      return new Statistics(planningMillis, optimizationMillis, resultFormulationMillis, executionMillis);
    }
 
    /**
@@ -220,11 +220,11 @@ public class Statistics implements Comparable<Statistics>, Serializable
    public Statistics withResultsFormulationTime(long resultFormulation, TimeUnit unit)
    {
 
-      Validate.isTrue(resultFormulation >= 0, "resultFormulation should not >=0");
+      Validate.isTrue(resultFormulation >= 0, "resultFormulation should be >=0");
       Validate.notNull(unit, "Unit should not be null");
 
-      long resultFormulationNanos = TimeUnit.NANOSECONDS.convert(resultFormulation, unit);
-      return new Statistics(planningNanos, optimizationNanos, resultFormulationNanos, executionNanos);
+      long resultFormulationMillis = TimeUnit.MILLISECONDS.convert(resultFormulation, unit);
+      return new Statistics(planningMillis, optimizationMillis, resultFormulationMillis, executionMillis);
    }
 
    /**
@@ -238,10 +238,10 @@ public class Statistics implements Comparable<Statistics>, Serializable
    public Statistics withExecutionTime(long execution, TimeUnit unit)
    {
 
-      Validate.isTrue(execution >= 0, "execution should not >=0");
+      Validate.isTrue(execution >= 0, "execution should be >=0");
       Validate.notNull(unit, "Unit should not be null");
-      long executionNanos = TimeUnit.NANOSECONDS.convert(execution, unit);
-      return new Statistics(planningNanos, optimizationNanos, resultFormulationNanos, executionNanos);
+      long executionMillis = TimeUnit.MILLISECONDS.convert(execution, unit);
+      return new Statistics(planningMillis, optimizationMillis, resultFormulationMillis, executionMillis);
    }
 
    /**
@@ -278,13 +278,13 @@ public class Statistics implements Comparable<Statistics>, Serializable
       StringBuilder sb = new StringBuilder();
       readable(totalTime(), sb);
       boolean first = false;
-      if (planningNanos != 0L)
+      if (planningMillis != 0L)
       {
          sb.append(" (plan=");
-         readable(planningNanos, sb);
+         readable(planningMillis, sb);
          first = false;
       }
-      if (optimizationNanos != 0L)
+      if (optimizationMillis != 0L)
       {
          if (first)
          {
@@ -296,9 +296,9 @@ public class Statistics implements Comparable<Statistics>, Serializable
             sb.append(" ,");
          }
          sb.append("opt=");
-         readable(optimizationNanos, sb);
+         readable(optimizationMillis, sb);
       }
-      if (resultFormulationNanos != 0L)
+      if (resultFormulationMillis != 0L)
       {
          if (first)
          {
@@ -310,9 +310,9 @@ public class Statistics implements Comparable<Statistics>, Serializable
             sb.append(" ,");
          }
          sb.append("res=");
-         readable(resultFormulationNanos, sb);
+         readable(resultFormulationMillis, sb);
       }
-      if (executionNanos != 0L)
+      if (executionMillis != 0L)
       {
          if (first)
          {
@@ -324,7 +324,7 @@ public class Statistics implements Comparable<Statistics>, Serializable
             sb.append(" ,");
          }
          sb.append("exec=");
-         readable(executionNanos, sb);
+         readable(executionMillis, sb);
       }
       if (!first)
       {
@@ -333,40 +333,41 @@ public class Statistics implements Comparable<Statistics>, Serializable
       return sb.toString();
    }
 
-   protected void readable(long nanos, StringBuilder sb)
+   protected void readable(long millis, StringBuilder sb)
    {
       // 3210987654321
-      // XXXXXXXXXXXXX nanos
+      // XXXXXXXXXXXXX millis
       // XXXXXXXXXX micros
       // XXXXXXX millis
       // XXXX seconds
-      if (nanos < 1000)
+      //TODO check conversion
+      if (millis < 1000)
       {
-         sb.append(nanos).append(" ns");
+         sb.append(millis).append(" ns");
       }
-      else if (nanos < 1000000)
+      else if (millis < 1000000)
       {
-         double value = nanos / 1000d;
+         double value = millis / 1000d;
          sb.append(FORMATTER.get().format(value)).append(" usec");
       }
-      else if (nanos < 1000000000)
+      else if (millis < 1000000000)
       {
-         double value = nanos / 1000000d;
+         double value = millis / 1000000d;
          sb.append(FORMATTER.get().format(value)).append(" ms");
       }
       else
       {
-         double value = nanos / 1000000000d;
+         double value = millis / 1000000000d;
          sb.append(FORMATTER.get().format(value)).append(" sec");
       }
    }
 
    static ThreadLocal<DecimalFormat> FORMATTER = new ThreadLocal<DecimalFormat>()
-   {
+            {
       @Override
       protected synchronized DecimalFormat initialValue()
       {
          return new DecimalFormat("###,###,##0.0##");
       }
-   };
+            };
 }
