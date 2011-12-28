@@ -50,10 +50,8 @@
    </distributionManagement>
    <properties>
       <!-- Repositories URLs -->
-      <xcmis.releases.repo.url>http://repository.exoplatform.org/service/local/staging/deploy/maven2/
-      </xcmis.releases.repo.url>
-      <xcmis.snapshots.repo.url>http://repository.exoplatform.org/content/repositories/xcmis-snapshots/
-      </xcmis.snapshots.repo.url>
+      <xcmis.releases.repo.url>http://repository.exoplatform.org/service/local/staging/deploy/maven2/</xcmis.releases.repo.url>
+      <xcmis.snapshots.repo.url>http://repository.exoplatform.org/content/repositories/xcmis-snapshots/</xcmis.snapshots.repo.url>
       <exo.product.name>xcmis</exo.product.name>
       <exo.product.specification>1.0</exo.product.specification>
       <source.url>http://xcmis.googlecode.com/svn/branches/1.1.0</source.url>
@@ -61,9 +59,9 @@
       <maven.build.timestamp.format>yyyy.MM.dd-HH:mm</maven.build.timestamp.format>
       <eclipse.projectNameTemplate>[artifactId]-[version]</eclipse.projectNameTemplate>
       <!-- eXo versions -->
-      <org.exoplatform.kernel.version>2.2.9-GA-SNAPSHOT</org.exoplatform.kernel.version>
-      <org.exoplatform.core.version>2.3.9-GA-SNAPSHOT</org.exoplatform.core.version>
-      <org.exoplatform.ws.version>2.1.9-GA-SNAPSHOT</org.exoplatform.ws.version>
+      <org.exoplatform.kernel.version>2.2.9-GA</org.exoplatform.kernel.version>
+      <org.exoplatform.core.version>2.3.9-GA</org.exoplatform.core.version>
+      <org.exoplatform.ws.version>2.1.9-GA</org.exoplatform.ws.version>
       <!-- Default tests settings -->
       <maven.test.skip>false</maven.test.skip>
       <forkMode>once</forkMode>
