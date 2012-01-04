@@ -258,7 +258,7 @@ public class CheckedOutCollection extends CmisObjectCollection
       feed.setId(getId(request));
       feed.setTitle(getTitle(request));
       feed.addAuthor(getAuthor(request));
-      // FIXME updated is incorrect when pass Date.
+      // Updated is incorrect when pass Date.
       // Abdera uses Calendar.getInstance(TimeZone.getTimeZone("GMT"))
       // See org.apache.abdera.model.AtomDate .
       feed.setUpdated(AtomUtils.getAtomDate(Calendar.getInstance()));

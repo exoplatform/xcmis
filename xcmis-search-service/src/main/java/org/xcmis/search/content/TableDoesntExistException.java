@@ -37,7 +37,6 @@ public class TableDoesntExistException extends SearchServiceException
    public TableDoesntExistException()
    {
       super();
-      // TODO Auto-generated constructor stub
    }
 
    /**
@@ -47,7 +46,6 @@ public class TableDoesntExistException extends SearchServiceException
    public TableDoesntExistException(String message, Throwable cause)
    {
       super(message, cause);
-      // TODO Auto-generated constructor stub
    }
 
    /**
@@ -56,7 +54,6 @@ public class TableDoesntExistException extends SearchServiceException
    public TableDoesntExistException(String message)
    {
       super(message);
-      // TODO Auto-generated constructor stub
    }
 
    /**
@@ -65,7 +62,6 @@ public class TableDoesntExistException extends SearchServiceException
    public TableDoesntExistException(Throwable cause)
    {
       super(cause);
-      // TODO Auto-generated constructor stub
    }
 
 }

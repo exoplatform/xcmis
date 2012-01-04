@@ -117,7 +117,7 @@ public class PersistedIndex implements LuceneIndexDataManager, Startable
       }
       catch (final IndexException e)
       {
-         e.printStackTrace();
+         LOG.error(e.getMessage(), e);
       }
       return 0;
    }
@@ -144,7 +144,6 @@ public class PersistedIndex implements LuceneIndexDataManager, Startable
       }
       catch (final IOException e)
       {
-         // e.printStackTrace()
          throw new IndexException(e.getLocalizedMessage(), e);
       }
       return this.indexReader;
@@ -221,7 +220,7 @@ public class PersistedIndex implements LuceneIndexDataManager, Startable
                // updated
                for (final String uuid : updatedDocuments)
                {
-                  // TODO posible use only delete
+                  // TODO possible use only delete
                   writer.updateDocument(new Term(FieldNames.UUID, uuid), updated.get(uuid));
                }
                // added

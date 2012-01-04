@@ -105,7 +105,6 @@ public class CmisSchema implements Schema
       }
       catch (TypeNotFoundException tnfe)
       {
-         tnfe.printStackTrace(); // TODO
          return null;
       }
    }

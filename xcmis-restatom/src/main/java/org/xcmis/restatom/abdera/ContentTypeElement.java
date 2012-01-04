@@ -83,11 +83,11 @@ public class ContentTypeElement extends ExtensibleElementWrapper
       return content;
    }
 
-   // TODO : useless, check and remove
    /**
     * Builds the element.
     * 
     * @param contentType the content type
+    * @deprecated
     */
    public void build(CmisContentType contentType)
    {

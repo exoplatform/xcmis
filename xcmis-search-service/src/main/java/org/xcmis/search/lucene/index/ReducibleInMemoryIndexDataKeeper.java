@@ -130,7 +130,6 @@ public class ReducibleInMemoryIndexDataKeeper implements TransactionableLuceneIn
     * @return
     * @throws IndexException
     */
-   // TODO removed
    public Directory getDirectory() throws IndexException
    {
       if (!isPendingCommited)

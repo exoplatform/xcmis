@@ -61,7 +61,7 @@ public class LocalStorageIndexDataManager implements LuceneIndexDataManager, Ind
    /**
     * Class logger.
     */
-   private final Logger log = Logger.getLogger(LocalStorageIndexDataManager.class);
+   private static final Logger LOG = Logger.getLogger(LocalStorageIndexDataManager.class);
 
    private final IndexConfiguration indexConfuguration;
 
@@ -83,7 +83,6 @@ public class LocalStorageIndexDataManager implements LuceneIndexDataManager, Ind
    public IndexTransactionModificationReport aggregate(final Collection<LuceneIndexDataManager> indexes)
       throws IndexException, IndexTransactionException
    {
-      // TODO Auto-generated method stub
       if (chains.size() == 0)
       {
          chains.add((PersistedIndex)indexFactory.merge(indexes));
@@ -303,11 +302,11 @@ public class LocalStorageIndexDataManager implements LuceneIndexDataManager, Ind
          }
          catch (final IndexException e)
          {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
          }
          catch (final IOException e)
          {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
          }
       }
 

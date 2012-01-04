@@ -250,8 +250,6 @@ public class MimeType
       /**
        * Process quoted string, it minds remove escape characters for quotes.
        *
-       * @see HeaderHelper#filterEscape(String)
-       *
        * @return processed string
        * @throws ParseException if string can't be parsed
        */
@@ -351,7 +349,6 @@ public class MimeType
     *        <code>source</code> will be ignored.
     * @return MimeType
     */
-   // TODO : support for parameter.
    public static MimeType fromString(String source)
    {
       if (source == null || source.length() == 0)

@@ -87,7 +87,7 @@ public class FolderDescentantsCollection extends CmisObjectCollection
       // In this case entry is parent for feed, so use info from entry for new feed.
       String entryId = entry.getId().toString();
       Feed childFeed = request.getAbdera().getFactory().newFeed(childrenElement);
-      childFeed.setId("ch:" + entryId); // TODO : entry use objectId and may not have two items with the same id.
+      childFeed.setId("ch:" + entryId);
       childFeed.setTitle("Folder Children");
       childFeed.addAuthor(entry.getAuthor());
       childFeed.setUpdated(entry.getUpdated());

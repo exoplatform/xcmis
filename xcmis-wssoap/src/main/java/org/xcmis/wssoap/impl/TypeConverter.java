@@ -476,7 +476,7 @@ public class TypeConverter
       }
       catch (IOException e)
       {
-         e.printStackTrace();
+         throw new RuntimeException(e);
       }
       return result;
    }
@@ -1129,14 +1129,7 @@ public class TypeConverter
       {
          if (one != null)
          {
-            try
-            {
-               result.add(new URI(one));
-            }
-            catch (URISyntaxException e)
-            {
-               e.printStackTrace();
-            }
+            result.add(URI.create(one));
          }
       }
       return result;

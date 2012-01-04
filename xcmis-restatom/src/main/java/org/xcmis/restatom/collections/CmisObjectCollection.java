@@ -208,13 +208,11 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       {
          Connection connection = getConnection(request);
          ChangeTokenHolder changeTokenHolder = new ChangeTokenHolder();
-         // TODO : Is it correct to use 'If-Match' header ?
          changeTokenHolder.setValue(request.getHeader(HttpHeaders.IF_MATCH));
          String objectId = connection.deleteContentStream(getId(request), changeTokenHolder /*changeToken*/);
          CmisObject object = connection.getProperties(objectId, true, CmisConstants.CHANGE_TOKEN);
          @SuppressWarnings("unchecked")
          Property<String> changeToken = (Property<String>)getProperty(object, CmisConstants.CHANGE_TOKEN);
-         // TODO : 204, is it correct ? It used by default when delete content of ATOM resource
          ResponseContext response = new EmptyResponseContext(204);
          if (changeToken != null && changeToken.getValues().size() > 0)
          {
@@ -258,7 +256,6 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       {
          Connection connection = getConnection(request);
          ChangeTokenHolder changeTokenHolder = new ChangeTokenHolder();
-         // TODO : Is it correct to use 'If-Match' header ?
          changeTokenHolder.setValue(request.getHeader(HttpHeaders.IF_MATCH));
          connection.deleteContentStream(documentId, changeTokenHolder);
       }
@@ -484,7 +481,6 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
          response.setContentLength(content.length());
          response.setHeader(AtomCMIS.CONTENT_DISPOSITION_HEADER, //
             "attachment; filename=\"" + content.getFileName() + "\"");
-         // TODO : need ETag here ?
          return response;
       }
       catch (ObjectNotFoundException onfe)
@@ -581,7 +577,6 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
          else
          {
             // If 'checkin' param is FALSE, execute updateProperties() service.
-            // TODO : is correct to use 'if-match' header?
             // Get 'if-match' header as is, according to HTTP specification :
             // http://www.w3.org/Protocols/rfc2616/rfc2616-sec13.html#sec13.3.3
             // ------------------------------------------
@@ -657,7 +652,6 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       {
          Connection connection = getConnection(request);
          ContentStream content = new BaseContentStream(inputStream, null, convertMimeType(contentType));
-         // TODO : is correct ?
          ChangeTokenHolder changeTokenHolder = new ChangeTokenHolder();
          changeTokenHolder.setValue(request.getHeader(HttpHeaders.IF_MATCH));
          boolean overwriteFlag = getBooleanParameter(request, AtomCMIS.PARAM_OVERWRITE_FLAG, true);
@@ -702,7 +696,6 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
          ContentStream content =
             new BaseContentStream(request.getInputStream(), null, convertMimeType(request.getContentType()));
          ChangeTokenHolder changeTokenHolder = new ChangeTokenHolder();
-         // TODO : is correct ?
          changeTokenHolder.setValue(request.getHeader(HttpHeaders.IF_MATCH));
          boolean overwriteFlag = getBooleanParameter(request, AtomCMIS.PARAM_OVERWRITE_FLAG, true);
          String updatedId = connection.setContentStream(getId(request), content, changeTokenHolder, overwriteFlag);
@@ -787,7 +780,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
    {
       String objectId = getId(object);
       entry.setId(objectId);
-      // FIXME updated and published is incorrect when pass Date.
+      // Updated and published is incorrect when pass Date.
       // Abdera uses Calendar.getInstance(TimeZone.getTimeZone("GMT"))
       // See org.apache.abdera.model.AtomDate .
       entry.setPublished(AtomUtils.getAtomDate(getCreationDate(object)));
@@ -997,7 +990,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       feed.setId(getId(request));
       feed.setTitle(getTitle(request));
       feed.addAuthor(getAuthor(request));
-      // FIXME updated is incorrect when pass Date.
+      // Updated is incorrect when pass Date.
       // Abdera uses Calendar.getInstance(TimeZone.getTimeZone("GMT"))
       // See org.apache.abdera.model.AtomDate .
       feed.setUpdated(AtomUtils.getAtomDate(Calendar.getInstance())); // TODO proper date
@@ -1185,7 +1178,6 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
                   // If 'src' attribute provides URI is the same to current
                   // object (document). This may happen when client does 'check-in'
                   // or 'check-out' operation.
-                  // TODO : need to do anything ??
                }
                else
                {
@@ -1248,7 +1240,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
                   byte[] data;
                   // XXX CMISSpaces sends XML content as Base64 encoded but
                   // Abdera waits for plain text.
-                  // TODO Done just for research work. Find good solution to fix this.
+                  // Done just for research work. Find good solution to fix this.
                   if (SPACES_AIR_SPECIFIC_REFERER.equalsIgnoreCase(request.getHeader("referer")))
                   {
                      data = Base64.decodeBase64(content.getText().getBytes());
@@ -1301,7 +1293,6 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
     * return null.
     *
     * @param id folder id
-    * @param repository info
     * @param request request context
     * @return link to AtomPub document that describes folder's descendants or
     *         null if capability 'getDescendants' is not supported.
@@ -1467,7 +1458,6 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
    @Override
    protected String getResourceName(RequestContext request)
    {
-      // TODO : can get smarter?
       String path = request.getTarget().getParameter("path");
       if (path != null)
       {

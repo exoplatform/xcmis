@@ -272,7 +272,7 @@ public class FolderChildrenCollection extends CmisObjectCollection
             }
          }
 
-         // TODO do we need to fill the perameters ?
+         // TODO do we need to fill the parameters ?
          boolean isIncludeAllowableActions = false;
          IncludeRelationships isIncludeRelationships = null;
          boolean isIncludePolicyIDs = false;

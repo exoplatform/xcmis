@@ -342,7 +342,6 @@ public abstract class AbstractLuceneQueryableIndexStorage extends QueryableIndex
       @Override
       public void visit(NodeLocalName node) throws VisitException
       {
-         // TODO Auto-generated method stub
          super.visit(node);
       }
 

@@ -51,10 +51,7 @@ public class LuceneIndexTransaction implements IndexTransaction<Document>
 
    /**
     * @param addedDocuments
-    * @param updatedDocuments
     * @param deletedDocuments
-    * @param storage TODO
-    * @param transactionLogDir
     */
    public LuceneIndexTransaction(final Map<String, Document> addedDocuments, final Set<String> deletedDocuments)
    {

@@ -1943,8 +1943,6 @@ public class ObjectTest extends BaseTest
       }
    }
 
-   // TODO
-
    /**
     * 
     * 2.2.4.6 getAllowableActions.

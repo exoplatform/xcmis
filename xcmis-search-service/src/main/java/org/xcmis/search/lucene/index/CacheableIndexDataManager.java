@@ -108,8 +108,6 @@ public class CacheableIndexDataManager extends LocalIndexDataManagerProxy
    private final Object updateMonitor = new Object();
 
    /**
-    * @param queryHandlerEntry
-    * @param dataKeeperFactory
     * @throws IndexConfigurationException
     * @throws IndexException
     */
@@ -181,7 +179,6 @@ public class CacheableIndexDataManager extends LocalIndexDataManagerProxy
    @Override
    public Directory getDirectory() throws IndexException
    {
-      // TODO Auto-generated method stub
       return super.getDirectory();
    }
 
@@ -436,11 +433,11 @@ public class CacheableIndexDataManager extends LocalIndexDataManagerProxy
       }
       catch (final ConcurrentModificationException e)
       {
-         e.printStackTrace();
+         LOG.error(e.getMessage(), e);
       }
       catch (final IndexException e)
       {
-         e.printStackTrace();
+         LOG.error(e.getMessage(), e);
       }
       super.stop();
    }

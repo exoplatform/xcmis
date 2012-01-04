@@ -259,8 +259,6 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
 
    public void visit(ChildNodeJoinCondition node) throws VisitException
    {
-      // TODO Auto-generated method stub
-
    }
 
    /**
@@ -1035,8 +1033,7 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
    /**
     * Transform Like pattern to regular expression.
     * 
-    * @param String
-    *           Like pattern
+    * @param pattern Like pattern
     * @return String regular expression
     */
    private String likePatternToRegex(final String pattern)

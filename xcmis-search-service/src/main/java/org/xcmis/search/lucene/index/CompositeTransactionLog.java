@@ -97,7 +97,6 @@ public class CompositeTransactionLog implements TransactionLog
     */
    public void log() throws TransactionLogException
    {
-      // TODO Auto-generated method stub
       throw new UnsupportedOperationException("CompositeTransactionLog do not support log() method.");
    }
 

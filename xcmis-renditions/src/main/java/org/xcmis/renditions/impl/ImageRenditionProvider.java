@@ -54,7 +54,6 @@ public class ImageRenditionProvider implements RenditionProvider
 
    private static final MimeType PRODUCED = new MimeType("image", "png");
 
-   // TODO configurable maxHeigth & maxWidth ??
    /** The max height. */
    private int maxHeight = 100;
 

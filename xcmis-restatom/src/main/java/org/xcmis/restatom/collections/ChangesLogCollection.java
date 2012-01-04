@@ -157,7 +157,7 @@ public class ChangesLogCollection extends AbstractCmisCollection<CmisObject>
    {
       String objectId = getId(object);
       entry.setId(objectId);
-      // FIXME updated and published is incorrect when pass Date.
+      // Updated and published is incorrect when pass Date.
       // Abdera uses Calendar.getInstance(TimeZone.getTimeZone("GMT"))
       // See org.apache.abdera.model.AtomDate .
       entry.setUpdated(AtomUtils.getAtomDate(getUpdated(object)));
@@ -271,7 +271,7 @@ public class ChangesLogCollection extends AbstractCmisCollection<CmisObject>
       feed.setId(getId(request));
       feed.setTitle(getTitle(request));
       feed.addAuthor(getAuthor(request));
-      // FIXME updated is incorrect when pass Date.
+      // Updated is incorrect when pass Date.
       // Abdera uses Calendar.getInstance(TimeZone.getTimeZone("GMT"))
       // See org.apache.abdera.model.AtomDate .
       feed.setUpdated(AtomUtils.getAtomDate(Calendar.getInstance()));

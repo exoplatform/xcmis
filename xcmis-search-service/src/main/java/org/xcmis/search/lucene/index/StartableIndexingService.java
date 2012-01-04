@@ -118,14 +118,13 @@ public class StartableIndexingService extends LuceneIndexingService
             }
             catch (final IOException e)
             {
-               LOG.error("Restore IOException occures " + e.getMessage(), e);
+               LOG.error("Restore IOException occurs " + e.getMessage(), e);
             }
          }
       }
       catch (IndexException e)
       {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
+         LOG.error(e.getMessage(), e);
       }
 
       changesLogBuffer.clear();
@@ -164,8 +163,6 @@ public class StartableIndexingService extends LuceneIndexingService
    /**
     * Restore Index from full repository content.
     * 
-    * @throws RepositoryException
-    *            - restore exception
     * @throws IOException
     *            if reindex flag file was not created or was'nt removed.
     * @throws IndexException

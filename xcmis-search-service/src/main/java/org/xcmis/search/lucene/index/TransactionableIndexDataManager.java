@@ -106,7 +106,6 @@ public class TransactionableIndexDataManager extends CacheableIndexDataManager
    @Override
    public void start()
    {
-      // TODO Auto-generated method stub
       super.start();
       try
       {
@@ -149,7 +148,6 @@ public class TransactionableIndexDataManager extends CacheableIndexDataManager
    @Override
    public void stop()
    {
-      // TODO Auto-generated method stub
       super.stop();
    }
 }

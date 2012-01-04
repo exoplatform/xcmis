@@ -261,7 +261,7 @@ public class AtomCmisService
       try
       {
          connection = CmisRegistry.getInstance().getConnection(repositoryId);
-         Boolean deleteAllVersions = true; // TODO
+         Boolean deleteAllVersions = true; // TODO : backend (JCR) not support removing just one version.
          connection.deleteTree(folderId, deleteAllVersions, unfileObject, continueOnFailure);
          return Response.noContent().build();
       }
@@ -771,7 +771,6 @@ public class AtomCmisService
       {
          for (Object v : abderaResponse.getHeaders(headerName))
          {
-            // TODO : need avoid direct casting to String.
             // For now just be sure not get errors if RESTful framework.
             responseBuilder.header(headerName, v.toString());
          }

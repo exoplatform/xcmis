@@ -60,7 +60,6 @@ public class WorkspaceManagerImpl extends AbstractWorkspaceManager
       // skip 'cmis/<repositoryId>'
       for (int seg = 2; seg > 0; seg--)
       {
-         // TODO improve
          if (path.charAt(0) == '/')
          {
             int next = path.indexOf('/', 1);

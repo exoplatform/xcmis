@@ -19,10 +19,6 @@
 package org.xcmis.search;
 
 /**
- * TODO add cause of exception.  
- * 
- */
-/**
  * VisitException.
  * @author <a href="mailto:Sergey.Kabashnyuk@exoplatform.org">Sergey Kabashnyuk</a>
  * @version $Id: VisitException.java 34360 2009-07-22 23:58:59Z ksm $

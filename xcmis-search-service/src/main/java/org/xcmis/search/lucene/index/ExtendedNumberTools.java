@@ -47,13 +47,11 @@ public class ExtendedNumberTools
    /**
     * Converts a long to a String suitable for indexing.
     * 
-    * @param doubleVal double value
+    * @param bigDecimal BigDecimal value
     * @return double as string
     */
    public static String bigDecimalToString(BigDecimal bigDecimal)
    {
-
-      // TODO fix me
       return doubleToString(bigDecimal.doubleValue());
    }
 }
