@@ -185,7 +185,7 @@ public class InterceptorChain implements Startable
       CommandInterceptor it = firstInChain;
       while (it != null)
       {
-         if (it == interceptor)
+         if (it.equals(interceptor))
          {
             return true;
          }

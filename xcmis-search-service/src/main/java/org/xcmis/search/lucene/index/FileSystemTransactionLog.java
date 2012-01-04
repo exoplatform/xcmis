@@ -81,10 +81,10 @@ public class FileSystemTransactionLog implements TransactionLog
 
    /**
     * Constructor for ordinary case.
-    * 
-    * @param indexTransaction - IndexTransaction
+    *
+    * @param addedDocumentsUuids added documents
+    * @param removedDocumentsUuids removed documents
     * @param storage - transaction storage.
-    * @param rootDir - Root directory file.
     */
    public FileSystemTransactionLog(final Set<String> addedDocumentsUuids, final Set<String> removedDocumentsUuids,
       final FSIndexTransactionService storage)
@@ -260,12 +260,13 @@ public class FileSystemTransactionLog implements TransactionLog
    private String buildPathFromName(final String fileName, final int dirCount)
    {
       final char[] chs = fileName.toCharArray();
-      String path = "";
+      StringBuilder path = new StringBuilder();
       for (int i = 1; i <= dirCount; i++)
       {
-         path += File.separator + chs[chs.length - i];
+         path.append(File.separator);
+         path.append(chs[chs.length - i]);
       }
-      return path;
+      return path.toString();
    }
 
    /**

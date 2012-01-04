@@ -105,7 +105,7 @@ public class ChildTraversingQueryNode extends Query
    public Query rewrite(IndexReader reader) throws IOException
    {
       Query newParentQuery = parentQuery.rewrite(reader);
-      if (newParentQuery == parentQuery)
+      if (newParentQuery.equals(parentQuery))
       {
          return this;
       }

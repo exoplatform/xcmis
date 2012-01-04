@@ -81,7 +81,9 @@ public class DescendantQueryNode extends Query
          cQuery = context.rewrite(reader);
       }
       Query pQuery = parentQuery.rewrite(reader);
-      if (cQuery == context && pQuery == parentQuery)
+      if (((cQuery != null && cQuery.equals(context)) || (cQuery == null && context == null))
+         && pQuery.equals(parentQuery)
+         )
       {
          return this;
       }
