@@ -18,8 +18,6 @@
  */
 package org.xcmis.search.query;
 
-import org.apache.commons.lang.Validate;
-
 import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.concurrent.TimeUnit;
@@ -65,7 +63,8 @@ public class Statistics implements Comparable<Statistics>, Serializable
     */
    public long getPlanningTime(TimeUnit unit)
    {
-      Validate.notNull(unit, "Unit should not be null");
+      //can be < 0 in some systems. see CMIS-549
+      //Validate.notNull(unit, "Unit should not be null");
       return unit.convert(planningMillis, TimeUnit.MILLISECONDS);
    }
 
@@ -78,7 +77,8 @@ public class Statistics implements Comparable<Statistics>, Serializable
     */
    public long getOptimizationTime(TimeUnit unit)
    {
-      Validate.notNull(unit, "Unit should not be null");
+      //can be < 0 in some systems. see CMIS-549
+      //Validate.notNull(unit, "Unit should not be null");
       return unit.convert(optimizationMillis, TimeUnit.MILLISECONDS);
    }
 
@@ -91,7 +91,8 @@ public class Statistics implements Comparable<Statistics>, Serializable
     */
    public long getResultFormulationTime(TimeUnit unit)
    {
-      Validate.notNull(unit, "Unit should not be null");
+      //can be < 0 in some systems. see CMIS-549
+      //Validate.notNull(unit, "Unit should not be null");
       return unit.convert(resultFormulationMillis, TimeUnit.MILLISECONDS);
    }
 
@@ -133,7 +134,8 @@ public class Statistics implements Comparable<Statistics>, Serializable
     */
    public Statistics withPlanningTime(long planningMillis)
    {
-      Validate.isTrue(planningMillis >= 0, "planningMillis should be >=0");
+      //can be < 0 in some systems. see CMIS-549
+      //Validate.isTrue(planningMillis >= 0, "planningMillis should be >=0");
       return new Statistics(planningMillis, optimizationMillis, resultFormulationMillis, executionMillis);
    }
 
@@ -146,7 +148,8 @@ public class Statistics implements Comparable<Statistics>, Serializable
     */
    public Statistics withOptimizationTime(long optimizationMillis)
    {
-      Validate.isTrue(optimizationMillis >= 0, "optimizationMillis should be >=0");
+      //can be < 0 in some systems. see CMIS-549
+      //Validate.isTrue(optimizationMillis >= 0, "optimizationMillis should be >=0");
       return new Statistics(planningMillis, optimizationMillis, resultFormulationMillis, executionMillis);
    }
 
@@ -159,7 +162,8 @@ public class Statistics implements Comparable<Statistics>, Serializable
     */
    public Statistics withResultsFormulationTime(long resultFormulationMillis)
    {
-      Validate.isTrue(resultFormulationMillis >= 0, "resultFormulationMillis should be >=0");
+      //can be < 0 in some systems. see CMIS-549
+      //Validate.isTrue(resultFormulationMillis >= 0, "resultFormulationMillis should be >=0");
       return new Statistics(planningMillis, optimizationMillis, resultFormulationMillis, executionMillis);
    }
 
@@ -172,7 +176,8 @@ public class Statistics implements Comparable<Statistics>, Serializable
     */
    public Statistics withExecutionTime(long executionMillis)
    {
-      Validate.isTrue(executionMillis >= 0, "executionMillis should be >=0");
+      //can be < 0 in some systems. see CMIS-549
+      //Validate.isTrue(executionMillis >= 0, "executionMillis should be >=0");
       return new Statistics(planningMillis, optimizationMillis, resultFormulationMillis, executionMillis);
    }
 
@@ -186,8 +191,9 @@ public class Statistics implements Comparable<Statistics>, Serializable
     */
    public Statistics withPlanningTime(long planning, TimeUnit unit)
    {
-      Validate.isTrue(planning >= 0, "planning should be >=0");
-      Validate.notNull(unit, "Unit should not be null");
+      //can be < 0 in some systems. see CMIS-549
+      //Validate.isTrue(planning >= 0, "planning should be >=0");
+      //Validate.notNull(unit, "Unit should not be null");
       long planningMillis = TimeUnit.NANOSECONDS.convert(planning, unit);
       return new Statistics(planningMillis, optimizationMillis, resultFormulationMillis, executionMillis);
    }
@@ -202,9 +208,9 @@ public class Statistics implements Comparable<Statistics>, Serializable
     */
    public Statistics withOptimizationTime(long optimization, TimeUnit unit)
    {
-
-      Validate.isTrue(optimization >= 0, "optimization should be >=0");
-      Validate.notNull(unit, "Unit should not be null");
+      //can be < 0 in some systems. see CMIS-549
+      //Validate.isTrue(optimization >= 0, "optimization should be >=0");
+      //Validate.notNull(unit, "Unit should not be null");
       long optimizationMillis = TimeUnit.NANOSECONDS.convert(optimization, unit);
       return new Statistics(planningMillis, optimizationMillis, resultFormulationMillis, executionMillis);
    }
@@ -219,9 +225,9 @@ public class Statistics implements Comparable<Statistics>, Serializable
     */
    public Statistics withResultsFormulationTime(long resultFormulation, TimeUnit unit)
    {
-
-      Validate.isTrue(resultFormulation >= 0, "resultFormulation should be >=0");
-      Validate.notNull(unit, "Unit should not be null");
+      //can be < 0 in some systems. see CMIS-549
+      //Validate.isTrue(resultFormulation >= 0, "resultFormulation should be >=0");
+      //Validate.notNull(unit, "Unit should not be null");
 
       long resultFormulationMillis = TimeUnit.MILLISECONDS.convert(resultFormulation, unit);
       return new Statistics(planningMillis, optimizationMillis, resultFormulationMillis, executionMillis);
@@ -237,9 +243,9 @@ public class Statistics implements Comparable<Statistics>, Serializable
     */
    public Statistics withExecutionTime(long execution, TimeUnit unit)
    {
-
-      Validate.isTrue(execution >= 0, "execution should be >=0");
-      Validate.notNull(unit, "Unit should not be null");
+      //can be < 0 in some systems. see CMIS-549
+      //Validate.isTrue(execution >= 0, "execution should be >=0");
+      //Validate.notNull(unit, "Unit should not be null");
       long executionMillis = TimeUnit.MILLISECONDS.convert(execution, unit);
       return new Statistics(planningMillis, optimizationMillis, resultFormulationMillis, executionMillis);
    }
