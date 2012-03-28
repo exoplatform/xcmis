@@ -34,8 +34,8 @@
       <url>http://jira.exoplatform.org/</url>
    </issueManagement>
    <scm>
-      <connection>scm:svn:http://xcmis.googlecode.com/svn/branches/1.1.x/</connection>
-      <developerConnection>scm:svn:https://xcmis.googlecode.com/svn/branches/1.1.x/</developerConnection>
+      <connection>scm:git:https://code.google.com/p/xcmis/</connection>
+      <developerConnection>scm:git:https://code.google.com/p/xcmis/</developerConnection>
       <url>http://code.google.com/p/xcmis/source/browse/</url>
    </scm>
    <distributionManagement>
@@ -87,6 +87,10 @@
       <lucene.version>2.4.1</lucene.version>
       <junit.version>4.8.1</junit.version>
       <abdera.version>0.4.0-incubating</abdera.version>
+      <!-- Maven plugin versions -->
+      <version.buildnumber.plugin>1.0</version.buildnumber.plugin>
+      <version.release.plugin>2.2.1</version.release.plugin>
+
    </properties>
    <dependencyManagement>
       <dependencies>
@@ -512,7 +516,7 @@
             <plugin>
                <groupId>org.codehaus.mojo</groupId>
                <artifactId>buildnumber-maven-plugin</artifactId>
-               <version>1.0-beta-4</version>
+               <version>1.0</version>
             </plugin>
             <plugin>
                <groupId>org.apache.maven.plugins</groupId>
@@ -592,6 +596,24 @@
          </plugins>
       </pluginManagement>
       <plugins>
+         <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>buildnumber-maven-plugin</artifactId>
+            <version>1.0</version>
+            <executions>
+               <execution>
+                  <phase>validate</phase>
+                  <id>getting-scm.revision</id>
+                  <goals>
+                     <goal>create</goal>
+                  </goals>
+               </execution>
+            </executions>
+            <configuration>
+               <buildNumberPropertyName>exo.product.scm.revision</buildNumberPropertyName>
+            </configuration>
+         </plugin>
+
          <!-- Manifest management -->
          <plugin>
             <groupId>org.apache.maven.plugins</groupId>
