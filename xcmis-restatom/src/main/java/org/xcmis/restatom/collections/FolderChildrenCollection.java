@@ -35,6 +35,7 @@ import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ItemsList;
+import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.StreamNotSupportedException;
@@ -186,7 +187,7 @@ public class FolderChildrenCollection extends CmisObjectCollection
 
       ObjectTypeElement objectElement = entry.getFirstChild(AtomCMIS.OBJECT);
       boolean hasCMISElement = objectElement != null;
-      CmisObject object = hasCMISElement ? object = objectElement.getObject() : new CmisObject();
+      CmisObject object = hasCMISElement ? objectElement.getObject() : new CmisObject();
       updatePropertiesFromEntry(object, entry);
       if (hasCMISElement)
       {
@@ -288,6 +289,10 @@ public class FolderChildrenCollection extends CmisObjectCollection
       catch (ConstraintException cve)
       {
          return createErrorResponse(cve, 409);
+      }
+      catch (NameConstraintViolationException nce)
+      {
+         return createErrorResponse(nce, 409);
       }
       catch (UpdateConflictException ue)
       {

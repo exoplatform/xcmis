@@ -609,7 +609,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       }
       catch (NameConstraintViolationException nce)
       {
-         return createErrorResponse(nce, 400);
+         return createErrorResponse(nce, 409);
       }
       catch (StorageException re)
       {

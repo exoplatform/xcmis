@@ -34,7 +34,7 @@
       <url>http://jira.exoplatform.org/</url>
    </issueManagement>
    <scm>
-      <connection>scm:git:https://code.google.com/p/xcmis//</connection>
+      <connection>scm:git:https://code.google.com/p/xcmis/</connection>
       <developerConnection>scm:git:https://code.google.com/p/xcmis/</developerConnection>
       <url>http://code.google.com/p/xcmis/source/browse/</url>
    </scm>
