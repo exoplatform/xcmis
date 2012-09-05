@@ -30,6 +30,7 @@ import org.xcmis.spi.model.PropertyDefinition;
 import org.xcmis.spi.model.TypeDefinition;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.namespace.QName;
@@ -74,8 +75,8 @@ public class TypeDefinitionTypeElement extends ExtensibleElementWrapper
       Map<String, PropertyDefinition<?>> propDefs = new HashMap<String, PropertyDefinition<?>>();
       for (QName q : AtomCMIS.PROPERTY_DEFINITIONS)
       {
-         PropertyDefinitionTypeElement propDefEl = getExtension(q);
-         if (propDefEl != null)
+         List<PropertyDefinitionTypeElement> propDefEls = getExtensions(q);
+         for (PropertyDefinitionTypeElement propDefEl : propDefEls)
          {
             PropertyDefinition<?> propDef = propDefEl.getPropertyDefinition();
             propDefs.put(propDef.getId(), propDef);

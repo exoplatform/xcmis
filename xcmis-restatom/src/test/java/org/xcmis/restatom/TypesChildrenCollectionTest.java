@@ -70,15 +70,16 @@ public class TypesChildrenCollectionTest extends BaseTest
       article.setContentStreamAllowed(ContentStreamAllowed.ALLOWED);
       article.setVersionable(false);
 
-      PropertyDefinition<String> pd = new PropertyDefinition<String>();
-      pd.setMultivalued(false);
-      pd.setUpdatability(Updatability.READWRITE);
-      pd.setDisplayName("cmis:hello");
-      pd.setId("cmis:hello");
-      pd.setInherited(false);
-      pd.setPropertyType(PropertyType.STRING);
+      PropertyDefinition<String> pd1 = new PropertyDefinition<String>();
+      pd1.setMultivalued(false);
+      pd1.setUpdatability(Updatability.READWRITE);
+      pd1.setDisplayName("cmis:hello");
+      pd1.setId("cmis:hello");
+      pd1.setInherited(false);
+      pd1.setPropertyType(PropertyType.STRING);
+
       Map<String, PropertyDefinition<?>> mapPD = new HashMap<String, PropertyDefinition<?>>();
-      mapPD.put(pd.getId(), pd);
+      mapPD.put(pd1.getId(), pd1);
       article.setPropertyDefinitions(mapPD);
 
       conn.addType(article);
@@ -173,6 +174,7 @@ public class TypesChildrenCollectionTest extends BaseTest
          + "<cmis:id>cmis:folder1</cmis:id>"//
          + "<cmis:baseId>cmis:folder</cmis:baseId>"//
          + "<cmis:parentId>cmis:folder</cmis:parentId>"//
+         //
          + "<cmis:propertyIdDefinition>" //
          + "<cmis:id>cmis:newProperty</cmis:id>" //
          + "<cmis:propertyType>id</cmis:propertyType>" //
@@ -186,6 +188,21 @@ public class TypesChildrenCollectionTest extends BaseTest
          + "<cmis:queryable>false</cmis:queryable>"//
          + "<cmis:orderable>false</cmis:orderable>"//
          + "</cmis:propertyIdDefinition>"//
+         //
+         + "<cmis:propertyIdDefinition>" //
+         + "<cmis:id>cmis:newProperty2</cmis:id>" //
+         + "<cmis:propertyType>id</cmis:propertyType>" //
+         + "<cmis:cardinality>single</cmis:cardinality>" //
+         + "<cmis:updatability>readonly</cmis:updatability>"//
+         + "<cmis:queryName>cmis:newProperty2</cmis:queryName>" //
+         + "<cmis:localName>cmis:newProperty2</cmis:localName>"//
+         + "<cmis:displayName>cmis:newProperty2</cmis:displayName>" //
+         + "<cmis:inherited>false</cmis:inherited>"//
+         + "<cmis:required>false</cmis:required>"//
+         + "<cmis:queryable>false</cmis:queryable>"//
+         + "<cmis:orderable>false</cmis:orderable>"//
+         + "</cmis:propertyIdDefinition>"//
+         //
          + "</cmisra:type>"//
          + "</entry>";
 
@@ -215,15 +232,10 @@ public class TypesChildrenCollectionTest extends BaseTest
       {
          fail("Type 'cmis:folder1' must be added.");
       }
-      boolean propDef = false;
-      for (PropertyDefinition<?> d : type.getPropertyDefinitions())
-      {
-         if (d.getId().equals("cmis:newProperty"))
-         {
-            propDef = true;
-         }
-      }
 
-      assertTrue("Property definition for newly created type not found.", propDef);
+      assertNotNull("Property definition 'cmis:newProperty' for newly created type not found.",
+         type.getPropertyDefinition("cmis:newProperty"));
+      assertNotNull("Property definition 'cmis:newProperty2' for newly created type not found.",
+         type.getPropertyDefinition("cmis:newProperty2"));
    }
 }
