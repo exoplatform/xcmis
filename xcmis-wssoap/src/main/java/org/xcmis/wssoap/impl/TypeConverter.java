@@ -72,7 +72,6 @@ import org.xcmis.core.EnumPropertyType;
 import org.xcmis.core.EnumSupportedPermissions;
 import org.xcmis.core.EnumTypeOfChanges;
 import org.xcmis.core.EnumUpdatability;
-import org.xcmis.messaging.CmisContentStreamType;
 import org.xcmis.messaging.CmisExtensionType;
 import org.xcmis.messaging.CmisObjectInFolderContainerType;
 import org.xcmis.messaging.CmisObjectInFolderListType;
@@ -82,7 +81,6 @@ import org.xcmis.messaging.CmisObjectParentsType;
 import org.xcmis.messaging.CmisRepositoryEntryType;
 import org.xcmis.messaging.CmisTypeContainer;
 import org.xcmis.messaging.CmisTypeDefinitionListType;
-import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.ItemsList;
 import org.xcmis.spi.ItemsTree;
 import org.xcmis.spi.model.ACLCapability;
@@ -113,11 +111,9 @@ import org.xcmis.spi.model.impl.StringProperty;
 import org.xcmis.spi.model.impl.UriProperty;
 import org.xcmis.spi.utils.CmisUtils;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -126,8 +122,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.activation.DataHandler;
-import javax.mail.util.ByteArrayDataSource;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
@@ -460,24 +454,6 @@ public class TypeConverter
       CmisObjectParentsType result = new CmisObjectParentsType();
       result.setObject(getCmisObjectType(source.getObject()));
       result.setRelativePathSegment(source.getRelativePathSegment());
-      return result;
-   }
-
-   public static CmisContentStreamType getCmisContentStreamType(ContentStream source)
-   {
-      CmisContentStreamType result = new CmisContentStreamType();
-      result.setFilename(source.getFileName());
-      result.setLength(BigInteger.valueOf(source.length()));
-      result.setMimeType(source.getMediaType().toString());
-      try
-      {
-         result
-            .setStream(new DataHandler(new ByteArrayDataSource(source.getStream(), source.getMediaType().toString())));
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException(e);
-      }
       return result;
    }
 
@@ -1041,7 +1017,6 @@ public class TypeConverter
             }
             catch (IllegalArgumentException ex)
             {
-               continue;
                // TODO:  Permission mapping keys described in spec does not coresponds with xml schema, so some keys are causing error
                // when try to do EnumAllowableActionsKey.fromValue(e.getKey()), e.g canRenditions.Object is present in spen but not in cmis-core.xsd;
             }

@@ -26,6 +26,7 @@ import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentAlreadyExistsException;
 import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.InvalidArgumentException;
+import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.NotSupportedException;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.PermissionDeniedException;
@@ -62,7 +63,7 @@ public class ExceptionFactory
          fault.setType(EnumServiceException.FILTER_NOT_VALID);
       else if (param instanceof InvalidArgumentException)
          fault.setType(EnumServiceException.INVALID_ARGUMENT);
-      else if (param instanceof ConstraintException)
+      else if (param instanceof NameConstraintViolationException)
          fault.setType(EnumServiceException.NAME_CONSTRAINT_VIOLATION);
       else if (param instanceof NotSupportedException)
          fault.setType(EnumServiceException.NOT_SUPPORTED);

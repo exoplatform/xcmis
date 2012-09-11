@@ -14,6 +14,13 @@
          <groupId>org.apache.shindig</groupId>
          <artifactId>shindig-common</artifactId>
          <scope>runtime</scope>
+         <exclusions>
+            <exclusion>
+               <!-- exclude commons-codec -->
+               <groupId>commons-codec</groupId>
+               <artifactId>commons-codec</artifactId>
+            </exclusion>
+         </exclusions>
       </dependency>
       <dependency>
          <groupId>org.apache.shindig</groupId>
@@ -25,6 +32,11 @@
          <artifactId>shindig-gadgets</artifactId>
          <scope>runtime</scope>
          <exclusions>
+            <exclusion>
+               <!-- exclude commons-codec -->
+               <groupId>commons-codec</groupId>
+               <artifactId>commons-codec</artifactId>
+            </exclusion>
             <exclusion>
                <groupId>caja</groupId>
                <artifactId>caja</artifactId>
@@ -40,6 +52,13 @@
          <groupId>org.apache.shindig</groupId>
          <artifactId>shindig-social-api</artifactId>
          <scope>runtime</scope>
+         <exclusions>
+            <exclusion>
+               <!-- exclude commons-codec -->
+               <groupId>commons-codec</groupId>
+               <artifactId>commons-codec</artifactId>
+            </exclusion>
+         </exclusions>
       </dependency>
       <dependency>
          <groupId>com.google.code.guice</groupId>

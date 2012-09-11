@@ -37,6 +37,7 @@ import org.xcmis.spi.ChangeTokenHolder;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRegistry;
 import org.xcmis.spi.Connection;
+import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.model.IncludeRelationships;
 import org.xcmis.spi.model.UnfileObject;
@@ -44,10 +45,15 @@ import org.xcmis.spi.model.VersioningState;
 import org.xcmis.spi.utils.Logger;
 import org.xcmis.spi.utils.MimeType;
 
+import java.io.FilterInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.math.BigInteger;
 import java.util.List;
 
 import javax.activation.DataHandler;
+import javax.activation.DataSource;
 
 /**
  * @author <a href="mailto:max.shaposhnik@exoplatform.com">Max Shaposhnik</a>
@@ -450,24 +456,32 @@ public class ObjectServicePortImpl implements ObjectServicePort
       {
          LOG.debug("Executing operation getContentStream");
       }
-      // TODO : content range
       Connection conn = null;
       try
       {
          conn = CmisRegistry.getInstance().getConnection(repositoryId);
-
-         CmisContentStreamType stream = new CmisContentStreamType();
          ContentStream cs = conn.getContentStream(objectId, streamId);
-
-         stream.setFilename(cs.getFileName());
-         String mediaType = cs.getMediaType().toString();
-         stream.setMimeType(mediaType);
-         if (cs.length() != -1)
+         String type = cs.getMediaType() == null ? "application/octet-stream" : cs.getMediaType().toString();
+         CmisContentStreamType result = new CmisContentStreamType();
+         result.setFilename(cs.getFileName());
+         result.setMimeType(type);
+         if (cs.length() > 0)
          {
-            stream.setLength(BigInteger.valueOf(cs.length()));
+            // Not clear need to set length of full content or part of it for range requests.
+            result.setLength(BigInteger.valueOf(cs.length()));
          }
-         stream.setStream(new DataHandler(cs.getStream(), mediaType));
-         return stream;
+         InputStream in = cs.getStream();
+         if (offset == null && length == null)
+         {
+            result.setStream(new DataHandler(new InputStreamDataSource(in, type)));
+         }
+         else
+         {
+            result.setStream(new DataHandler(new InputStreamDataSource(
+               new ContentRange(in, offset == null ? 0 : offset.longValue(), length == null ? -1 : length.longValue()),
+               type)));
+         }
+         return result;
       }
       catch (Exception e)
       {
@@ -480,6 +494,94 @@ public class ObjectServicePortImpl implements ObjectServicePort
          {
             conn.close();
          }
+      }
+   }
+
+   private static class InputStreamDataSource implements DataSource
+   {
+      private final InputStream in;
+      private final String type;
+
+      private InputStreamDataSource(InputStream in, String type)
+      {
+         this.in = in;
+         this.type = type;
+      }
+
+      @Override
+      public InputStream getInputStream() throws IOException
+      {
+         return in;
+      }
+
+      @Override
+      public OutputStream getOutputStream() throws IOException
+      {
+         return null;
+      }
+
+      @Override
+      public String getContentType()
+      {
+         return type;
+      }
+
+      @Override
+      public String getName()
+      {
+         return null;
+      }
+   }
+
+   private static class ContentRange extends FilterInputStream
+   {
+      private long remaining;
+      private final boolean needTruncate;
+
+      private ContentRange(InputStream in, long offset, long length) throws IOException, ConstraintException
+      {
+         super(in);
+         if (offset > 0)
+         {
+            if (in.skip(offset) < offset)
+            {
+               throw new ConstraintException("offset value is greater than the size of the content. ");
+            }
+         }
+         needTruncate = length >= 0;
+         remaining = length;
+      }
+
+      @Override
+      public int read() throws IOException
+      {
+         if (needTruncate)
+         {
+            if (remaining > 0)
+            {
+               int b = super.read();
+               remaining -= 1;
+               return b;
+            }
+            return -1;
+         }
+         return super.read();
+      }
+
+      @Override
+      public int read(byte[] b, int off, int len) throws IOException
+      {
+         if (needTruncate)
+         {
+            if (remaining > 0)
+            {
+               int n = super.read(b, off, (int)Math.min(len, remaining));
+               remaining -= n;
+               return n;
+            }
+            return -1;
+         }
+         return super.read(b, off, len);
       }
    }
 
