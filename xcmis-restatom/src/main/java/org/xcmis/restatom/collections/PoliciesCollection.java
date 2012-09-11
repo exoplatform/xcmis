@@ -127,7 +127,7 @@ public class PoliciesCollection extends CmisObjectCollection
 
       ObjectTypeElement objectElement = entry.getFirstChild(AtomCMIS.OBJECT);
       boolean hasCMISElement = objectElement != null;
-      CmisObject object = hasCMISElement ? object = objectElement.getObject() : new CmisObject();
+      CmisObject object = hasCMISElement ? objectElement.getObject() : new CmisObject();
       updatePropertiesFromEntry(object, entry);
       String policyId = null;
       if (hasCMISElement)

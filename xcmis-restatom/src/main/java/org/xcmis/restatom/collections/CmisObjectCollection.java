@@ -553,7 +553,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       {
          Connection connection = getConnection(request);
          ObjectTypeElement objectElement = entry.getFirstChild(AtomCMIS.OBJECT);
-         CmisObject object = objectElement != null ? object = objectElement.getObject() : new CmisObject();
+         CmisObject object = objectElement != null ? objectElement.getObject() : new CmisObject();
          updatePropertiesFromEntry(object, entry);
 
          Map<String, Property<?>> properties = object.getProperties();
@@ -609,7 +609,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       }
       catch (NameConstraintViolationException nce)
       {
-         return createErrorResponse(nce, 400);
+         return createErrorResponse(nce, 409);
       }
       catch (StorageException re)
       {

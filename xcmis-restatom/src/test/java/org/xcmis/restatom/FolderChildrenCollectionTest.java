@@ -101,6 +101,29 @@ public class FolderChildrenCollectionTest extends BaseTest
       validateObjectEntry(entry, "cmis:document");
    }
 
+   public void testCreateDocumentInvalidName() throws Exception
+   {
+      String s = "<?xml version='1.0' encoding='utf-8'?>" //
+         + "<entry xmlns='http://www.w3.org/2005/Atom'" + " xmlns:cmis='" + CmisConstants.CMIS_NS_URI + "'" //
+         + " xmlns:cmisra='" + AtomCMIS.CMISRA_NS_URI + "'>" //
+         + "<title>new_document</title><summary>summary</summary>" //
+         + "<content type='text'>hello</content>" //
+         + "<cmisra:object><cmis:properties>" //
+         + "<cmis:propertyId localName='cmis:objectTypeId' propertyDefinitionId='cmis:objectTypeId'>" //
+         + "<cmis:value>cmis:document</cmis:value></cmis:propertyId>" //
+         + "</cmis:properties>" + "</cmisra:object></entry>";
+      String requestURI = "http://localhost:8080/rest/cmisatom/" + cmisRepositoryId + "/children/" + testFolderId;
+      assertFalse(getChildren(testFolderId).getItems().iterator().hasNext());
+      ByteArrayContainerResponseWriter writer = new ByteArrayContainerResponseWriter();
+      byte[] body = s.getBytes();
+      ContainerResponse resp = service("POST", requestURI, "http://localhost:8080/rest", null, body, writer);
+
+      assertEquals(201, resp.getStatus());
+      // try create one more document with the same name 'new_document'.
+      resp = service("POST", requestURI, "http://localhost:8080/rest", null, body, writer);
+      assertEquals(409, resp.getStatus());
+   }
+
    public void testCreateDocumentCmisContent() throws Exception
    {
       String s = "<?xml version='1.0' encoding='utf-8'?>" //
