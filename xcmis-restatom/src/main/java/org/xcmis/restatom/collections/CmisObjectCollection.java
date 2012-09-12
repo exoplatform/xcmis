@@ -31,11 +31,11 @@ import org.apache.abdera.protocol.server.RequestContext;
 import org.apache.abdera.protocol.server.ResponseContext;
 import org.apache.abdera.protocol.server.TargetType;
 import org.apache.abdera.protocol.server.context.EmptyResponseContext;
-import org.apache.abdera.protocol.server.context.MediaResponseContext;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
 import org.apache.commons.codec.binary.Base64;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.AtomUtils;
+import org.xcmis.restatom.BinaryResponseContext;
 import org.xcmis.restatom.abdera.ContentTypeElement;
 import org.xcmis.restatom.abdera.ObjectTypeElement;
 import org.xcmis.restatom.types.CmisContentType;
@@ -476,7 +476,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
          Connection connection = getConnection(request);
          // TODO : resolve (optional) offset, length
          ContentStream content = connection.getContentStream(getId(request), getStreamId(request));
-         ResponseContext response = new MediaResponseContext(content.getStream(), 200);
+         ResponseContext response = new BinaryResponseContext(content.getStream(), 200);
          response.setContentType(content.getMediaType().toString());
          response.setContentLength(content.length());
          response.setHeader(AtomCMIS.CONTENT_DISPOSITION_HEADER, //
@@ -1465,7 +1465,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
          {
             path = URLDecoder.decode(path, "UTF-8");
          }
-         catch (UnsupportedEncodingException uee)
+         catch (UnsupportedEncodingException ignored)
          {
          }
          return path.charAt(0) == '/' ? path : ('/' + path);

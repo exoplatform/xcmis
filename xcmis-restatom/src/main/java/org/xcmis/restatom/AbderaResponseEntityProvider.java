@@ -21,7 +21,6 @@ package org.xcmis.restatom;
 
 import org.apache.abdera.protocol.server.ResponseContext;
 import org.apache.abdera.protocol.server.context.EmptyResponseContext;
-import org.apache.abdera.protocol.server.context.MediaResponseContext;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -71,7 +70,7 @@ public class AbderaResponseEntityProvider implements MessageBodyWriter<ResponseC
    {
       if (t.hasEntity())
       {
-         if (t instanceof MediaResponseContext)
+         if (t instanceof BinaryResponseContext)
             t.writeTo(entityStream);
          else
             t.writeTo(entityStream, new XmlWriter());
