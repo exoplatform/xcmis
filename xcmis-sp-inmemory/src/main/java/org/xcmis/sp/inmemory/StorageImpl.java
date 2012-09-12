@@ -53,6 +53,7 @@ import org.xcmis.spi.ObjectDataVisitor;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.PermissionService;
 import org.xcmis.spi.PolicyData;
+import org.xcmis.spi.QueryNameTypeManager;
 import org.xcmis.spi.RelationshipData;
 import org.xcmis.spi.RenditionManager;
 import org.xcmis.spi.Storage;
@@ -1177,19 +1178,27 @@ public class StorageImpl implements Storage
    /**
     * {@inheritDoc}
     */
-   public String addType(TypeDefinition type) throws StorageException, CmisRuntimeException
+   public String addType(TypeDefinition type) throws ConstraintException, StorageException
    {
       if (types.get(type.getId()) != null)
       {
-         throw new InvalidArgumentException("Type " + type.getId() + " already exists.");
+         throw new ConstraintException("Type " + type.getId() + " already exists.");
+      }
+      // check duplicate for queryName object type attribute.
+      for (TypeDefinition t : types.values())
+      {
+         if (t.getQueryName().equals(type.getQueryName()))
+         {
+            throw new ConstraintException("Duplicate queryName for types " + t.getId() + " and " + type.getId());
+         }
       }
       if (type.getBaseId() == null)
       {
-         throw new InvalidArgumentException("Base type id must be specified.");
+         throw new ConstraintException("Base type id must be specified.");
       }
       if (type.getParentId() == null)
       {
-         throw new InvalidArgumentException("Unable add root type. Parent type id must be specified");
+         throw new ConstraintException("Unable add root type. Parent type id must be specified");
       }
 
       TypeDefinition superType;
@@ -1199,7 +1208,7 @@ public class StorageImpl implements Storage
       }
       catch (TypeNotFoundException e)
       {
-         throw new InvalidArgumentException("Specified parent type '" + type.getParentId() + "' does not exist.");
+         throw new ConstraintException("Specified parent type '" + type.getParentId() + "' does not exist.");
       }
       // Check new type does not use known property IDs.
       if (type.getPropertyDefinitions() != null)
@@ -1209,7 +1218,7 @@ public class StorageImpl implements Storage
             PropertyDefinition<?> definition = superType.getPropertyDefinition(newDefinition.getId());
             if (definition != null)
             {
-               throw new InvalidArgumentException("Property " + newDefinition.getId() + " already defined");
+               throw new ConstraintException("Property " + newDefinition.getId() + " already defined");
             }
          }
       }
@@ -1385,8 +1394,10 @@ public class StorageImpl implements Storage
       {
          IndexConfiguration indexConfiguration = new IndexConfiguration(getRepositoryInfo().getRootFolderId());
 
-         CmisSchema schema = new CmisSchema(this);
-         CmisSchemaTableResolver tableResolver = new CmisSchemaTableResolver(new ToStringNameConverter(), schema, this);
+         QueryNameTypeManager typeManager = new QueryNameTypeManager(this);
+         CmisSchema schema = new CmisSchema(typeManager);
+         CmisSchemaTableResolver tableResolver = new CmisSchemaTableResolver(
+            new ToStringNameConverter(), schema, typeManager);
 
          SearchServiceConfiguration searchConfiguration =
             new SearchServiceConfiguration(schema, tableResolver, new CmisContentReader(this), indexConfiguration);

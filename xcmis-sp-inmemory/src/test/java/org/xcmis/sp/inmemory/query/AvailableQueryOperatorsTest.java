@@ -26,6 +26,7 @@ import org.xcmis.search.model.source.SelectorName;
 import org.xcmis.search.query.QueryExecutionException;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ItemsIterator;
+import org.xcmis.spi.QueryNameTypeManager;
 import org.xcmis.spi.query.Result;
 
 import java.util.ArrayList;
@@ -40,14 +41,11 @@ public class AvailableQueryOperatorsTest extends BaseQueryTest
 {
    private CmisSchema cmisSchema;
 
-   /**
-    * @see org.exoplatform.ecms.xcmis.sp.query.BaseQueryTest#setUp()
-    */
    @Override
    public void setUp() throws Exception
    {
       super.setUp();
-      cmisSchema = new CmisSchema(storage);
+      cmisSchema = new CmisSchema(new QueryNameTypeManager(storage));
 
    }
 

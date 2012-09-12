@@ -213,7 +213,7 @@ public class SimplePlaner implements QueryExecutionPlaner
             else
             {
                context.getExecutionExceptions().addException(
-                  new TableDoesntExistException("Table " + selector.getName() + " doesnt exist"));
+                  new TableDoesntExistException("Table " + selector.getName() + " doesn't exist"));
             }
             stepsStack.push(selectorPlan);
          }
@@ -299,17 +299,16 @@ public class SimplePlaner implements QueryExecutionPlaner
                if (table == null)
                {
                   context.getExecutionExceptions().addException(
-                     new TableDoesntExistException("Table " + tableName + " doesnt exist"));
+                     new TableDoesntExistException("Table " + tableName + " doesn't exist"));
                }
                else
                {
                   // Make sure that the column is in the table ...
-                  String columnName = column.getPropertyName();
-                  String name = columnName;
+                  String name = column.getPropertyName();
                   if (table.getColumn(name) == null)
                   {
                      context.getExecutionExceptions().addException(
-                        new ColumnDoesNotExistOnTable("Column  " + name + " on " + tableName + " doesnt exist"));
+                        new ColumnDoesNotExistOnTable("Column  " + name + " on " + tableName + " doesn't exist"));
                   }
                }
             }

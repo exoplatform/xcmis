@@ -31,7 +31,7 @@ import org.xcmis.search.content.Schema;
 import org.xcmis.search.model.constraint.Operator;
 import org.xcmis.search.model.source.SelectorName;
 import org.xcmis.search.value.PropertyType;
-import org.xcmis.spi.TypeManager;
+import org.xcmis.spi.QueryNameTypeManager;
 import org.xcmis.spi.TypeNotFoundException;
 import org.xcmis.spi.model.PropertyDefinition;
 import org.xcmis.spi.model.TypeDefinition;
@@ -81,13 +81,13 @@ public class CmisSchema implements Schema
 
    }
 
-   private final TypeManager typeManager;
+   private final QueryNameTypeManager typeManager;
 
    /**
     * Constructor.
     * @param typeManager TypeManager
     */
-   public CmisSchema(TypeManager typeManager)
+   public CmisSchema(QueryNameTypeManager typeManager)
    {
       super();
       this.typeManager = typeManager;
@@ -100,7 +100,7 @@ public class CmisSchema implements Schema
    {
       try
       {
-         TypeDefinition typeDefinition = typeManager.getTypeDefinition(name.getName(), true);
+         TypeDefinition typeDefinition = typeManager.getTypeDefinitionByQueryName(name.getName(), true);
          return new CmisTableDefinition(name, typeDefinition);
       }
       catch (TypeNotFoundException tnfe)
@@ -132,7 +132,7 @@ public class CmisSchema implements Schema
        */
       public Column getColumn(String name)
       {
-         PropertyDefinition<?> propertyDefinition = typeDefinition.getPropertyDefinition(name);
+         PropertyDefinition<?> propertyDefinition = typeDefinition.getPropertyDefinitionByQueryName(name);
          if (propertyDefinition != null)
          {
             org.xcmis.spi.model.PropertyType propertyType = propertyDefinition.getPropertyType();

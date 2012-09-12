@@ -69,9 +69,6 @@ public class QueryUsecasesTest extends BaseQueryTest
 
    private FolderData testRoot;
 
-   /**
-    * @see org.exoplatform.ecms.xcmis.sp.query.BaseQueryTest#setUp()
-    */
    @Override
    public void setUp() throws Exception
    {
@@ -1229,9 +1226,6 @@ public class QueryUsecasesTest extends BaseQueryTest
       return doc;
    }
 
-   /**
-    * @see org.exoplatform.ecms.xcmis.sp.BaseTest#tearDown()
-    */
    @Override
    protected void tearDown() throws Exception
    {

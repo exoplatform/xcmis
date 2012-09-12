@@ -316,7 +316,7 @@ public class TypeDefinition
 
    /**
     * @return property definitions or <code>null</code> if type was retrieved
-    *         with parameter 'includePropertyDefintions' as <code>false</code>,
+    *         with parameter 'includePropertyDefinitions' as <code>false</code>,
     *         see {@link Connection#getTypeDefinition(String, boolean)}
     */
    public Collection<PropertyDefinition<?>> getPropertyDefinitions()
@@ -324,6 +324,30 @@ public class TypeDefinition
       if (propertyDefinitions != null)
       {
          return Collections.unmodifiableCollection(propertyDefinitions.values());
+      }
+      return null;
+   }
+
+   /**
+    * Get {@link PropertyDefinition} by queryName.
+    *
+    * @param queryName property definition queryName
+    * @return property definition or <code>null</code> if type was retrieved
+    *         with parameter 'includePropertyDefinitions' as <code>false</code>,
+    *         see {@link Connection#getTypeDefinition(String, boolean)} or if
+    *         property definition with specified queryName does not exist.
+    */
+   public PropertyDefinition<?> getPropertyDefinitionByQueryName(String queryName)
+   {
+      if (propertyDefinitions != null)
+      {
+         for (PropertyDefinition<?> propertyDefinition : propertyDefinitions.values())
+         {
+            if (queryName.equals(propertyDefinition.getQueryName()))
+            {
+               return propertyDefinition;
+            }
+         }
       }
       return null;
    }

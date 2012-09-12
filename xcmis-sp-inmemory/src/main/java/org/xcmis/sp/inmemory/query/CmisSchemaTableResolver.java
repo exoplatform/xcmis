@@ -22,7 +22,7 @@ import org.xcmis.search.content.Schema;
 import org.xcmis.search.lucene.content.SchemaTableResolver;
 import org.xcmis.search.value.NameConverter;
 import org.xcmis.spi.ItemsIterator;
-import org.xcmis.spi.TypeManager;
+import org.xcmis.spi.QueryNameTypeManager;
 import org.xcmis.spi.TypeNotFoundException;
 import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.utils.Logger;
@@ -37,7 +37,7 @@ import java.util.Set;
 public class CmisSchemaTableResolver extends SchemaTableResolver
 {
 
-   private final TypeManager typeManager;
+   private final QueryNameTypeManager typeManager;
 
    private static final Logger LOG = Logger.getLogger(CmisSchemaTableResolver.class);
 
@@ -45,7 +45,7 @@ public class CmisSchemaTableResolver extends SchemaTableResolver
     * @param nameConverter
     * @param schema
     */
-   public CmisSchemaTableResolver(NameConverter nameConverter, Schema schema, TypeManager typeManager)
+   public CmisSchemaTableResolver(NameConverter nameConverter, Schema schema, QueryNameTypeManager typeManager)
    {
       super(nameConverter, schema);
       this.typeManager = typeManager;
@@ -61,7 +61,8 @@ public class CmisSchemaTableResolver extends SchemaTableResolver
 
       try
       {
-         ItemsIterator<TypeDefinition> typeChildren = typeManager.getTypeChildren(tableName, false);
+         TypeDefinition type = typeManager.getTypeDefinitionByQueryName(tableName, false);
+         ItemsIterator<TypeDefinition> typeChildren = typeManager.getTypeChildren(type.getId(), false);
          while (typeChildren.hasNext())
          {
             TypeDefinition typeDefinition = typeChildren.next();
