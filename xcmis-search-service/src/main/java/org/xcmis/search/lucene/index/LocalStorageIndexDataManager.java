@@ -18,27 +18,28 @@
  */
 package org.xcmis.search.lucene.index;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.index.MultiReader;
 import org.apache.lucene.index.IndexWriter.MaxFieldLength;
+import org.apache.lucene.index.MultiReader;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.LockObtainFailedException;
+import org.apache.lucene.util.Version;
 import org.xcmis.search.Startable;
 import org.xcmis.search.config.IndexConfiguration;
 import org.xcmis.search.config.IndexConfigurationException;
 import org.xcmis.search.content.IndexModificationException;
 import org.xcmis.search.lucene.index.merge.IndexAggregator;
 import org.xcmis.spi.utils.Logger;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
 
 /**
  * Created by The eXo Platform SAS.
@@ -94,7 +95,7 @@ public class LocalStorageIndexDataManager implements LuceneIndexDataManager, Ind
          {
             final PersistedIndex index = chains.get(0);
 
-            writer = new IndexWriter(index.getDirectory(), new StandardAnalyzer(), MaxFieldLength.UNLIMITED);
+            writer = new IndexWriter(index.getDirectory(), new StandardAnalyzer(Version.LUCENE_35), MaxFieldLength.UNLIMITED);
             final List<Directory> dirs = new ArrayList<Directory>();
             for (final LuceneIndexDataManager luceneIndexDataManager : indexes)
             {

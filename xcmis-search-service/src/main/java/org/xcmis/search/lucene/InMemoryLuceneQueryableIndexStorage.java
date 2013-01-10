@@ -28,6 +28,7 @@ import org.apache.lucene.index.Term;
 import org.apache.lucene.index.IndexWriter.MaxFieldLength;
 import org.apache.lucene.store.LockObtainFailedException;
 import org.apache.lucene.store.RAMDirectory;
+import org.apache.lucene.util.Version;
 import org.xcmis.search.config.SearchServiceConfiguration;
 import org.xcmis.search.content.IndexModificationException;
 import org.xcmis.search.lucene.index.FieldNames;
@@ -122,7 +123,7 @@ public class InMemoryLuceneQueryableIndexStorage extends AbstractLuceneQueryable
 
       try
       {
-         IndexWriter writer = new IndexWriter(ramDirectory, new StandardAnalyzer(), MaxFieldLength.UNLIMITED);
+         IndexWriter writer = new IndexWriter(ramDirectory, new StandardAnalyzer(Version.LUCENE_35), MaxFieldLength.UNLIMITED);
 
          // removed
          for (final String uuid : indexTransaction.getRemovedDocuments())

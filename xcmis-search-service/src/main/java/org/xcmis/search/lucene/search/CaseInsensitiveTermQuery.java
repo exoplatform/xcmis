@@ -18,13 +18,13 @@
  */
 package org.xcmis.search.lucene.search;
 
+import java.io.IOException;
+
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.FilteredTermEnum;
 import org.apache.lucene.search.MultiTermQuery;
-import org.xcmis.spi.utils.Logger;
-
-import java.io.IOException;
+import org.apache.lucene.util.ToStringUtils;
 
 /**
  * Created by The eXo Platform SAS.
@@ -38,20 +38,24 @@ public class CaseInsensitiveTermQuery extends MultiTermQuery
    /** The serialVersionUID. */
    private static final long serialVersionUID = 8733959357848332771L;
 
-   /**
-    * Class logger.
-    */
-   private final static Logger log = Logger.getLogger(CaseInsensitiveTermQuery.class);
+   protected Term term;
 
    public CaseInsensitiveTermQuery(Term term)
    {
-      super(term);
+     this.term = term;
    }
 
+   /**
+    * Returns the pattern term.
+    */
+   public Term getTerm() {
+     return term;
+   }
+   
    @Override
    protected FilteredTermEnum getEnum(IndexReader reader) throws IOException
    {
-      return new CaseInsensitiveTermEnum(reader, getTerm());
+      return new CaseInsensitiveTermEnum(reader, term);
    }
 
    private class CaseInsensitiveTermEnum extends FilteredTermEnum
@@ -95,15 +99,31 @@ public class CaseInsensitiveTermQuery extends MultiTermQuery
       }
 
       @Override
-      protected boolean termCompare(Term term)
+      protected boolean termCompare(Term termCompare)
       {
-         if (field == term.field())
+         if (field == termCompare.field())
          {
-            String searchText = term.text();
+            String searchText = termCompare.text();
             return text.equals(searchText.toLowerCase());
          }
          endEnum = true;
          return false;
       }
-   };
+   }
+
+  @Override
+  public String toString(String field) {
+    StringBuffer buffer = new StringBuffer();
+    if (term != null) {
+      if (!term.field().equals(field)) {
+        buffer.append(term.field());
+        buffer.append(":");
+      }
+      buffer.append(term.text());
+    } else {
+      buffer.append("termPattern:unknown");
+    }
+    buffer.append(ToStringUtils.boost(getBoost()));
+    return buffer.toString();
+  };
 }

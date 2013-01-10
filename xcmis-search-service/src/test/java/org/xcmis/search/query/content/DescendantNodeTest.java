@@ -23,7 +23,6 @@ import org.xcmis.search.InvalidQueryException;
 import org.xcmis.search.SearchServiceException;
 import org.xcmis.search.model.Query;
 import org.xcmis.search.query.QueryExecutionException;
-import org.xcmis.search.query.content.AbstractQueryTest.Node;
 
 /**
  * <code>DescendantNodeTest</code> contains test cases related to QOM

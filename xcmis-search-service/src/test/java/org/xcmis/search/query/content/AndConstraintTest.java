@@ -16,14 +16,14 @@
  */
 package org.xcmis.search.query.content;
 
+import java.util.List;
+
 import org.junit.Test;
 import org.xcmis.search.InvalidQueryException;
 import org.xcmis.search.content.IndexModificationException;
 import org.xcmis.search.model.Query;
 import org.xcmis.search.query.QueryExecutionException;
 import org.xcmis.search.result.ScoredRow;
-
-import java.util.List;
 
 /**
  * <code>AndConstraintTest</code> contains tests that check AND constraints.
@@ -47,9 +47,9 @@ public class AndConstraintTest extends AbstractQueryTest
       List<ScoredRow> result = searchService.execute(query);
       checkResult(result, "s", new Node[]{n1});
 
-      String stmt =
-         "SELECT * FROM [" + testNodeType + "] AS s WHERE " + "ISDESCENDANTNODE(s, [" + testRootNode.getPath() + "]) "
-            + "AND s.[" + propertyName1 + "] IS NOT NULL " + "AND s.[" + propertyName2 + "] IS NOT NULL";
+//      String stmt =
+//         "SELECT * FROM [" + testNodeType + "] AS s WHERE " + "ISDESCENDANTNODE(s, [" + testRootNode.getPath() + "]) "
+//            + "AND s.[" + propertyName1 + "] IS NOT NULL " + "AND s.[" + propertyName2 + "] IS NOT NULL";
       //    result = qm.createQuery(stmt, Query.JCR_SQL2).execute();
       //  checkResult(result, new Node[]{n1});
    }

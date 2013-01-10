@@ -18,18 +18,25 @@
  */
 package org.xcmis.search.lucene;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.lang.Validate;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.SortField;
 import org.apache.lucene.search.TopFieldDocs;
-import org.apache.lucene.search.BooleanClause.Occur;
 import org.xcmis.search.VisitException;
 import org.xcmis.search.Visitors;
 import org.xcmis.search.config.IndexConfiguration;
@@ -63,13 +70,6 @@ import org.xcmis.search.result.ScoredRow;
 import org.xcmis.search.value.NameConverter;
 import org.xcmis.search.value.PathSplitter;
 import org.xcmis.spi.utils.Logger;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Base implementation of Lucene based {@link QueryableIndexStorage}.
@@ -369,8 +369,10 @@ public abstract class AbstractLuceneQueryableIndexStorage extends QueryableIndex
       @Override
       public void visit(PropertyValue node) throws VisitException
       {
+        //AUTO mode was removed since version 3.0. Therefore we will used STRING type as sort type.
          sortField =
-            new SortField(FieldNames.createPropertyFieldName(node.getPropertyName()), order == Order.DESCENDING);
+            new SortField(FieldNames.createPropertyFieldName(node.getPropertyName()), 
+                    SortField.STRING, order == Order.DESCENDING);
       }
 
       /**

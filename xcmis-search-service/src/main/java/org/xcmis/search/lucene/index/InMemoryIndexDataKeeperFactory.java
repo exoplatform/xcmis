@@ -18,20 +18,21 @@
  */
 package org.xcmis.search.lucene.index;
 
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.document.Document;
-import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.index.IndexWriter.MaxFieldLength;
-import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.RAMDirectory;
-import org.xcmis.spi.utils.Logger;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriter.MaxFieldLength;
+import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.RAMDirectory;
+import org.apache.lucene.util.Version;
+import org.xcmis.spi.utils.Logger;
 
 /**
  * Created by The eXo Platform SAS.
@@ -101,7 +102,7 @@ public class InMemoryIndexDataKeeperFactory extends LuceneIndexDataKeeperFactory
 
             newDirectory = new RAMDirectory();
             final IndexWriter newWriter =
-               new IndexWriter(newDirectory, new StandardAnalyzer(), MaxFieldLength.UNLIMITED);
+               new IndexWriter(newDirectory, new StandardAnalyzer(Version.LUCENE_35), MaxFieldLength.UNLIMITED);
             final Directory[] dirsToMerge = new Directory[mergeDirectorys.size()];
             newWriter.addIndexesNoOptimize(mergeDirectorys.toArray(dirsToMerge));
             newWriter.optimize();

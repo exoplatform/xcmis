@@ -18,22 +18,23 @@
  */
 package org.xcmis.search.lucene.index;
 
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriter.MaxFieldLength;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.index.TermDocs;
-import org.apache.lucene.index.IndexWriter.MaxFieldLength;
 import org.apache.lucene.store.Directory;
+import org.apache.lucene.util.Version;
 import org.xcmis.search.Startable;
 import org.xcmis.spi.utils.Logger;
-
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Created by The eXo Platform SAS.
@@ -81,7 +82,7 @@ public class PersistedIndex implements LuceneIndexDataManager, Startable
       int result = 0;
       try
       {
-         final String[] list = this.indexDirectiry.list();
+         final String[] list = this.indexDirectiry.listAll();
 
          for (final String element : list)
          {
@@ -210,7 +211,7 @@ public class PersistedIndex implements LuceneIndexDataManager, Startable
             if (removedDocuments.size() > 0 || changes.getAddedDocuments().size() > 0)
             {
 
-               writer = new IndexWriter(this.indexDirectiry, new StandardAnalyzer(), MaxFieldLength.UNLIMITED);
+               writer = new IndexWriter(this.indexDirectiry, new StandardAnalyzer(Version.LUCENE_35), MaxFieldLength.UNLIMITED);
 
                // removed
                for (final String uuid : removedDocuments)

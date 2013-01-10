@@ -18,12 +18,13 @@
  */
 package org.xcmis.search.lucene;
 
+import java.io.IOException;
+
 import org.apache.commons.lang.Validate;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.index.TermDocs;
-import org.xcmis.search.config.IndexConfigurationException;
 import org.xcmis.search.config.SearchServiceConfiguration;
 import org.xcmis.search.content.interceptors.QueryableIndexStorage;
 import org.xcmis.search.lucene.index.FieldNames;
@@ -32,8 +33,6 @@ import org.xcmis.search.lucene.index.IndexTransactionException;
 import org.xcmis.search.lucene.index.LuceneIndexTransaction;
 import org.xcmis.search.lucene.index.StartableIndexingService;
 import org.xcmis.spi.utils.Logger;
-
-import java.io.IOException;
 
 /**
  * Lucene persisted implementation of {@link QueryableIndexStorage}.

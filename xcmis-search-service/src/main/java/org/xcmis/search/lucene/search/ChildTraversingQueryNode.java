@@ -18,10 +18,14 @@
  */
 package org.xcmis.search.lucene.search;
 
+import java.io.IOException;
+import java.util.Set;
+
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
+import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Explanation;
 import org.apache.lucene.search.Query;
@@ -29,12 +33,8 @@ import org.apache.lucene.search.Scorer;
 import org.apache.lucene.search.Searcher;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.Weight;
-import org.apache.lucene.search.BooleanClause.Occur;
 import org.xcmis.search.lucene.index.FieldNames;
 import org.xcmis.spi.utils.Logger;
-
-import java.io.IOException;
-import java.util.Set;
 
 /**
  * Created by The eXo Platform SAS.
@@ -135,7 +135,8 @@ public class ChildTraversingQueryNode extends Query
    /**
     * {@inheritDoc}
     */
-   protected Weight createWeight(Searcher searcher) throws IOException
+   @Override
+   public Weight createWeight(Searcher searcher) throws IOException
    {
       return new ChildTraversingQueryNodeWeight(searcher);
    }
@@ -165,58 +166,56 @@ public class ChildTraversingQueryNode extends Query
        * Child Scorer.
        */
       private Scorer childScorer;
+      
+      private boolean scoreDocsInOrder;
+      private boolean topScorer;
 
       /**
        * @param searcher - query searcher.
        * @param parentScorer - parent query scorer.
        * @param reader - query reader.
        */
-      public ChildTraversingQueryNodeScorer(Searcher searcher, Scorer parentScorer, IndexReader reader)
+      public ChildTraversingQueryNodeScorer(Searcher searcher, Scorer parentScorer, IndexReader reader, 
+              boolean scoreDocsInOrder, boolean topScorer)
       {
          super(searcher.getSimilarity());
          this.searcher = searcher;
          this.parentScorer = parentScorer;
          this.reader = reader;
+         this.scoreDocsInOrder = scoreDocsInOrder;
+         this.topScorer = topScorer;
       }
 
       /**
        * {@inheritDoc}
        */
-      public int doc()
+      public int docID()
       {
-         return childScorer.doc();
+        return childScorer.docID();
       }
 
       /**
        * {@inheritDoc}
        */
-      public Explanation explain(int doc) throws IOException
+      public int nextDoc() throws IOException
       {
-         return new Explanation();
-      }
-
-      /**
-       * {@inheritDoc}
-       */
-      public boolean next() throws IOException
-      {
-         // no parent selected
-         if (childScorer == null)
-         {
-            // search for parent
-            if (!parentScorer.next())
+        // no parent selected
+        if (childScorer == null)
+        {
+          // search for parent
+          if (parentScorer.nextDoc() == Scorer.NO_MORE_DOCS)
+          {
+            if (log.isDebugEnabled())
             {
-               if (log.isDebugEnabled())
-               {
-                  log.debug("Childs not found");
-               }
-               return false;
+              log.debug("Childs not found");
             }
-            // load childs of current parent
-            reloadChildScorer();
-         }
+            return -1;
+          }
+          // load childs of current parent
+          reloadChildScorer();
+        }
 
-         return childScorer.next();
+        return childScorer.nextDoc();
 
       }
 
@@ -225,29 +224,28 @@ public class ChildTraversingQueryNode extends Query
        */
       public float score() throws IOException
       {
-
          return childScorer.score();
       }
 
       /**
        * {@inheritDoc}
        */
-      public boolean skipTo(int target) throws IOException
+      public int advance(int target) throws IOException
       {
          if (log.isDebugEnabled())
          {
-            log.debug("Before " + doc() + "-" + reader.document(doc()).get(FieldNames.LABEL) + "=" + target + "-"
+            log.debug("Before " + docID() + "-" + reader.document(docID()).get(FieldNames.LABEL) + "=" + target + "-"
                + reader.document(target).get(FieldNames.LABEL));
          }
 
-         boolean result = childScorer.skipTo(target);
+         int result = childScorer.advance(target);
 
          if (log.isDebugEnabled())
          {
 
             try
             {
-               log.debug("After " + doc() + "-" + reader.document(doc()).get(FieldNames.LABEL) + "=" + target + "-"
+               log.debug("After " + docID() + "-" + reader.document(docID()).get(FieldNames.LABEL) + "=" + target + "-"
                   + reader.document(target).get(FieldNames.LABEL));
             }
             catch (Exception e)
@@ -285,7 +283,7 @@ public class ChildTraversingQueryNode extends Query
          Query childQuery = null;
          do
          {
-            int parentDoc = parentScorer.doc();
+            int parentDoc = parentScorer.docID();
             Document parentDocument = reader.document(parentDoc, new UUIDFieldSelector());
 
             Query parentTermQuery = new TermQuery(new Term(FieldNames.PARENT, parentDocument.get(FieldNames.UUID)));
@@ -307,20 +305,21 @@ public class ChildTraversingQueryNode extends Query
                childQuery = createOrQuery(childQuery, parentTermQuery);
             }
          }
-         while (parentScorer.next());
+         while (parentScorer.nextDoc() < Scorer.NO_MORE_DOCS);
          if (log.isDebugEnabled())
          {
             log.debug("Sub query " + childQuery);
          }
-         childScorer = childQuery.weight(searcher).scorer(reader);
+         childScorer = childQuery.createWeight(searcher).scorer(reader, scoreDocsInOrder, topScorer);
       }
+
    }
 
    /**
     * Weight for ChildTraversingQuery.
     * 
     */
-   private class ChildTraversingQueryNodeWeight implements Weight
+   private class ChildTraversingQueryNodeWeight extends Weight
    {
 
       /**
@@ -375,10 +374,11 @@ public class ChildTraversingQueryNode extends Query
       /**
        * {@inheritDoc}
        */
-      public Scorer scorer(IndexReader reader) throws IOException
+      @Override
+      public Scorer scorer(IndexReader reader, boolean scoreDocsInOrder, boolean topScorer) throws IOException
       {
-         Scorer parentScorer = parentQuery.weight(searcher).scorer(reader);
-         return new ChildTraversingQueryNodeScorer(searcher, parentScorer, reader);
+         Scorer parentScorer = parentQuery.createWeight(searcher).scorer(reader, scoreDocsInOrder, topScorer);
+         return new ChildTraversingQueryNodeScorer(searcher, parentScorer, reader, scoreDocsInOrder, topScorer);
       }
 
       /**
@@ -388,6 +388,7 @@ public class ChildTraversingQueryNode extends Query
       {
          return 1.0f;
       }
+
    }
 
 }

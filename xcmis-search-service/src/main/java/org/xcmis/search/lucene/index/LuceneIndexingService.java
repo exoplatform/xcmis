@@ -27,6 +27,7 @@ import org.apache.lucene.index.IndexWriter.MaxFieldLength;
 import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.LockObtainFailedException;
+import org.apache.lucene.util.Version;
 import org.xcmis.search.config.IndexConfiguration;
 import org.xcmis.search.config.IndexConfigurationException;
 import org.xcmis.search.lucene.IndexRecoveryTool;
@@ -103,7 +104,7 @@ public class LuceneIndexingService extends TransactionableIndexDataManager
                try
                {
                   final IndexWriter writer =
-                     new IndexWriter(super.getDirectory(), new StandardAnalyzer(), MaxFieldLength.UNLIMITED);
+                     new IndexWriter(super.getDirectory(), new StandardAnalyzer(Version.LUCENE_35), MaxFieldLength.UNLIMITED);
                   writer.deleteDocuments(new MatchAllDocsQuery());
                   writer.commit();
                   writer.optimize();

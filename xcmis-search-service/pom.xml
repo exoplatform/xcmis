@@ -22,7 +22,7 @@
       </dependency>
       <dependency>
          <groupId>org.apache.lucene</groupId>
-         <artifactId>lucene-regex</artifactId>
+         <artifactId>lucene-queries</artifactId>
          <scope>compile</scope>
       </dependency>
       <dependency>

@@ -36,6 +36,7 @@ import org.apache.lucene.search.WildcardQuery;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.MatchAllDocsQuery;
+import org.apache.lucene.util.Version;
 }
 
 @lexer::header {
@@ -212,7 +213,7 @@ qoutedterm returns[Query q]
 		BooleanQuery bq = new BooleanQuery();
 	 	for(String field : fields)
 	 	{
-		 QueryParser parser = new QueryParser(field,analyzer);
+		 QueryParser parser = new QueryParser(Version.LUCENE_35, field, analyzer);
 		 try
 		   {
 		   bq.add(parser.parse(processEscSymb($qoutedterm.text)) ,BooleanClause.Occur.SHOULD); 
@@ -231,7 +232,7 @@ word returns[Query q]
 		BooleanQuery bq = new BooleanQuery();
 	        for(String field : fields)	  		   
 	 	{
-	 	  QueryParser parser = new QueryParser(field,analyzer);
+	 	  QueryParser parser = new QueryParser(Version.LUCENE_35, field, analyzer);
 		  try{
 //	 	  bq.add( new TermQuery(new Term(field, processEscSymb($word.text))),BooleanClause.Occur.SHOULD);
 		    bq.add(parser.parse(processEscSymb($word.text)) ,BooleanClause.Occur.SHOULD); 

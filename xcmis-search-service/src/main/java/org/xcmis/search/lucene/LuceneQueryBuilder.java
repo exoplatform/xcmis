@@ -18,6 +18,17 @@
  */
 package org.xcmis.search.lucene;
 
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Stack;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CharStream;
 import org.antlr.runtime.CommonTokenStream;
@@ -26,18 +37,19 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.DateTools;
-import org.apache.lucene.document.NumberTools;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause;
+import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.Query;
-import org.apache.lucene.search.RangeQuery;
 import org.apache.lucene.search.TermQuery;
+import org.apache.lucene.search.TermRangeQuery;
 import org.apache.lucene.search.WildcardQuery;
-import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.regex.RegexQuery;
+import org.apache.lucene.util.NumericUtils;
+import org.apache.lucene.util.Version;
 import org.xcmis.search.InvalidQueryException;
 import org.xcmis.search.QueryObjectModelVisitor;
 import org.xcmis.search.VisitException;
@@ -85,17 +97,6 @@ import org.xcmis.search.model.source.join.EquiJoinCondition;
 import org.xcmis.search.model.source.join.SameNodeJoinCondition;
 import org.xcmis.search.value.NameConverter;
 import org.xcmis.search.value.PathSplitter;
-
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Stack;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * @author <a href="mailto:Sergey.Kabashnyuk@gmail.com">Sergey Kabashnyuk</a>
@@ -388,7 +389,7 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
       Query query = null;
       try
       {
-         parser.fulltext(fields, new StandardAnalyzer());
+         parser.fulltext(fields, new StandardAnalyzer(Version.LUCENE_35));
          query = parser.getQuery();
          final InvalidQueryException ex = reporter.getException();
          if (ex != null)
@@ -440,7 +441,7 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
          + queryBuilderStack.peek().getClass().getCanonicalName());
 
       Long staticLongValue = (Long)queryBuilderStack.pop();
-      String value = NumberTools.longToString(staticLongValue);
+      String value = NumericUtils.longToPrefixCoded(staticLongValue);
       String propertyField = FieldNames.createFieldLengthName(node.getPropertyValue().getPropertyName());
 
       Term lengthTerm = new Term(propertyField, value);
@@ -460,16 +461,16 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
             queryBuilderStack.push(booleanQuery);
             break;
          case GREATER_THAN :
-            queryBuilderStack.push(new RangeQuery(lengthTerm, null, false));
+            queryBuilderStack.push(new TermRangeQuery(lengthTerm.field(), lengthTerm.text(), null, false, false));
             break;
          case GREATER_THAN_OR_EQUAL_TO :
-            queryBuilderStack.push(new RangeQuery(lengthTerm, null, true));
+            queryBuilderStack.push(new TermRangeQuery(lengthTerm.field(), lengthTerm.text(), null, true, true));
             break;
          case LESS_THAN :
-            queryBuilderStack.push(new RangeQuery(null, lengthTerm, false));
+            queryBuilderStack.push(new TermRangeQuery(lengthTerm.field(), null, lengthTerm.text(), false, false));
             break;
          case LESS_THAN_OR_EQUAL_TO :
-            queryBuilderStack.push(new RangeQuery(null, lengthTerm, true));
+            queryBuilderStack.push(new TermRangeQuery(lengthTerm.field(), null, lengthTerm.text(), true, true));
             break;
          case LIKE :
             throw new VisitException("Unsupported operation for Length operator");
@@ -659,43 +660,50 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
          case GREATER_THAN :
             if (caseInsensitiveSearch)
             {
-               queryBuilderStack.push(new CaseInsensitiveRangeQuery(staticValueTerm, null, false));
+               queryBuilderStack.push(new CaseInsensitiveRangeQuery(staticValueTerm.field(), 
+                       staticValueTerm.text().toLowerCase(), null, false, false));
             }
             else
             {
-               queryBuilderStack.push(new RangeQuery(staticValueTerm, null, false));
+               queryBuilderStack.push(new TermRangeQuery(staticValueTerm.field(), 
+                       staticValueTerm.text().toLowerCase(), null, false, false));
             }
             break;
          case GREATER_THAN_OR_EQUAL_TO :
 
             if (caseInsensitiveSearch)
             {
-               queryBuilderStack.push(new CaseInsensitiveRangeQuery(staticValueTerm, null, true));
+               queryBuilderStack.push(new CaseInsensitiveRangeQuery(staticValueTerm.field(), 
+                       staticValueTerm.text().toLowerCase(), null, true, true));
             }
             else
             {
-               queryBuilderStack.push(new RangeQuery(staticValueTerm, null, true));
+               queryBuilderStack.push(new TermRangeQuery(staticValueTerm.field(), 
+                       staticValueTerm.text().toLowerCase(), null, true, true));
             }
             break;
          case LESS_THAN :
             if (caseInsensitiveSearch)
             {
-               queryBuilderStack.push(new CaseInsensitiveRangeQuery(null, staticValueTerm, false));
-
+               queryBuilderStack.push(new CaseInsensitiveRangeQuery(staticValueTerm.field(),
+                       null, staticValueTerm.text().toUpperCase(), false, false));
             }
             else
             {
-               queryBuilderStack.push(new RangeQuery(null, staticValueTerm, false));
+               queryBuilderStack.push(new TermRangeQuery(staticValueTerm.field(), 
+                       null, staticValueTerm.text().toUpperCase(), false, false));
             }
             break;
          case LESS_THAN_OR_EQUAL_TO :
             if (caseInsensitiveSearch)
             {
-               queryBuilderStack.push(new CaseInsensitiveRangeQuery(null, staticValueTerm, true));
+               queryBuilderStack.push(new CaseInsensitiveRangeQuery(staticValueTerm.field(), 
+                       null, staticValueTerm.text().toUpperCase(), true, true));
             }
             else
             {
-               queryBuilderStack.push(new RangeQuery(null, staticValueTerm, true));
+               queryBuilderStack.push(new TermRangeQuery(staticValueTerm.field(), 
+                       null, staticValueTerm.text().toUpperCase(), true, true));
             }
             break;
          case LIKE :
@@ -820,7 +828,7 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
       }
       else if (staticValue instanceof Long)
       {
-         staticStingValue = NumberTools.longToString((Long)staticValue);
+         staticStingValue = NumericUtils.longToPrefixCoded((Long)staticValue);
       }
       else if (staticValue instanceof Calendar)
       {
@@ -867,51 +875,51 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
          case GREATER_THAN :
             if (caseInsensitiveSearch)
             {
-               queryBuilderStack.push(new CaseInsensitiveRangeQuery(propertyValueTerm, maxFildValue, false));
+               queryBuilderStack.push(new CaseInsensitiveRangeQuery(FieldNames.createPropertyFieldName(node.getPropertyName()), 
+                       propertyValueTerm.text(), maxFildValue.text(), false, false));
             }
             else
             {
-               queryBuilderStack.push(new RangeQuery(propertyValueTerm, maxFildValue, false));
+               queryBuilderStack.push(new TermRangeQuery(FieldNames.createPropertyFieldName(node.getPropertyName()), 
+                       propertyValueTerm.text(), maxFildValue.text(), false, false));
             }
             break;
          case GREATER_THAN_OR_EQUAL_TO :
 
             if (caseInsensitiveSearch)
             {
-               queryBuilderStack.push(new CaseInsensitiveRangeQuery(propertyValueTerm, maxFildValue, true));
-
+               queryBuilderStack.push(new CaseInsensitiveRangeQuery(FieldNames.createPropertyFieldName(node.getPropertyName()), 
+                       propertyValueTerm.text(), maxFildValue.text(), true, true));
             }
             else
             {
-               queryBuilderStack.push(new RangeQuery(propertyValueTerm, maxFildValue, true));
+               queryBuilderStack.push(new TermRangeQuery(FieldNames.createPropertyFieldName(node.getPropertyName()), 
+                       propertyValueTerm.text(), maxFildValue.text(), true, true));
             }
             break;
          case LESS_THAN :
             if (caseInsensitiveSearch)
             {
-               queryBuilderStack.push(new CaseInsensitiveRangeQuery(new Term(FieldNames.createPropertyFieldName(node
-                  .getPropertyName()), ""), propertyValueTerm, false));
-
+               queryBuilderStack.push(new CaseInsensitiveRangeQuery(FieldNames.createPropertyFieldName(node.getPropertyName()), 
+                       "", propertyValueTerm.text(), false, false));
             }
             else
             {
-
-               queryBuilderStack.push(new RangeQuery(new Term(FieldNames
-                  .createPropertyFieldName(node.getPropertyName()), ""), propertyValueTerm, false));
+               queryBuilderStack.push(new TermRangeQuery(FieldNames.createPropertyFieldName(node.getPropertyName()), 
+                       "", propertyValueTerm.text(), false, false));
             }
             break;
          case LESS_THAN_OR_EQUAL_TO :
             if (caseInsensitiveSearch)
             {
-               queryBuilderStack.push(new CaseInsensitiveRangeQuery(new Term(FieldNames.createPropertyFieldName(node
-                  .getPropertyName()), ""), propertyValueTerm, true));
-
+               queryBuilderStack.push(new CaseInsensitiveRangeQuery(FieldNames.createPropertyFieldName(node.getPropertyName()), 
+                       "", propertyValueTerm.text(), true, true));
             }
             else
             {
 
-               queryBuilderStack.push(new RangeQuery(new Term(FieldNames
-                  .createPropertyFieldName(node.getPropertyName()), ""), propertyValueTerm, true));
+               queryBuilderStack.push(new TermRangeQuery(FieldNames.createPropertyFieldName(node.getPropertyName()), 
+                       "", propertyValueTerm.text(), true, true));
             }
             break;
          case LIKE :

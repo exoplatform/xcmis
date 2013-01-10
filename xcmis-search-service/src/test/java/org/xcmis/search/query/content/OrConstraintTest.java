@@ -39,7 +39,6 @@ public class OrConstraintTest extends AbstractQOMTest
       Query query =
          qf.from(testNodeType + " AS s").where().isBelowPath("s", testRootNode.getPath()).and().openParen()
             .hasProperty("s", propertyName2).or().hasProperty("s", propertyName1).closeParen().end().query();
-
       checkQOM(query, "s", new Node[]{n1, n2});
    }
 

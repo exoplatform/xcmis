@@ -18,21 +18,22 @@
  */
 package org.xcmis.search.lucene.index;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriter.MaxFieldLength;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.util.Version;
 import org.xcmis.search.config.IndexConfiguration;
 import org.xcmis.search.config.IndexConfigurationException;
 import org.xcmis.spi.utils.Logger;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
 /**
  * Created by The eXo Platform SAS.
@@ -89,7 +90,7 @@ public class PersistentIndexDataKeeperFactory extends LuceneIndexDataKeeperFacto
       FSDirectory dir;
       try
       {
-         dir = FSDirectory.getDirectory(new File(indexDir, newIndexName));
+         dir = FSDirectory.open(new File(indexDir, newIndexName));
          indexNames.addName(newIndexName);
          indexNames.write(indexDir);
       }
@@ -133,7 +134,7 @@ public class PersistentIndexDataKeeperFactory extends LuceneIndexDataKeeperFacto
          }
          try
          {
-            final FSDirectory dir = FSDirectory.getDirectory(sub);
+            final FSDirectory dir = FSDirectory.open(sub);
             result.add(new PersistedIndex(dir));
          }
          catch (final IOException e)
@@ -153,8 +154,8 @@ public class PersistentIndexDataKeeperFactory extends LuceneIndexDataKeeperFacto
       try
       {
          final String newIndexName = indexNames.newName();
-         dir = FSDirectory.getDirectory(new File(indexDir, newIndexName));
-         final IndexWriter writer = new IndexWriter(dir, new StandardAnalyzer(), MaxFieldLength.UNLIMITED);
+         dir = FSDirectory.open(new File(indexDir, newIndexName));
+         final IndexWriter writer = new IndexWriter(dir, new StandardAnalyzer(Version.LUCENE_35), MaxFieldLength.UNLIMITED);
          final List<Directory> dirs = new ArrayList<Directory>();
          for (final LuceneIndexDataManager luceneIndexDataManager : chains)
          {

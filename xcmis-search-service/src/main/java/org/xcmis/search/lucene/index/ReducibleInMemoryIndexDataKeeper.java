@@ -18,26 +18,27 @@
  */
 package org.xcmis.search.lucene.index;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
 import org.apache.lucene.analysis.SimpleAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriter.MaxFieldLength;
 import org.apache.lucene.index.SerialMergeScheduler;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.index.IndexWriter.MaxFieldLength;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.LockObtainFailedException;
 import org.apache.lucene.store.RAMDirectory;
+import org.apache.lucene.util.Version;
 import org.xcmis.spi.utils.Logger;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.Map.Entry;
 
 /**
  * Created by The eXo Platform SAS.
@@ -286,7 +287,8 @@ public class ReducibleInMemoryIndexDataKeeper implements TransactionableLuceneIn
                   {
                      if (writer == null)
                      {
-                        writer = new IndexWriter(this.indexDirectiry, new StandardAnalyzer(), MaxFieldLength.UNLIMITED);
+                        writer = new IndexWriter(this.indexDirectiry, 
+                                new StandardAnalyzer(Version.LUCENE_35), MaxFieldLength.UNLIMITED);
                         //to avoid deadlock
                         writer.setMergeScheduler(new SerialMergeScheduler());
                      }
@@ -354,7 +356,7 @@ public class ReducibleInMemoryIndexDataKeeper implements TransactionableLuceneIn
             synchronized (this.indexDirectiry)
             {
 
-               writer = new IndexWriter(this.indexDirectiry, new StandardAnalyzer(), MaxFieldLength.UNLIMITED);
+               writer = new IndexWriter(this.indexDirectiry, new StandardAnalyzer(Version.LUCENE_35), MaxFieldLength.UNLIMITED);
                for (final Entry<String, Document> addedDocument : this.pendingDocumentsBuffer.entrySet())
                {
                   writer.addDocument(addedDocument.getValue());

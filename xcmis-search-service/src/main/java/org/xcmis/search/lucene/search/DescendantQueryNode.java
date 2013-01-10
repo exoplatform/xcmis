@@ -18,9 +18,13 @@
  */
 package org.xcmis.search.lucene.search;
 
+import java.io.IOException;
+import java.util.Set;
+
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
+import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Explanation;
 import org.apache.lucene.search.Query;
@@ -28,12 +32,8 @@ import org.apache.lucene.search.Scorer;
 import org.apache.lucene.search.Searcher;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.Weight;
-import org.apache.lucene.search.BooleanClause.Occur;
 import org.xcmis.search.lucene.index.FieldNames;
 import org.xcmis.spi.utils.Logger;
-
-import java.io.IOException;
-import java.util.Set;
 
 /**
  * Created by The eXo Platform SAS.
@@ -106,7 +106,7 @@ public class DescendantQueryNode extends Query
    }
 
    @Override
-   protected Weight createWeight(Searcher searcher) throws IOException
+   public Weight createWeight(Searcher searcher) throws IOException
    {
       return new DescendantQueryNodeWeight(searcher);
    }
@@ -129,40 +129,40 @@ public class DescendantQueryNode extends Query
       private Scorer currentContextScorer;
 
       private final Scorer parentScorer;
+      
+      private boolean scoreDocsInOrder;
+      
+      private boolean topScorer;
 
-      protected DescendantQueryNodeScorer(Searcher searcher, Scorer parentScorer, IndexReader reader)
+      protected DescendantQueryNodeScorer(Searcher searcher, Scorer parentScorer, IndexReader reader, 
+              boolean scoreDocsInOrder, boolean topScorer)
       {
-
          super(searcher.getSimilarity());
          this.parentScorer = parentScorer;
          this.searcher = searcher;
          this.reader = reader;
+         this.scoreDocsInOrder = scoreDocsInOrder;
+         this.topScorer = topScorer;
       }
 
       @Override
-      public int doc()
+      public int docID()
       {
-         return currentContextScorer.doc();
+         return currentContextScorer.docID();
       }
 
       @Override
-      public Explanation explain(int doc) throws IOException
-      {
-         return new Explanation();
-      }
-
-      @Override
-      public boolean next() throws IOException
+      public int nextDoc() throws IOException
       {
          if (currentContextScorer == null)
          {
-            if (!parentScorer.next())
+            if (parentScorer.nextDoc() == Scorer.NO_MORE_DOCS)
             {
                log.error("parent not found");
-               return false;
+               return -1;
             }
 
-            int parentDoc = parentScorer.doc();
+            int parentDoc = parentScorer.docID();
 
             Document parentDocument = reader.document(parentDoc, new UUIDFieldSelector());
             if (context != null)
@@ -174,18 +174,18 @@ public class DescendantQueryNode extends Query
                {
                   log.debug("Sub query " + bq);
                }
-               currentContextScorer = bq.weight(searcher).scorer(reader);
+               currentContextScorer = bq.createWeight(searcher).scorer(reader, scoreDocsInOrder, topScorer);
             }
             else
             {
                TermQuery newQuery = new TermQuery(new Term(FieldNames.PARENT, parentDocument.get(FieldNames.UUID)));
                log.debug("Sub query " + newQuery);
-               currentContextScorer = newQuery.weight(searcher).scorer(reader);
+               currentContextScorer = newQuery.createWeight(searcher).scorer(reader, scoreDocsInOrder, topScorer);
             }
 
          }
 
-         return currentContextScorer.next();
+         return currentContextScorer.nextDoc();
       }
 
       @Override
@@ -195,14 +195,13 @@ public class DescendantQueryNode extends Query
       }
 
       @Override
-      public boolean skipTo(int target) throws IOException
+      public int advance(int target) throws IOException
       {
-         return currentContextScorer.skipTo(target);
+         return currentContextScorer.advance(target);
       }
-
    }
 
-   private class DescendantQueryNodeWeight implements Weight
+   private class DescendantQueryNodeWeight extends Weight
    {
 
       private final Searcher searcher;
@@ -231,10 +230,11 @@ public class DescendantQueryNode extends Query
       {
       }
 
-      public Scorer scorer(IndexReader reader) throws IOException
+      @Override
+      public Scorer scorer(IndexReader reader, boolean scoreDocsInOrder, boolean topScorer) throws IOException
       {
-         Scorer parentScorer = parentQuery.weight(searcher).scorer(reader);
-         return new DescendantQueryNodeScorer(searcher, parentScorer, reader);
+         Scorer parentScorer = parentQuery.createWeight(searcher).scorer(reader, scoreDocsInOrder, topScorer);
+         return new DescendantQueryNodeScorer(searcher, parentScorer, reader, scoreDocsInOrder, topScorer);
       }
 
       public float sumOfSquaredWeights() throws IOException
