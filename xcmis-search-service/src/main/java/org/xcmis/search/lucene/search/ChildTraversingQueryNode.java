@@ -203,13 +203,13 @@ public class ChildTraversingQueryNode extends Query
         if (childScorer == null)
         {
           // search for parent
-          if (parentScorer.nextDoc() == Scorer.NO_MORE_DOCS)
+          if (parentScorer == null || parentScorer.nextDoc() == Scorer.NO_MORE_DOCS)
           {
             if (log.isDebugEnabled())
             {
               log.debug("Childs not found");
             }
-            return -1;
+            return Scorer.NO_MORE_DOCS;
           }
           // load childs of current parent
           reloadChildScorer();
@@ -232,28 +232,7 @@ public class ChildTraversingQueryNode extends Query
        */
       public int advance(int target) throws IOException
       {
-         if (log.isDebugEnabled())
-         {
-            log.debug("Before " + docID() + "-" + reader.document(docID()).get(FieldNames.LABEL) + "=" + target + "-"
-               + reader.document(target).get(FieldNames.LABEL));
-         }
-
-         int result = childScorer.advance(target);
-
-         if (log.isDebugEnabled())
-         {
-
-            try
-            {
-               log.debug("After " + docID() + "-" + reader.document(docID()).get(FieldNames.LABEL) + "=" + target + "-"
-                  + reader.document(target).get(FieldNames.LABEL));
-            }
-            catch (Exception e)
-            {
-            }
-         }
-
-         return result;
+         return childScorer.advance(target);
       }
 
       private Query createOrQuery(Query first, Query second)

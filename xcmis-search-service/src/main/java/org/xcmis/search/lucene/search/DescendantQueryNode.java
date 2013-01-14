@@ -156,10 +156,10 @@ public class DescendantQueryNode extends Query
       {
          if (currentContextScorer == null)
          {
-            if (parentScorer.nextDoc() == Scorer.NO_MORE_DOCS)
+            if (parentScorer == null || parentScorer.nextDoc() == Scorer.NO_MORE_DOCS)
             {
                log.error("parent not found");
-               return -1;
+               return Scorer.NO_MORE_DOCS;
             }
 
             int parentDoc = parentScorer.docID();
