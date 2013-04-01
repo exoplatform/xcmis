@@ -65,6 +65,7 @@ import java.security.Principal;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -156,7 +157,13 @@ public abstract class BaseTest extends TestCase
    {
       try
       {
-         conn.deleteTree(testFolderId, true, null, true);
+         for(CmisObject item : conn.getChildren(rootFolderId, true, null, true, true, "", "", "", 10, 0).getItems()) {
+           if(item.getObjectInfo().getBaseType().equals(BaseType.FOLDER)) {
+             conn.deleteTree(item.getObjectInfo().getId(), true, null, true);
+           } else if(item.getObjectInfo().getBaseType().equals(BaseType.DOCUMENT)) {
+             conn.deleteObject(item.getObjectInfo().getId(), true);
+           }
+         }
       }
       catch (Exception e)
       {

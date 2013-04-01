@@ -40,20 +40,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
  */
 public class QueryCollectionTest extends BaseTest
 {
-    
-   @Override
-   public void setUp() throws Exception
-   {
-       cmisRepositoryId = this.getName();
-       try 
-       {
-           CmisRegistry.getInstance().addStorage(new org.xcmis.sp.inmemory.StorageProviderImpl(cmisRepositoryId, cmisRepositoryId, "", -1L, -1L));
-       } 
-       catch(CmisRuntimeException e)
-       {
-       }
-       super.setUp();
-   }
 
    public void testQueryElement() throws Exception
    {
