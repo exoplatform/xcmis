@@ -84,7 +84,7 @@ public abstract class BaseTest extends TestCase
 {
    protected final Logger LOG = Logger.getLogger(BaseTest.class);
 
-   protected final String cmisRepositoryId = "cmis1";
+   protected String cmisRepositoryId = "cmis1";
 
    protected final String testFolderName = "testRoot";
 

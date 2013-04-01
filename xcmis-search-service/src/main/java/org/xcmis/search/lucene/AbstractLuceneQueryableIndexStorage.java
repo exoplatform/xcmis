@@ -32,6 +32,7 @@ import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.FieldDoc;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.Sort;
@@ -186,7 +187,7 @@ public abstract class AbstractLuceneQueryableIndexStorage extends QueryableIndex
          IndexReader indexReader = getIndexReader();
          if (indexReader != null)
          {
-            searcher = new IndexSearcher(indexReader);
+            searcher = new Searcher(indexReader);
 
             // query
             Limit limit = command.getLimit();
@@ -199,7 +200,13 @@ public abstract class AbstractLuceneQueryableIndexStorage extends QueryableIndex
                // get identifiers
                final Document doc = searcher.doc(topDocs.scoreDocs[i].doc, new UUIDFieldSelector());
                final String id = doc.get(FieldNames.UUID);
-               resultNodes.add(new ScoredRow(command.getAlias().getName(), id, topDocs.scoreDocs[i].score));
+               final FieldDoc fieldDoc = (FieldDoc) topDocs.scoreDocs[i];
+               Float score = Float.NaN;
+               if(fieldDoc.fields[0] instanceof Float)
+               {
+                   score = (Float) fieldDoc.fields[0];
+               }
+               resultNodes.add(new ScoredRow(command.getAlias().getName(), id, score));
             }
          }
       }

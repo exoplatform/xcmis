@@ -26,6 +26,8 @@ import org.everrest.core.tools.ByteArrayContainerResponseWriter;
 import org.w3c.dom.NodeList;
 import org.xcmis.restatom.abdera.QueryTypeElement;
 import org.xcmis.spi.CmisConstants;
+import org.xcmis.spi.CmisRegistry;
+import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.query.Query;
 
 import java.io.ByteArrayInputStream;
@@ -38,6 +40,20 @@ import javax.xml.parsers.DocumentBuilderFactory;
  */
 public class QueryCollectionTest extends BaseTest
 {
+    
+   @Override
+   public void setUp() throws Exception
+   {
+       cmisRepositoryId = this.getName();
+       try 
+       {
+           CmisRegistry.getInstance().addStorage(new org.xcmis.sp.inmemory.StorageProviderImpl(cmisRepositoryId, cmisRepositoryId, "", -1L, -1L));
+       } 
+       catch(CmisRuntimeException e)
+       {
+       }
+       super.setUp();
+   }
 
    public void testQueryElement() throws Exception
    {
