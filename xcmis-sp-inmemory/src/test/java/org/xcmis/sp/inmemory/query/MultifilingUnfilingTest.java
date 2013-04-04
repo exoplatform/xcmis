@@ -18,6 +18,10 @@
  */
 package org.xcmis.sp.inmemory.query;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.DocumentData;
 import org.xcmis.spi.FolderData;
 import org.xcmis.spi.ObjectData;
@@ -136,8 +140,11 @@ public class MultifilingUnfilingTest extends BaseQueryTest
    public void testSearchUnfiled() throws Exception
    {
       checkResult("SELECT * FROM " + NASA_DOCUMENT + " WHERE CONTAINS(\"helloworld\")", new ObjectData[]{});
+      Map<String, String> parameters = new HashMap<String, String>();
+      parameters.put(CmisConstants.CHARSET, "UTF-8");
       DocumentData doc1 =
-         createDocument(testRoot, "node1", nasaDocumentTypeDefinition, "helloworld".getBytes(), new MimeType("text", "plain"));
+         createDocument(testRoot, "node1", nasaDocumentTypeDefinition, "helloworld".getBytes(), 
+                 new MimeType("text", "plain", parameters));
 
       checkResult("SELECT * FROM " + NASA_DOCUMENT + " WHERE CONTAINS(\"helloworld\")", new ObjectData[]{doc1});
 

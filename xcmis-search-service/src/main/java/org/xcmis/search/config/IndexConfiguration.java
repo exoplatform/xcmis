@@ -19,6 +19,7 @@
 package org.xcmis.search.config;
 
 import org.apache.tika.config.TikaConfig;
+import org.apache.tika.exception.TikaException;
 import org.apache.tika.mime.MimeTypeException;
 import org.xcmis.search.content.interceptors.QueryableIndexStorage;
 
@@ -69,7 +70,7 @@ public class IndexConfiguration
     * @throws MimeTypeException
     * @throws IOException
     */
-   public IndexConfiguration(String rootUuid) throws IndexConfigurationException, MimeTypeException, IOException
+   public IndexConfiguration(String rootUuid) throws IndexConfigurationException, MimeTypeException, IOException, TikaException
    {
       this(null, "", rootUuid, DEFAULT_QUERYABLEINDEXSTORAGE, new TikaConfig());
    }
@@ -84,19 +85,19 @@ public class IndexConfiguration
     * @throws IOException
     */
    public IndexConfiguration(String rootParentUuid, String rootUuid) throws IndexConfigurationException,
-      MimeTypeException, IOException
+      MimeTypeException, IOException, TikaException
    {
       this(null, rootParentUuid, rootUuid, DEFAULT_QUERYABLEINDEXSTORAGE, new TikaConfig());
    }
 
    public IndexConfiguration(String indexDir, String rootParentUuid, String rootUuid)
-      throws IndexConfigurationException, MimeTypeException, IOException
+      throws IndexConfigurationException, MimeTypeException, IOException, TikaException
    {
       this(indexDir, rootParentUuid, rootUuid, "org.xcmis.search.lucene.LuceneQueryableIndexStorage", new TikaConfig());
    }
 
    public IndexConfiguration(String indexDir, String rootParentUuid, String rootUuid, String queryableIndexStorage,
-      TikaConfig tikaConfiguration) throws IndexConfigurationException, MimeTypeException, IOException
+      TikaConfig tikaConfiguration) throws IndexConfigurationException, MimeTypeException, IOException, TikaException
    {
       super();
       this.indexDir = indexDir;

@@ -25,6 +25,7 @@ import static org.mockito.Mockito.mock;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.tika.config.TikaConfig;
+import org.apache.tika.exception.TikaException;
 import org.apache.tika.mime.MimeTypeException;
 import org.junit.After;
 import org.junit.Before;
@@ -106,7 +107,7 @@ public class SearchServiceTest
    }
 
    @Test
-   public void testShouldCreateSearchService() throws SearchServiceException, MimeTypeException, IOException
+   public void testShouldCreateSearchService() throws SearchServiceException, MimeTypeException, IOException, TikaException
    {
       NameConverter<String> nameConverter = new ToStringNameConverter();
       SchemaTableResolver tableResolver = new SchemaTableResolver(nameConverter, schema);
@@ -126,7 +127,7 @@ public class SearchServiceTest
 
    @Test
    public void testShouldCreateSearchServiceWithRamDirectory() throws SearchServiceException, MimeTypeException,
-      IOException
+      IOException, TikaException
    {
       NameConverter<String> nameConverter = new ToStringNameConverter();
       SchemaTableResolver tableResolver = new SchemaTableResolver(nameConverter, schema);
@@ -144,7 +145,7 @@ public class SearchServiceTest
 
    @Test(expected = SearchServiceException.class)
    public void testShouldNotCreateSearchServiceWithWrongStorage() throws SearchServiceException, MimeTypeException,
-      IOException
+      IOException, TikaException
    {
       NameConverter<String> nameConverter = new ToStringNameConverter();
       SchemaTableResolver tableResolver = new SchemaTableResolver(nameConverter, schema);
@@ -161,7 +162,7 @@ public class SearchServiceTest
 
    //TODO check
    public void testShouldRunQuerySearchServie() throws SearchServiceException, InvalidQueryException,
-      MimeTypeException, IOException
+      MimeTypeException, IOException, TikaException
    {
       //value
       NameConverter<String> nameConverter = new ToStringNameConverter();
@@ -182,7 +183,7 @@ public class SearchServiceTest
 
    @Test
    public void testShouldIndexBinaryDocument() throws SearchServiceException, InvalidQueryException, MimeTypeException,
-      IOException
+      IOException, TikaException
    {
       NameConverter<String> nameConverter = new ToStringNameConverter();
       SchemaTableResolver tableResolver = new SchemaTableResolver(nameConverter, schema);

@@ -19,18 +19,17 @@
 
 package org.xcmis.sp.inmemory.tck;
 
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
+import java.util.Properties;
+
+import org.apache.tika.exception.TikaException;
 import org.xcmis.spi.CmisRegistry;
 import org.xcmis.spi.CmisRegistryFactory;
 import org.xcmis.spi.RenditionManager;
 import org.xcmis.spi.utils.Logger;
-
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.Arrays;
-import java.util.Properties;
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
@@ -44,7 +43,7 @@ public class InmemoryCmisRegistryFactory implements CmisRegistryFactory
 
    private CmisRegistry reg = new CmisRegistry();
 
-   public InmemoryCmisRegistryFactory()
+   public InmemoryCmisRegistryFactory() throws TikaException
    {
       ClassLoader cl = null;
       try

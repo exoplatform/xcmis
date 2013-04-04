@@ -19,6 +19,7 @@
 
 package org.xcmis.sp.inmemory;
 
+import org.apache.tika.exception.TikaException;
 import org.apache.tika.mime.MimeTypeException;
 import org.xcmis.search.InvalidQueryException;
 import org.xcmis.search.SearchService;
@@ -186,14 +187,15 @@ public class StorageImpl implements Storage
 
    private final StorageConfiguration configuration;
 
-   public StorageImpl(StorageConfiguration configuration, RenditionManager manager, PermissionService permissionService)
+   public StorageImpl(StorageConfiguration configuration, RenditionManager manager, 
+           PermissionService permissionService) throws TikaException
    {
       this(configuration);
       this.renditionManager = manager;
       this.permissionService = permissionService;
    }
 
-   protected StorageImpl(StorageConfiguration configuration)
+   protected StorageImpl(StorageConfiguration configuration) throws TikaException
    {
       this.configuration = configuration;
 
@@ -1187,6 +1189,8 @@ public class StorageImpl implements Storage
       // check duplicate for queryName object type attribute.
       for (TypeDefinition t : types.values())
       {
+         if(type.getQueryName() == null) break;
+         if(t.getQueryName() == null) continue;
          if (t.getQueryName().equals(type.getQueryName()))
          {
             throw new ConstraintException("Duplicate queryName for types " + t.getId() + " and " + type.getId());
@@ -1388,7 +1392,7 @@ public class StorageImpl implements Storage
       }
    }
 
-   private SearchService getInitializedSearchService()
+   private SearchService getInitializedSearchService() throws TikaException
    {
       try
       {

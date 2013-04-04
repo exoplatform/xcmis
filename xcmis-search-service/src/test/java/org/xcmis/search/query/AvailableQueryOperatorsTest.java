@@ -30,6 +30,7 @@ import static org.xcmis.search.model.constraint.Operator.LIKE;
 import static org.xcmis.search.model.constraint.Operator.NOT_EQUAL_TO;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.tika.exception.TikaException;
 import org.apache.tika.mime.MimeTypeException;
 import org.junit.Assert;
 import org.junit.Before;
@@ -84,7 +85,7 @@ public class AvailableQueryOperatorsTest
    private final static String TABLE_NAME = "someTable";
 
    @Before
-   public void beforeEach() throws SearchServiceException, MimeTypeException, IOException
+   public void beforeEach() throws SearchServiceException, MimeTypeException, IOException, TikaException
    {
       builder = new QueryBuilder(mock(CastSystem.class));
 

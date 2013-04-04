@@ -39,7 +39,9 @@ import org.xcmis.spi.utils.MimeType;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by The eXo Platform SAS. <br/>
@@ -466,15 +468,18 @@ public class QueryUsecasesTest extends BaseQueryTest
     */
    public void testNOTConstraint() throws Exception
    {
+     
+     Map<String, String> parameters = new HashMap<String, String>();
+     parameters.put(CmisConstants.CHARSET, "UTF-8");
 
       DocumentData doc1 =
-         createDocument(testRoot, "node1", nasaDocumentTypeDefinition, "hello world".getBytes(), MimeType
-            .fromString("text/plain"));
+         createDocument(testRoot, "node1", nasaDocumentTypeDefinition, "hello world".getBytes(), 
+                 new MimeType("text", "plain", parameters));
 
       FolderData folder2 = createFolder(testRoot, "folder2");
       DocumentData doc2 =
-         createDocument(folder2, "node2", nasaDocumentTypeDefinition, "hello".getBytes(), MimeType
-            .fromString("text/plain"));
+         createDocument(folder2, "node2", nasaDocumentTypeDefinition, "hello".getBytes(), 
+                 new MimeType("text", "plain", parameters));
 
       String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE NOT CONTAINS(\"world\")";
 

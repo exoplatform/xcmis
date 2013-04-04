@@ -19,6 +19,7 @@
 
 package org.xcmis.sp.inmemory;
 
+import org.apache.tika.exception.TikaException;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.PermissionService;
@@ -49,9 +50,10 @@ public class StorageProviderImpl implements StorageProvider
     * @param maxStorageMemSize the max storage memory size in bytes or -1L for
     *        unbounded
     * @param maxItemsNumber the maximum items number, or -1L for unbounded
+   * @throws TikaException 
     */
    public StorageProviderImpl(String repositoryId, String repositoryName, String description, long maxStorageMemSize,
-      long maxItemsNumber)
+      long maxItemsNumber) throws TikaException
    {
       this.storageConfig =
          new StorageConfiguration(repositoryId, repositoryName, description, maxStorageMemSize, maxItemsNumber);
