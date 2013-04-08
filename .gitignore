@@ -99,3 +99,6 @@ bin/
 ehthumbs.db
 Icon?
 Thumbs.db
+
+# Misc
+overlays
