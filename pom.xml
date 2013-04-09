@@ -63,18 +63,6 @@
     <surefire.useFile>true</surefire.useFile>
     <exo.test.includes>Test*</exo.test.includes>
     <exo.test.classesdirectory>target/classes</exo.test.classesdirectory>
-    <!-- Defaut compiler settings -->
-    <maven.compiler.optimize>true</maven.compiler.optimize>
-    <maven.compiler.source>1.6</maven.compiler.source>
-    <maven.compiler.target>1.6</maven.compiler.target>
-    <!-- Default release Settings -->
-    <useReleaseProfile>false</useReleaseProfile>
-    <arguments>-Prelease,sign-artifacts -Dmaven.test.skip=true</arguments>
-    <autoVersionSubmodules>true</autoVersionSubmodules>
-    <!-- Encoding used for files in the project -->
-    <!-- Standard property supported by many plugins : compiler, resources, ... -->
-    <!-- Will be an entry in the POM in the future -->
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <!-- **************************************** -->
     <!-- Project Dependencies -->
     <!-- **************************************** -->
