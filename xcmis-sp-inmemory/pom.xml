@@ -11,12 +11,16 @@
   <name>xCMIS :: SP :: InMemory</name>
   <dependencies>
     <dependency>
-      <groupId>org.xcmis</groupId>
-      <artifactId>xcmis-search-parser-cmis</artifactId>
+      <groupId>org.apache.tika</groupId>
+      <artifactId>tika-core</artifactId>
     </dependency>
     <dependency>
       <groupId>org.xcmis</groupId>
       <artifactId>xcmis-search-model</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.xcmis</groupId>
+      <artifactId>xcmis-search-parser-cmis</artifactId>
     </dependency>
     <dependency>
       <groupId>org.xcmis</groupId>
@@ -25,10 +29,6 @@
     <dependency>
       <groupId>org.xcmis</groupId>
       <artifactId>xcmis-spi</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.tika</groupId>
-      <artifactId>tika-core</artifactId>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
