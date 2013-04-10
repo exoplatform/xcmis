@@ -76,9 +76,11 @@
     <org.slf4j.version>1.7.5</org.slf4j.version>
     <org.mortbay.jetty.version>6.1.11</org.mortbay.jetty.version>
     <org.antlr.version>3.1.3</org.antlr.version>
+    <org.hamcrest.version>1.3</org.hamcrest.version>
     <javax.xml.bind.version>2.1</javax.xml.bind.version>
     <com.sun.xml.bind.version>2.1.7</com.sun.xml.bind.version>
     <hsqldb.version>2.0.0</hsqldb.version>
+    <commons-codec.version>1.4</commons-codec.version>
     <commons-collections.version>3.2.1</commons-collections.version>
     <commons-io.version>2.1</commons-io.version>
     <commons-lang.version>2.6</commons-lang.version>
@@ -91,6 +93,7 @@
     <wsdl4j.version>1.6.1</wsdl4j.version>
     <jdom.version>1.0</jdom.version>
     <org.apache.pdfbox.version>1.7.1</org.apache.pdfbox.version>
+    <org.apache.ws.commons.axiom.version>1.2.5</org.apache.ws.commons.axiom.version>
     <caja.version>r3828</caja.version>
     <com.google.code.guice.version>2.0</com.google.code.guice.version>
     <org.mockito.version>1.8.1</org.mockito.version>
@@ -122,6 +125,11 @@
         <groupId>com.sun.xml.bind</groupId>
         <artifactId>jaxb-impl</artifactId>
         <version>${com.sun.xml.bind.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>commons-codec</groupId>
+        <artifactId>commons-codec</artifactId>
+        <version>${commons-codec.version}</version>
       </dependency>
       <dependency>
         <groupId>commons-collections</groupId>
@@ -203,6 +211,21 @@
       </dependency>
       <dependency>
         <groupId>org.apache.abdera</groupId>
+        <artifactId>abdera-core</artifactId>
+        <version>${abdera.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.abdera</groupId>
+        <artifactId>abdera-i18n</artifactId>
+        <version>${abdera.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.abdera</groupId>
+        <artifactId>abdera-parser</artifactId>
+        <version>${abdera.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.abdera</groupId>
         <artifactId>abdera-server</artifactId>
         <version>${abdera.version}</version>
       </dependency>
@@ -220,6 +243,21 @@
         <groupId>org.apache.chemistry.opencmis</groupId>
         <artifactId>chemistry-opencmis-client-impl</artifactId>
         <version>${opencmis.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.cxf</groupId>
+        <artifactId>cxf-api</artifactId>
+        <version>${cxf.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.cxf</groupId>
+        <artifactId>cxf-rt-core</artifactId>
+        <version>${cxf.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.cxf</groupId>
+        <artifactId>cxf-rt-bindings-soap</artifactId>
+        <version>${cxf.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.cxf</groupId>
@@ -322,6 +360,11 @@
         <version>${org.apache.tika.version}</version>
       </dependency>
       <dependency>
+        <groupId>org.apache.ws.commons.axiom</groupId>
+        <artifactId>axiom-api</artifactId>
+        <version>${org.apache.ws.commons.axiom.version}</version>
+      </dependency>
+      <dependency>
         <groupId>org.everrest</groupId>
         <artifactId>everrest-core</artifactId>
         <version>${org.everrest.version}</version>
@@ -330,6 +373,11 @@
         <groupId>org.everrest</groupId>
         <artifactId>everrest-test</artifactId>
         <version>${org.everrest.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.hamcrest</groupId>
+        <artifactId>hamcrest-core</artifactId>
+        <version>${org.hamcrest.version}</version>
       </dependency>
       <dependency>
         <groupId>org.mockito</groupId>
@@ -384,6 +432,35 @@
       </dependency>
       <dependency>
         <groupId>org.xcmis</groupId>
+        <artifactId>xcmis-server-tomcat</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.xcmis</groupId>
+        <artifactId>xcmis-server-tomcat-demo</artifactId>
+        <version>${project.version}</version>
+        <type>pom</type>
+      </dependency>
+      <dependency>
+        <groupId>org.xcmis</groupId>
+        <artifactId>xcmis-server-tomcat-demo</artifactId>
+        <version>${project.version}</version>
+        <type>war</type>
+      </dependency>
+      <dependency>
+        <groupId>org.xcmis</groupId>
+        <artifactId>xcmis-server-war</artifactId>
+        <version>${project.version}</version>
+        <type>pom</type>
+      </dependency>
+      <dependency>
+        <groupId>org.xcmis</groupId>
+        <artifactId>xcmis-server-war</artifactId>
+        <version>${project.version}</version>
+        <type>war</type>
+      </dependency>
+      <dependency>
+        <groupId>org.xcmis</groupId>
         <artifactId>xcmis-sp-inmemory</artifactId>
         <version>${project.version}</version>
       </dependency>
@@ -391,6 +468,16 @@
       <dependency>
         <groupId>org.xcmis</groupId>
         <artifactId>xcmis-spi</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.xcmis</groupId>
+        <artifactId>xcmis-spi-tck</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.xcmis</groupId>
+        <artifactId>xcmis-tests</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>

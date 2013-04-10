@@ -16,11 +16,19 @@
     </dependency>
     <dependency>
       <groupId>org.xcmis</groupId>
+      <artifactId>xcmis-search-model</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.xcmis</groupId>
       <artifactId>xcmis-search-service</artifactId>
     </dependency>
     <dependency>
       <groupId>org.xcmis</groupId>
       <artifactId>xcmis-spi</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.tika</groupId>
+      <artifactId>tika-core</artifactId>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
