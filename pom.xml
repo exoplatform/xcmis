@@ -4,7 +4,7 @@
   <parent>
     <artifactId>maven-parent-pom</artifactId>
     <groupId>org.exoplatform</groupId>
-    <version>9</version>
+    <version>10</version>
     <relativePath />
   </parent>
   <groupId>org.xcmis</groupId>
