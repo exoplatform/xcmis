@@ -4,7 +4,7 @@
   <parent>
     <artifactId>xcmis-parent</artifactId>
     <groupId>org.xcmis</groupId>
-    <version>1.3.0-SNAPSHOT</version>
+    <version>1.3.0</version>
   </parent>
   <artifactId>xcmis-search-model</artifactId>
   <packaging>jar</packaging>
