@@ -68,6 +68,8 @@ class CmisRegistryFactoryFinder
       }
       catch (SecurityException se)
       {
+          if (LOG.isDebugEnabled())
+              LOG.error(se.getMessage(), se);
       }
 
       String file = "META-INF/services/xcmis/" + CmisRegistry.XCMIS_REGISTRY_FACTORY;
@@ -92,6 +94,8 @@ class CmisRegistryFactoryFinder
          }
          catch (Exception e)
          {
+             if (LOG.isDebugEnabled())
+                 LOG.error(e.getMessage(), e);
          }
       }
 

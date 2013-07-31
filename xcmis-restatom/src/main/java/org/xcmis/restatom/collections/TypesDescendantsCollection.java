@@ -116,9 +116,8 @@ public class TypesDescendantsCollection extends CmisTypeCollection
       {
          throw new ResponseContextException(createErrorResponse(tnfe, 404));
       }
-      catch (Throwable t)
+      catch (Exception t)
       {
-         //t.printStackTrace();
          throw new ResponseContextException(createErrorResponse(t, 500));
       }
    }

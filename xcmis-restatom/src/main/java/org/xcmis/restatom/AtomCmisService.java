@@ -137,7 +137,7 @@ public class AtomCmisService
       {
          throw new WebApplicationException(io, createErrorResponse(io, 500));
       }
-      catch (Throwable t)
+      catch (Exception t)
       {
          throw new WebApplicationException(t, createErrorResponse(t, 500));
       }
@@ -277,7 +277,7 @@ public class AtomCmisService
       {
          throw new WebApplicationException(iae, createErrorResponse(iae, 400));
       }
-      catch (Throwable t)
+      catch (Exception t)
       {
          throw new WebApplicationException(t, createErrorResponse(t, 500));
       }
@@ -322,7 +322,7 @@ public class AtomCmisService
       {
          throw new WebApplicationException(iae, createErrorResponse(iae, 400));
       }
-      catch (Throwable others)
+      catch (Exception others)
       {
          throw new WebApplicationException(others, createErrorResponse(others, 500));
       }
@@ -358,7 +358,7 @@ public class AtomCmisService
       {
          throw new WebApplicationException(iae, createErrorResponse(iae, 400));
       }
-      catch (Throwable others)
+      catch (Exception others)
       {
          throw new WebApplicationException(others, createErrorResponse(others, 500));
       }
@@ -805,7 +805,7 @@ public class AtomCmisService
       {
          throw new WebApplicationException(iae, createErrorResponse(iae, 400));
       }
-      catch (Throwable others)
+      catch (Exception others)
       {
          throw new WebApplicationException(others, createErrorResponse(others, 500));
       }

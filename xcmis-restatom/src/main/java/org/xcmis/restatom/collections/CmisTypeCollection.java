@@ -76,7 +76,7 @@ public abstract class CmisTypeCollection extends AbstractCmisCollection<TypeDefi
       {
          throw new ResponseContextException(createErrorResponse(tne, 400));
       }
-      catch (Throwable t)
+      catch (Exception t)
       {
          throw new ResponseContextException(createErrorResponse(t, 500));
       }

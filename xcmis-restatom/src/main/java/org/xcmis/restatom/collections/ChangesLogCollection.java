@@ -234,7 +234,7 @@ public class ChangesLogCollection extends AbstractCmisCollection<CmisObject>
       {
          throw new ResponseContextException(createErrorResponse(cve, 409));
       }
-      catch (Throwable t)
+      catch (Exception t)
       {
          throw new ResponseContextException(createErrorResponse(t, 500));
       }

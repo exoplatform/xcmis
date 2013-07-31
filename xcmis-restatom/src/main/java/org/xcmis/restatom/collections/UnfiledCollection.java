@@ -135,7 +135,7 @@ public class UnfiledCollection extends CmisObjectCollection
       {
          return createErrorResponse(iae, 400);
       }
-      catch (Throwable t)
+      catch (Exception t)
       {
          return createErrorResponse(t, 500);
       }
@@ -254,7 +254,7 @@ public class UnfiledCollection extends CmisObjectCollection
       {
          throw new ResponseContextException(createErrorResponse(iae, 400));
       }
-      catch (Throwable t)
+      catch (Exception t)
       {
          throw new ResponseContextException(createErrorResponse(t, 500));
       }

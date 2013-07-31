@@ -198,7 +198,7 @@ public class QueryCollection extends CmisObjectCollection
       {
          throw new ResponseContextException(createErrorResponse(iae, 404));
       }
-      catch (Throwable t)
+      catch (Exception t)
       {
          throw new ResponseContextException(createErrorResponse(t, 500));
       }

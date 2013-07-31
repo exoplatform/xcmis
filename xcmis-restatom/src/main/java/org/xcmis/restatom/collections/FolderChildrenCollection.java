@@ -148,7 +148,7 @@ public class FolderChildrenCollection extends CmisObjectCollection
       {
          throw new ResponseContextException(createErrorResponse(iae, 404));
       }
-      catch (Throwable t)
+      catch (Exception t)
       {
          throw new ResponseContextException(createErrorResponse(t, 500));
       }
@@ -318,7 +318,7 @@ public class FolderChildrenCollection extends CmisObjectCollection
       {
          return createErrorResponse(re, 500);
       }
-      catch (Throwable t)
+      catch (Exception t)
       {
          return createErrorResponse(t, 500);
       }

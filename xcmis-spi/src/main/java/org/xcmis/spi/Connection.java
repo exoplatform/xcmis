@@ -236,7 +236,7 @@ public abstract class Connection
       }
 
       AccessControlPropagation storagePropagation = storage.getRepositoryInfo().getAclCapability().getPropagation();
-      if (propagation != storagePropagation)
+      if (!propagation.equals(storagePropagation))
       {
          throw new ConstraintException("Specified ACL propagation '" + propagation
             + "' does not to supported by repository '" + storagePropagation + "' ");

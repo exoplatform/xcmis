@@ -192,7 +192,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       {
          throw new ResponseContextException(createErrorResponse(iae, 400));
       }
-      catch (Throwable t)
+      catch (Exception t)
       {
          throw new ResponseContextException(createErrorResponse(t, 500));
       }
@@ -240,7 +240,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       {
          return createErrorResponse(iae, 400);
       }
-      catch (Throwable t)
+      catch (Exception t)
       {
          return createErrorResponse(t, 500);
       }
@@ -279,7 +279,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       {
          throw new ResponseContextException(createErrorResponse(iae, 400));
       }
-      catch (Throwable t)
+      catch (Exception t)
       {
          throw new ResponseContextException(createErrorResponse(t, 500));
       }
@@ -441,7 +441,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       {
          throw new ResponseContextException(createErrorResponse(iae, 400));
       }
-      catch (Throwable t)
+      catch (Exception t)
       {
          throw new ResponseContextException(createErrorResponse(t, 500));
       }
@@ -491,7 +491,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       {
          return createErrorResponse(cve, 409);
       }
-      catch (Throwable t)
+      catch (Exception t)
       {
          return createErrorResponse(t, 500);
       }
@@ -627,7 +627,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       {
          return rce.getResponseContext();
       }
-      catch (Throwable t)
+      catch (Exception t)
       {
          return createErrorResponse(t, 500);
       }
@@ -678,7 +678,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       {
          throw new ResponseContextException(createErrorResponse(uce, 409));
       }
-      catch (Throwable t)
+      catch (Exception t)
       {
          throw new ResponseContextException(createErrorResponse(t, 500));
       }
@@ -736,7 +736,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       {
          return createErrorResponse(uce, 409);
       }
-      catch (Throwable t)
+      catch (Exception t)
       {
          return createErrorResponse(t, 500);
       }

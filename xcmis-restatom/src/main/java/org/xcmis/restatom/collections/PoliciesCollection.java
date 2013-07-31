@@ -100,7 +100,7 @@ public class PoliciesCollection extends CmisObjectCollection
       {
          throw new ResponseContextException(createErrorResponse(onfe, 404));
       }
-      catch (Throwable t)
+      catch (Exception t)
       {
          throw new ResponseContextException(createErrorResponse(t, 500));
       }
@@ -179,7 +179,7 @@ public class PoliciesCollection extends CmisObjectCollection
       {
          return createErrorResponse(fae, 400);
       }
-      catch (Throwable t)
+      catch (Exception t)
       {
          return createErrorResponse(t, 500);
       }
@@ -238,7 +238,7 @@ public class PoliciesCollection extends CmisObjectCollection
       {
          return createErrorResponse(iae, 400);
       }
-      catch (Throwable t)
+      catch (Exception t)
       {
          return createErrorResponse(t, 500);
       }

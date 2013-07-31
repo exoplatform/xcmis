@@ -131,7 +131,7 @@ public class FolderTreeCollection extends FolderDescentantsCollection
       {
          throw new ResponseContextException(createErrorResponse(iae, 400));
       }
-      catch (Throwable t)
+      catch (Exception t)
       {
          throw new ResponseContextException(createErrorResponse(t, 500));
       }

@@ -104,7 +104,7 @@ public class TypesChildrenCollection extends CmisTypeCollection
       {
          throw new ResponseContextException(createErrorResponse(tnfe, 404));
       }
-      catch (Throwable t)
+      catch (Exception t)
       {
          throw new ResponseContextException(createErrorResponse(t, 500));
       }
