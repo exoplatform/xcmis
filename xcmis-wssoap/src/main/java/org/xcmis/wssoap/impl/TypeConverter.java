@@ -916,8 +916,8 @@ public class TypeConverter
       {
          result.put(one.getId(), new PropertyDefinition(one.getId(), one.getQueryName(), one.getLocalName(), one
             .getLocalNamespace(), one.getDisplayName(), one.getDescription(), PropertyType.fromValue(one
-            .getPropertyType().value()), Updatability.fromValue(one.getUpdatability().value()), one.getInherited(), one
-            .isRequired(), one.isQueryable(), one.isOrderable(), one.getOpenChoice(), false, null, null));
+            .getPropertyType().value()), Updatability.fromValue(one.getUpdatability().value()), one.isInherited(), one
+            .isRequired(), one.isQueryable(), one.isOrderable(), one.isOpenChoice(), false, null, null));
 
       }
       return result;
