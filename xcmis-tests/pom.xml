@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.xcmis</groupId>
 		<artifactId>xcmis-parent</artifactId>
-		<version>1.3.0-SNAPSHOT</version>
+		<version>1.4.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>xcmis-tests</artifactId>
 	<packaging>jar</packaging>

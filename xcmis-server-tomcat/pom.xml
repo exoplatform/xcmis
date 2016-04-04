@@ -4,7 +4,7 @@
   <parent>
     <artifactId>xcmis-parent</artifactId>
     <groupId>org.xcmis</groupId>
-    <version>1.3.x-SNAPSHOT</version>
+    <version>1.4.x-SNAPSHOT</version>
   </parent>
   <artifactId>xcmis-server-tomcat</artifactId>
   <name>xCMIS :: Server :: Tomcat</name>
