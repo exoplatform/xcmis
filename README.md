@@ -4,14 +4,14 @@ OASIS's [Content Management Interoperability Services](http://www.oasis-open.org
 
 xCMIS provides an out-of-the-box ability to expose an eXo JCR repository, and can be used in conjunction with CMIS gadgets using GWT based client side framework (coming soon to Open Source). Both can be easily integrated to the <a href="http://www.gatein.org"> !GateIn portal </a>. To see full-featured CMIS gadgets in action, check out the demo on the <a href="http://xcmis.org">xcmis.org</a> site.
 
-xCMIS supports all the features specified in the CMIS core definition as well as both REST !AtomPub and Web Services (SOAP/WSDL) protocol bindings. In addition to architecture supposed to provide an ability to a plug any third party content repository thanks to Storage Provider Interface layer. 
+xCMIS supports all the features specified in the CMIS core definition as well as both REST !AtomPub and Web Services (SOAP/WSDL) protocol bindings. In addition to architecture supposed to provide an ability to a plug any third party content repository thanks to Storage Provider Interface layer.
 
 So, the idea of the project is to make as simple as possible joining Enterprise Content repositories making all of them CMIS-able and expose them to language-independent CMIS clients using the most convenient protocol. Read more about CMIS in real-life <a href=http://gazarenkov.blogspot.com/2010/04/cmis-targets-in-real-life.html> here </a>.  
 
 xCMIS project:
 
-  * Is Packaged as J2EE Web archive ( [WAR](http://code.google.com/p/xcmis/downloads/detail?name=xcmis-server-war-1.2.1.zip) ) as well as prepared "[download and go](http://code.google.com/p/xcmis/downloads/detail?name=xcmis-server-tomcat-1.2.1.zip)" Tomcat bundle
-  * Has a live demo with full-featured CMIS gadget on !GateIn portal is accessible on the [xcmis.org](http://xcmis.org/CmisExpert1/org.exoplatform.cmis.CmisExpertApplication/CmisExpertApplication.html) site as well as with prepared ["download and go"](http://code.google.com/p/xcmis/downloads/detail?name=xcmis-server-tomcat-demo-1.2.1.zip) Tomcat bundle (the client is accessible as remote gadget) 
+  * Is Packaged as J2EE Web archive ( [WAR](https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/xcmis/xcmis-server-war-1.2.2.zip) ) as well as prepared "[download and go](https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/xcmis/xcmis-server-tomcat-1.2.2.zip)" Tomcat bundle
+  * Has a live demo with full-featured CMIS gadget on !GateIn portal is accessible on the [xcmis.org](http://xcmis.org/CmisExpert1/org.exoplatform.cmis.CmisExpertApplication/CmisExpertApplication.html) site as well as with prepared ["download and go"](https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/xcmis/xcmis-server-tomcat-demo-1.2.2.zip) Tomcat bundle (the client is accessible as remote gadget)
   * Tested with third-party CMIS clients such as: IBM CMIS Firefox Connector and CMIS Spaces Flex+AIR client. Either local repository ( as described [here](http://code.google.com/p/xcmis/wiki/xCMISthirdPartyClients)) or http://xcmis.org/xcmis1/rest/cmisatom can be used as a CMIS repository's endpoint URL for these or other types of clients.
 
 
@@ -65,7 +65,7 @@ We are waiting for the official approval of CMIS 1.0 specs, so it is the latest,
  * <a href=http://code.google.com/p/xcmis/wiki/xCMISSearch> Search engine </a> is decouped it from JCR storage (naturally as SPI is independent). Added support of multifiling and unfiling
  * xCMIS is no more tightly coupled with eXo (IoC) Container, deploying mechanism is pluggable
  * Added In-memory storage for both content and index, so now we have full featured, fast mechanism to test the binding internals
- * xCMIS can be bundled with stable !GateIn 3.0 portal. Thanks to <a href=http://code.google.com/p/xcmis/wiki/xCMISGateInPortalExtension>!GateIn extension</a> bundle, added to the project's binaries it is possible to integrate xCMIS to the working portal. 
+ * xCMIS can be bundled with stable !GateIn 3.0 portal. Thanks to <a href=http://code.google.com/p/xcmis/wiki/xCMISGateInPortalExtension>!GateIn extension</a> bundle, added to the project's binaries it is possible to integrate xCMIS to the working portal.
  * xCMIS is tested under !RestAtom TCK
  * You can access xCMIS along with other CMIS repositories on online <a href=http://gazarenkov.blogspot.com/2010/04/xcmis-in-aiim-cmis-demo-2010.html> AIIM CMIS Demo </a>
 
@@ -82,9 +82,9 @@ We are waiting for the official approval of CMIS 1.0 specs, so it is the latest,
 
 For assembly "xCMIS" or "xCMIS Demo" with Tomcat server application:
 
-  Make sure you have correct: 
-   * Maven version 2.2.0 (or higher). 
-   * Apache Tomcat 6.0.32+ application server distributive. 
+  Make sure you have correct:
+   * Maven version 2.2.0 (or higher).
+   * Apache Tomcat 6.0.32+ application server distributive.
 
 # Build xCMIS Demo application and assembly it with Tomcat server application.
    * Run "mvn clean install" command within root project folder.
@@ -98,7 +98,7 @@ For assembly "xCMIS" or "xCMIS Demo" with Tomcat server application:
    * On Unix/linux/cygwin/MacOSX
      Open a terminal and type the command:
      ./xcmis.sh run
-     You may need to change the permission of all *.sh files in the tomcat/bin dir by using: chmod +x *.sh 
+     You may need to change the permission of all *.sh files in the tomcat/bin dir by using: chmod +x *.sh
    Available services URLs:
    * Home page at the URL "http://localhost:8080/xcmis"
    * Demo CMIS Client http://localhost:8080/xcmis/xcmis-demo-gadget/GadgetWrapper.html
@@ -120,11 +120,10 @@ For assembly "xCMIS" or "xCMIS Demo" with Tomcat server application:
    * On Unix/linux/cygwin/MacOSX
      Open a terminal and type the command:
      ./xcmis.sh run
-     You may need to change the permission of all *.sh files in the tomcat/bin dir by using: chmod +x *.sh 
+     You may need to change the permission of all *.sh files in the tomcat/bin dir by using: chmod +x *.sh
    Available services URLs:
    * Home page at the URL "http://localhost:8080/xcmis"
    * REST Atom services will be available at the URL "http://localhost:8080/xcmis/rest/cmisatom"
    * SOAP services should be available at the URL "http://localhost:8080/xcmis/cmisws"
 
   Default service credential: username is "root" and password is "exo".
-
