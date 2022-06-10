@@ -93,7 +93,7 @@
     <org.everrest.version>1.0</org.everrest.version>
     <org.hamcrest.version>1.3</org.hamcrest.version>
     <org.mockito.version>1.8.1</org.mockito.version>
-    <org.mortbay.jetty.version>6.1.11</org.mortbay.jetty.version>
+    <org.mortbay.jetty.version>6.1.23</org.mortbay.jetty.version>
     <org.slf4j.version>1.7.5</org.slf4j.version>
     <shindig.version>1.1-BETA5-incubating</shindig.version>
     <stax.version>1.0</stax.version>
